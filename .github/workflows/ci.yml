@@ -1,4 +1,4 @@
-name: EAS Build for Expo App
+name: EAS Build for Expo App2
 
 on:
   push:
