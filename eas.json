@@ -1,13 +1,13 @@
 {
     "build": {
-        "production": {
+      "production": {
         "android": {
-            "buildType": "apk"
+          "buildType": "apk"
         },
         "ios": {
-            "simulator": true
+          "simulator": true
         }
-        }
+      }
     }
-}
+  }
   
