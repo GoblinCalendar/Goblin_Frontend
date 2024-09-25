@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "goblinapp",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -30,6 +31,7 @@
         "projectId": "c0838412-c03f-4872-9997-be961e6785f7"
       }
     },
-    "owner": "eazzzzzzy"
+    "owner": "eazzzzzzy",
+    "plugins": ["expo-router"]
   }
 }
