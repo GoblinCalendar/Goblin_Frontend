@@ -3,7 +3,7 @@ name: EAS Build for Expo App
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   eas-build:
