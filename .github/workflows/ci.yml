@@ -1,70 +1,31 @@
-# .github/workflows/ci.yml
-name: CI/CD for Expo App
+name: EAS Build for Expo App
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  test:
+  eas-build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm test
 
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
       - name: Install dependencies
         run: npm install
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
-      - name: Login to Expo
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: expo login -t $EXPO_TOKEN
-      - name: Build Expo project
-        run: expo build:android --non-interactive
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: android-build
-          path: android/app/build/outputs
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      - name: Install dependencies
-        run: npm install
-      - name: Install Expo CLI
-        run: npm install -g expo-cli
-      - name: Publish to Expo
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: EAS build
         env:
+          EAS_BUILD_PROFILE: production
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: expo publish --non-interactive
+        run: eas build --platform all --non-interactive
