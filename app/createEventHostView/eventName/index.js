@@ -17,15 +17,14 @@ const EventNameScreen = () => {
 
     const handleNextPress = () => {
         if (inputValue) {
-            
             router.push('/createEventHostView/eventTime');
         }
     };
 
     return(
         <View style={[styles.container, { width }]}>
-        {/* BackButton 컴포넌트 */}
-            <BackButton />
+            {/* BackButton 컴포넌트 */}
+            <BackButton navigateTo='/'/>
 
             {/* 타이틀 문구 */}
             <Text style={styles.titleText}>
@@ -37,6 +36,7 @@ const EventNameScreen = () => {
             <InputBox 
                 style={[styles.inputBox, { left: horizontalPadding }]} 
                 onChangeText={setInputValue} 
+                placeholder="일정 이름을 작성해 주세요!"
             />
 
             {/* ButtonComponent */}

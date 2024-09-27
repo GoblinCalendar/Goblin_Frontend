@@ -39,10 +39,15 @@ const EventTimeScreen = () => {
     }
   };
 
+  const handleTimePickerConfirm = () => {
+    setSelectedTime(`${customHour}시간 ${customMinute}분`);
+    setIsTimePickerVisible(false);
+  };
+
   return (
     <View style={[styles.container, { width }]}>
       {/* BackButton 컴포넌트 */}
-      <BackButton />
+      <BackButton navigateTo='/createEventHostView/eventName'/>
 
       {/* 타이틀 문구 */}
       <Text style={styles.titleText}>
@@ -95,36 +100,46 @@ const EventTimeScreen = () => {
 
       {/* 타임 피커 */}
       {isTimePickerVisible && (
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={customHour}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-            onValueChange={(itemValue) => setCustomHour(itemValue)}
-          >
-            {[...Array(6).keys()].map((i) => (
-              <Picker.Item key={i} label={`${i}시간`} value={`${i}`} />
-            ))}
-          </Picker>
-          <Text style={styles.colonText}>:</Text>
-          <Picker
-            selectedValue={customMinute}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-            onValueChange={(itemValue) => setCustomMinute(itemValue)}
-          >
-            {['00', '15', '30', '45'].map((minute) => (
-              <Picker.Item key={minute} label={`${minute}분`} value={minute} />
-            ))}
-          </Picker>
+        <TouchableOpacity 
+        style={styles.overlay} 
+        activeOpacity={1} 
+        onPress={() => {
+          handleTimePickerConfirm();
+        }}
+        >
+        <View style={styles.allpickerContainer}>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={customHour}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              onValueChange={(itemValue) => setCustomHour(itemValue)}
+            >
+              {[...Array(6).keys()].map((i) => (
+                <Picker.Item key={i} label={`${i}시간`} value={`${i}`} />
+              ))}
+            </Picker>
+            <Text style={styles.colonText}>:</Text>
+            <Picker
+              selectedValue={customMinute}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              onValueChange={(itemValue) => setCustomMinute(itemValue)}
+            >
+              {['00', '15', '30', '45'].map((minute) => (
+                <Picker.Item key={minute} label={`${minute}분`} value={minute} />
+              ))}
+            </Picker>
+          </View>
         </View>
+        </TouchableOpacity>
       )}
 
       {/* 다음 버튼 */}
       <ButtonComponent
         title="다음"
         style={[styles.button, { left: horizontalPadding }]}
-        isActive={!!selectedTime || isTimePickerVisible} // 선택한 시간이 있으면 활성화
+        isActive={selectedTime !== ''}
         onPress={handleNextPress}
       />
     </View>
@@ -210,23 +225,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#5daed6',
   },
+  allpickerContainer: {
+    backgroundColor: colors.buttonBeforeColor,
+    alignItems: 'center',
+    marginTop: 20,
+    borderRadius: 12,
+    padding: 10,
+    position: 'absolute',
+    top: 360,
+    left: 20,
+    width: '90%',
+  },
   pickerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: colors.buttonBeforeColor,
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 10,
-    position: 'absolute',
-    top: 370,
-    left: 25,
   },
   picker: {
     width: 150,
     height: 180,
-    backgroundColor : colors.white,
-    borderRadius: 12,
   },
   pickerItem: {
     height: 180, // 원하는 높이 설정

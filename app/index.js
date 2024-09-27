@@ -20,6 +20,10 @@ export default function Index() {
         title="이벤트 날짜 화면으로 이동"
         onPress={() => router.push('/createEventHostView/eventDate')}
       />
+      <Button
+        title="이벤트 멤버 화면으로 이동"
+        onPress={() => router.push('/createEventHostView/eventPeople')}
+      />
     </View>
   );
 }
