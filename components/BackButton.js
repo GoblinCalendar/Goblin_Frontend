@@ -1,15 +1,23 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 
-const BackButton = () => {
-  const navigation = useNavigation();
+const BackButton = ({ navigateTo }) => {
+  const router = useRouter();
+
+  const handlePress = () => {
+    if (navigateTo) {
+      router.replace(navigateTo);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <TouchableOpacity
       style={styles.backButton}
-      onPress={() => navigation.goBack()}
+      onPress={handlePress}
     >
       <Svg width={30} height={30} viewBox="0 0 24 24">
         <Path
@@ -34,6 +42,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
 });
 

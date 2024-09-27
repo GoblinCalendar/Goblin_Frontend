@@ -10,5 +10,6 @@ export default {
     buttonAfterColor: '#5DAED6',
     skyBlue: '#5DAED6',
     calendarColor: '#E3EFF5',
+    memberFontColor: 'rgba(93, 174, 214, 0.6)'
   };
   

@@ -12,6 +12,8 @@ export default function RootLayout() {
       <Stack.Screen name="createEventHostView/eventName" />
       <Stack.Screen name="createEventHostView/eventPeople" />
       <Stack.Screen name="createEventHostView/eventTime" />
+      <Stack.Screen name="createEventHostView/eventPlace" />
+      <Stack.Screen name="createEventHostView/eventComplete" />
     </Stack>
   );
 }

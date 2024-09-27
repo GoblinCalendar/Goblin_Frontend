@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import colors from '../styles/colors';
 
-const InputBox = ({ style, onChangeText }) => {
+const InputBox = ({ style, onChangeText, placeholder }) => {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -20,7 +20,7 @@ const InputBox = ({ style, onChangeText }) => {
         ]}
         value={text}
         onChangeText={handleTextChange}
-        placeholder="일정 이름을 작성해 주세요!"
+        placeholder={placeholder}
         placeholderTextColor={colors.gray}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
