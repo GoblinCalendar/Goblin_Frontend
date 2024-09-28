@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
@@ -7,6 +7,7 @@ import ButtonComponent from '../../../components/Button';
 import BackButton from '../../../components/BackButton';
 import colors from '../../../styles/colors';
 import 'moment/locale/ko'; // 한국어 설정 추가
+import { EventContext } from '../../../context/EventContext';
 
 // Locale 설정
 LocaleConfig.locales['ko'] = {
@@ -38,6 +39,7 @@ const EventDateScreen = () => {
   const router = useRouter();
   const { width } = useWindowDimensions(); 
   const horizontalPadding = (width - buttonWidth) / 2; 
+  const { setEventDetails } = useContext(EventContext);
 
   const handleDayPress = (day) => {
     let newSelectedDates = { ...selectedDates };
@@ -71,7 +73,12 @@ const EventDateScreen = () => {
   };
 
   const handleNextPress = () => {
-    if (Object.keys(selectedDates).length > 0) {
+    if (Object.keys(selectedDates).length > 0 && startTime !== '-' && endTime !== '-') {
+      setEventDetails((prevDetails) => ({
+        ...prevDetails,
+        startTime: startTime,
+        endTime: endTime,
+      }));
       router.push('/createEventHostView/eventPeople');
     }
   };
@@ -117,6 +124,11 @@ const EventDateScreen = () => {
         return `${start.getMonth() + 1}.${start.getDate()} ~ ${end.getMonth() + 1}.${end.getDate()}`;
       }
     });
+
+    setEventDetails((prevDetails) => ({
+      ...prevDetails,
+      dates: dateArray,
+    }));
   
     setSelectedText(dateStrings.join(' | '));
     setIsCalendarVisible(false);
