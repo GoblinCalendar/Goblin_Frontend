@@ -58,7 +58,7 @@ const EventPeopleScreen = () => {
         <ScrollView 
           horizontal 
           contentContainerStyle={styles.selectedFriendsContainer} 
-          showsHorizontalScrollIndicator={true}
+          showsHorizontalScrollIndicator={false}
         >
           {selectedFriends.length === 0 ? (
             <Text style={styles.placeholderText}>참여 인원 선택</Text>

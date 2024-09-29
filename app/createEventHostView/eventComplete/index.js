@@ -76,13 +76,15 @@ const EventCompleteScreen = () => {
                             source={require('../../../assets/membergray.png')}
                             style={styles.icon} 
                         />
-                        <View style={styles.participants}>
-                            {eventDetails.participants.map((participant, index) => (
-                                <View key={index} style={styles.participantTag}>
-                                    <Text style={styles.participantName}>{participant}</Text>
-                                </View>
-                            ))}
-                        </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={styles.participants}>
+                                {eventDetails.participants.map((participant, index) => (
+                                    <View key={index} style={styles.participantTag}>
+                                        <Text style={styles.participantName}>{participant}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </ScrollView>
                     </View>
                 </View>
 
@@ -177,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 10,
     height: 40,
-    width: 300,
+    width: 350,
   },
   iconContainer: {
     flexDirection: 'row',
@@ -198,7 +200,6 @@ const styles = StyleSheet.create({
   },
   participants: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
   },
   participantTag: {
     backgroundColor: colors.buttonAfterColor,
