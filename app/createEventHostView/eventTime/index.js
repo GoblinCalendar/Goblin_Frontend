@@ -1,11 +1,12 @@
 // eventTime/index.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import BackButton from '../../../components/BackButton';
 import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
+import { EventContext } from '../../../context/EventContext';
 
 const durations = ['30분', '1시간', '2시간', '3시간', '1시간 30분', '2시간 30분', '3시간 30분'];
 const buttonWidth = 335; // 버튼의 고정 너비
@@ -18,6 +19,7 @@ const EventTimeScreen = () => {
   const router = useRouter();
   const { width } = useWindowDimensions(); // 현재 화면의 너비와 높이 가져오기
   const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
+  const { setEventDetails } = useContext(EventContext);
 
   const handleTimePress = (duration) => { // 시간버튼 이미 선택된 시간인 경우 선택 해제
     if (selectedTime === duration) {
@@ -35,6 +37,10 @@ const EventTimeScreen = () => {
 
   const handleNextPress = () => {
     if (selectedTime) {
+      setEventDetails((prevDetails) => ({
+        ...prevDetails,
+        duration: selectedTime,
+      }));
       router.push('/createEventHostView/eventDate');
     }
   };

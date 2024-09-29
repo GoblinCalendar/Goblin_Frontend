@@ -1,11 +1,11 @@
-// eventName/index.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import InputBox from '../../../components/InputBox';
 import ButtonComponent from '../../../components/Button';
 import BackButton from '../../../components/BackButton';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
+import { EventContext } from '../../../context/EventContext';
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
@@ -14,9 +14,14 @@ const EventNameScreen = () => {
     const router = useRouter();
     const [inputValue, setInputValue] = useState('');
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
+    const { setEventDetails } = useContext(EventContext);
 
     const handleNextPress = () => {
         if (inputValue) {
+            setEventDetails((prevDetails) => ({
+                ...prevDetails,
+                name: inputValue
+            }));
             router.push('/createEventHostView/eventTime');
         }
     };

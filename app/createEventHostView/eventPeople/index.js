@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, ScrollView } from 'react-native';
 import BackButton from '../../../components/BackButton';
 import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
+import { EventContext } from '../../../context/EventContext';
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
@@ -12,6 +13,7 @@ const EventPeopleScreen = () => {
     const router = useRouter();
     const { width } = useWindowDimensions(); // 현재 화면의 너비와 높이 가져오기
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산 
+    const { setEventDetails } = useContext(EventContext);
 
     // 더미 데이터
   const friends = [
@@ -30,7 +32,11 @@ const EventPeopleScreen = () => {
 
   const handleNextPress = () => {
     if (selectedFriends.length > 0) {
-        router.push('/createEventHostView/eventPlace');
+      setEventDetails((prevDetails) => ({
+        ...prevDetails,
+        participants: selectedFriends,
+      }));
+      router.push('/createEventHostView/eventPlace');
     }
   };
 
@@ -52,7 +58,7 @@ const EventPeopleScreen = () => {
         <ScrollView 
           horizontal 
           contentContainerStyle={styles.selectedFriendsContainer} 
-          showsHorizontalScrollIndicator={true}
+          showsHorizontalScrollIndicator={false}
         >
           {selectedFriends.length === 0 ? (
             <Text style={styles.placeholderText}>참여 인원 선택</Text>
