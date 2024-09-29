@@ -13,6 +13,10 @@ export default function Index() {
         title="이벤트 생성 화면으로 이동"
         onPress={() => router.push("/createEventHostView/eventName")}
       />
+      <Button
+        title="이벤트 시간 고르는 화면으로 이동"
+        onPress={() => router.push("/joinEventGuestView")}
+      />
     </View>
   );
 }
