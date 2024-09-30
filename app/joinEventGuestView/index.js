@@ -1,146 +1,155 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, PanResponder } from 'react-native';
+// ScheduleScreen.js
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import colors from '../../styles/colors';
+import TimeSelectionGrid from '../../components/TimeSelectionGrid';  // 컴포넌트 import
 
-const hours = Array.from({ length: 24 }, (_, i) => `${i < 12 ? '오전' : '오후'} ${i % 12 === 0 ? 12 : i % 12}시`);
-const days = ['화', '수', '목', '금', '일'];
-const dates = ['9.10', '9.11', '9.12', '9.13', '9.15'];
+const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
 
-const TimeSelectionGrid = () => {
-  const [selectedTimes, setSelectedTimes] = useState({});
-  const timeScrollRef = useRef(null);  // 시간 스크롤뷰 참조
-  const gridScrollRefs = useRef([]);   // 요일별 스크롤뷰 참조
-  const isDraggingRef = useRef(false); // 드래그 여부 추적
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-  const handleTouch = (dayIndex, startHourIndex, endHourIndex) => {
-    setSelectedTimes((prev) => {
-      const updated = { ...prev };
-      for (let i = startHourIndex; i <= endHourIndex; i++) {
-        const key = `${dayIndex}-${i}`;
-        updated[key] = !prev[key]; // 선택/해제 기능
-      }
-      return updated;
-    });
-  };
-
-  const createPanResponder = (dayIndex) => {
-    let startHourIndex = null;
-
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e, gestureState) => {
-        isDraggingRef.current = true; // 드래그 시작
-        const { y0 } = gestureState;
-        startHourIndex = Math.floor(y0 / 50);
-        handleTouch(dayIndex, startHourIndex, startHourIndex);
-      },
-      onPanResponderMove: (e, gestureState) => {
-        if (!isDraggingRef.current) return;
-        const { moveY } = gestureState;
-        const endHourIndex = Math.floor(moveY / 50);
-        if (startHourIndex !== null) {
-          handleTouch(dayIndex, Math.min(startHourIndex, endHourIndex), Math.max(startHourIndex, endHourIndex));
-        }
-      },
-      onPanResponderRelease: () => {
-        isDraggingRef.current = false; // 드래그 종료
-      },
-    });
-  };
-
-  const syncScroll = (event) => {
-    if (isDraggingRef.current) return; // 드래그 중일 때는 스크롤 비활성화
-
-    const offsetY = event.nativeEvent.contentOffset.y;
-    if (timeScrollRef.current) {
-      timeScrollRef.current.scrollTo({ y: offsetY, animated: false });
-    }
-    gridScrollRefs.current.forEach((ref) => {
-      if (ref) {
-        ref.scrollTo({ y: offsetY, animated: false });
-      }
-    });
-  };
+const ScheduleScreen = () => {
+  const maxParticipantsToShow = 6;
+  const extraParticipants = participants.length - maxParticipantsToShow;
 
   return (
-    <ScrollView horizontal>
-      <View style={styles.timeContainer}>
-        <ScrollView ref={timeScrollRef} onScroll={syncScroll} scrollEventThrottle={16}>
-          {hours.map((hour, index) => (
-            <View key={index} style={styles.timeLabel}>
-              <Text>{hour}</Text>
+    <View style={styles.container}>
+        <View style={styles.headerBox}>
+            <View style={styles.header}>
+            <Text style={styles.headerText}>2차 대면 회의</Text>
+            <View style={styles.headerDetails}>
+                <Text style={styles.meetingDuration}>1시간 30분</Text>
+                <Text style={styles.devide}> | </Text>
+                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text>
             </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      {days.map((day, dayIndex) => (
-        <View key={dayIndex} style={styles.dayColumn}>
-          <View style={styles.dayHeader}>
-            <Text style={styles.dayText}>{day}</Text>
-            <Text style={styles.dateText}>{dates[dayIndex]}</Text>
-          </View>
-
-          <View style={styles.grid}>
-            <ScrollView
-              ref={(ref) => (gridScrollRefs.current[dayIndex] = ref)}
-              scrollEnabled={!isDraggingRef.current} // 드래그 중일 때는 스크롤 비활성화
-              onScroll={syncScroll}
-              scrollEventThrottle={16}
-              {...createPanResponder(dayIndex).panHandlers}
-            >
-              {hours.map((_, hourIndex) => (
-                <View
-                  key={hourIndex}
-                  style={[
-                    styles.timeBlock,
-                    selectedTimes[`${dayIndex}-${hourIndex}`] && styles.selectedBlock,
-                  ]}
-                />
-              ))}
-            </ScrollView>
-          </View>
+            <View style={styles.participantContainer}>
+                {participants.slice(0, maxParticipantsToShow).map((participant, index) => (
+                <View key={index} style={styles.participant}>
+                    <Text style={styles.participantText}>{participant}</Text>
+                </View>
+                ))}
+                {extraParticipants > 0 && (
+                <Text style={styles.extraParticipants}>+{extraParticipants}</Text>
+                )}
+            </View>
+            </View>
         </View>
-      ))}
-    </ScrollView>
+
+        <View style={styles.grayBG}>
+            {/* 시간 선택 그리드 컴포넌트 사용 */}
+            <TimeSelectionGrid />
+
+            <View style={styles.footer}>
+            <TouchableOpacity style={styles.resetButton}>
+                <Text style={styles.resetText}>초기화</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.submitButton}>
+                <Text style={styles.submitText}>일정 등록 완료</Text>
+            </TouchableOpacity>
+            </View>
+        </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  timeContainer: {
-    width: 80,
+  container: {
+    flex: 1,
+    backgroundColor: colors.lightGrayBG,
+    marginTop: 64,
   },
-  timeLabel: {
-    height: 50,
-    justifyContent: 'center',
+  grayBG: {
+    backgroundColor: colors.lightGrayBG,
+  },
+  headerBox: {
+    backgroundColor: colors.white,
+    width: SCREEN_WIDTH,
+    height: 118,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  header: {
+    position: 'absolute',
+    top: 24,             
+    left: 25,           
+    marginBottom: 24,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.black,
+    height: 26,
+  },
+  headerDetails: {
+    flexDirection: 'row',
+    marginTop: 8,
     alignItems: 'center',
+    height: 18,
   },
-  dayColumn: {
-    width: 60,
-    marginHorizontal: 5,
+  meetingDuration: {
+    fontSize: 12,
+    color: colors.fontGray,
+    marginRight: 8,
   },
-  dayHeader: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
+  devide: {
+    color: colors.lightGray,
   },
-  dayText: {
-    fontWeight: 'bold',
+  meetingDate: {
+    fontSize: 12,
+    color: colors.fontGray,
   },
-  dateText: {
-    color: 'gray',
+  participantContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 4,
+    width: 314,
   },
-  grid: {
-    flexDirection: 'column',
+  participant: {
+    backgroundColor: colors.coolGrayBlue,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    marginRight: 4,
+    marginBottom: 8,
+    width: 44,
+    height: 16,
   },
-  timeBlock: {
-    height: 50,
+  participantText: {
+    color: colors.white,
+    fontSize: 8,
+    fontWeight: '600',
+  },
+  extraParticipants: {
+    color: colors.coolGrayBlue,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: colors.lightGrayBG,
+  },
+  resetButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     backgroundColor: '#E0E0E0',
-    marginBottom: 5,
-    borderRadius: 4,
+    borderRadius: 24,
   },
-  selectedBlock: {
-    backgroundColor: '#82B1FF',
+  resetText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  submitButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: '#00AEEF',
+    borderRadius: 24,
+  },
+  submitText: {
+    fontSize: 14,
+    color: '#FFF',
   },
 });
 
-export default TimeSelectionGrid;
+export default ScheduleScreen;

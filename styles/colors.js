@@ -12,5 +12,10 @@ export default {
     calendarColor: '#E3EFF5',
     memberFontColor: 'rgba(93, 174, 214, 0.6)',
     eventCompleteLine:'#F7F7FB',
+    
+    // eventJoin 페이지 사용 색
+    coolGrayBlue: '#B0CDD4',
+    lightGrayBG: '#F7F7FB',
+    fontGray: '#505050',
   };
   
