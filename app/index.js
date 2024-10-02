@@ -30,6 +30,10 @@ export default function Index() {
         title="게스트 선택 완료" 
         onPress={handleGuestSelectionComplete} 
       />
+      <Button 
+        title="멤머 목록 보기" 
+        onPress={() => router.push("/memberHostView")} 
+      />
     </View>
   );
 }
