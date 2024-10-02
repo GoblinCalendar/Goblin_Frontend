@@ -8,9 +8,8 @@
     "scheme": "goblinapp",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#5DAED6"
     },
     "ios": {
       "supportsTablet": true,
