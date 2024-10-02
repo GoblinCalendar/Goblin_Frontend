@@ -31,8 +31,12 @@ export default function Index() {
         onPress={handleGuestSelectionComplete} 
       />
       <Button 
-        title="멤머 목록 보기" 
+        title="멤버 목록 보기" 
         onPress={() => router.push("/memberHostView")} 
+      />
+      <Button 
+        title="랜딩 페이지 보기" 
+        onPress={() => router.push("/landingPage")} 
       />
     </View>
   );

@@ -5,8 +5,9 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NotificationProvider } from '../context/NotificationContext';
 import NotificationCard from '../components/NotificationCard';
+import Toast from 'react-native-toast-message';
 
-console.warn = () => {};
+console.warn = () => {}; //warn 경고 안뜨게함
 
 export default function RootLayout() {
   return (
@@ -31,10 +32,13 @@ export default function RootLayout() {
             <Stack.Screen name="createEventHostView/eventPlace" />
             <Stack.Screen name="createEventHostView/eventComplete" />
             <Stack.Screen name="joinEventGuestView" />
+            <Stack.Screen name="signUp" />
             </Stack>
           </NotificationProvider>
         </EventProvider>
       </SafeAreaProvider>
+      {/* Toast 설정 */}
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </GestureHandlerRootView>
   );
 }
