@@ -17,5 +17,7 @@ export default {
     coolGrayBlue: '#B0CDD4',
     lightGrayBG: '#F7F7FB',
     fontGray: '#505050',
+    ButtonDisableGray: '#F1F1F5',
+    font04Gray: '#767676'
   };
   
