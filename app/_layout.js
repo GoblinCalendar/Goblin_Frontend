@@ -6,6 +6,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NotificationProvider } from '../context/NotificationContext';
 import NotificationCard from '../components/NotificationCard';
 
+console.warn = () => {};
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}> 

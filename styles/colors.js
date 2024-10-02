@@ -28,5 +28,7 @@ export default {
     participation4: '#2A78EE', // 참여 인원 4명
 
     LineDisabled: '#CACAD7',
+
+    checkBoxGray: '#DFE3E4',
   };
   

@@ -10,13 +10,10 @@ export const NotificationProvider = ({ children }) => {
   // 알림을 보여주기 위한 함수
   const triggerNotification = () => {
     setShowNotification(true);
-    setTimeout(() => {
-      setShowNotification(false); // 알림을 5초 후에 자동으로 끔
-    }, 5000);
   };
 
   return (
-    <NotificationContext.Provider value={{ showNotification, triggerNotification }}>
+    <NotificationContext.Provider value={{ showNotification, triggerNotification , setShowNotification}}>
       {children}
     </NotificationContext.Provider>
   );

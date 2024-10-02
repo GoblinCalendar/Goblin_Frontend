@@ -32,6 +32,9 @@
       }
     },
     "owner": "eazzzzzzy",
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
   }
 }
