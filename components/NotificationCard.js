@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity  } from 'react-native';
+import React, { useContext, useRef, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity , Animated } from 'react-native';
 import BellIcon from '../assets/bell.svg';
 import colors from '../styles/colors';
 import { useRouter } from 'expo-router';
@@ -7,17 +7,37 @@ import { NotificationContext } from '../context/NotificationContext';
 
 const NotificationCard = () => {
     const router = useRouter();
-    const { showNotification } = useContext(NotificationContext); // 전역 상태에서 알림 표시 여부를 가져옴
+    const { showNotification, setShowNotification } = useContext(NotificationContext); // 전역 상태에서 알림 표시 여부를 가져옴
+    const slideAnim = useRef(new Animated.Value(-150)).current;
+
+    useEffect(() => {
+      if (showNotification) {
+        // 알림이 표시될 때 애니메이션 시작
+        Animated.timing(slideAnim, {
+          toValue: 100, // 알림이 나타날 위치
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        // 알림이 사라질 때 애니메이션
+        Animated.timing(slideAnim, {
+          toValue: -150, // 알림이 사라질 위치
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      }
+    }, [showNotification, slideAnim]);
 
     if (!showNotification) return null; // 알림을 표시할 필요가 없으면 렌더링하지 않음
 
     // "일정 확정하기" 버튼을 눌렀을 때 호출될 함수
   const handleConfirmPress = () => {
+    setShowNotification(false);
     router.push('/HostEventConfirm'); // HostEventConfirm 페이지로 이동
   };
 
   return (
-    <View style={styles.cardContainer}>
+    <Animated.View style={[styles.cardContainer, { transform: [{ translateY: slideAnim }] }]}>
       {/* 상단 배경 박스와 알림 텍스트 */}
       <View style={styles.header}>
         <BellIcon width={24} height={24} marginLeft={12} />
@@ -36,7 +56,7 @@ const NotificationCard = () => {
           <Text style={styles.date}>24.09.10 ~ 24.09.15</Text>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -54,9 +74,9 @@ const styles = StyleSheet.create({
     elevation: 4,
     overflow: 'hidden',
     position: 'absolute', // 화면에 고정
-    top: 100, // 상단에서 100px 아래
-    left: '50%',
-    transform: [{ translateX: -335 / 2 }],
+    // top: 100, // 상단에서 100px 아래
+    left: '7.5%',
+    // transform: [{ translateX: -335 / 2 }],
     zIndex: 50, // 최우선으로 처리
   },
   header: {
