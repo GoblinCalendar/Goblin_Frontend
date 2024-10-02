@@ -18,6 +18,15 @@ export default {
     lightGrayBG: '#F7F7FB',
     fontGray: '#505050',
     ButtonDisableGray: '#F1F1F5',
-    font04Gray: '#767676'
+    font04Gray: '#767676',
+
+    // HostEventConfirm 페이지 사용 색
+    participationNone: '#F1F1F5', // 참여 인원 0명
+    participation1: 'rgba(42, 120, 238, 0.25)', // 참여 인원 1명
+    participation2: 'rgba(42, 120, 238, 0.50)', // 참여 인원 2명
+    participation3: 'rgba(42, 120, 238, 0.75)', // 참여 인원 3명
+    participation4: '#2A78EE', // 참여 인원 4명
+
+    LineDisabled: '#CACAD7',
   };
   

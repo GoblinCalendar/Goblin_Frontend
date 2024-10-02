@@ -3,18 +3,23 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import { EventProvider } from '../context/EventContext';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { NotificationProvider } from '../context/NotificationContext';
+import NotificationCard from '../components/NotificationCard';
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}> 
       <SafeAreaProvider>
         <EventProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: styles.screenContent,
-            }}
-          >
+          <NotificationProvider>
+            {/* 모든 화면에서 NotificationCard를 렌더링 */}
+            <NotificationCard />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: styles.screenContent,
+              }}
+            >
             <Stack.Screen name="index" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="createEventHostView/eventDate" />
@@ -24,7 +29,8 @@ export default function RootLayout() {
             <Stack.Screen name="createEventHostView/eventPlace" />
             <Stack.Screen name="createEventHostView/eventComplete" />
             <Stack.Screen name="joinEventGuestView" />
-          </Stack>
+            </Stack>
+          </NotificationProvider>
         </EventProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
