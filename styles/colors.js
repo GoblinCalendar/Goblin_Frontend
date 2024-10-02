@@ -30,5 +30,7 @@ export default {
     LineDisabled: '#CACAD7',
 
     checkBoxGray: '#DFE3E4',
+    deleteButtonRed: '#DE5E56',
+    font05Gray: '#999999',
   };
   
