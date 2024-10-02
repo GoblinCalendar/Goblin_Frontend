@@ -1,22 +1,45 @@
 // ScheduleScreen.js
-import React from 'react';
+import React, { useRef, useState  } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import colors from '../../styles/colors';
-import TimeSelectionGrid from '../../components/TimeSelectionGrid';  // 컴포넌트 import
+import TimeSelectionGrid from '../../components/TimeSelectionGrid';
+import { useRouter } from 'expo-router';
 
 const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ScheduleScreen = () => {
+  const router = useRouter();
   const maxParticipantsToShow = 6;
   const extraParticipants = participants.length - maxParticipantsToShow;
+
+  const [headerText, setHeaderText] = useState('2차 대면 회의');
+  
+  // TimeSelectionGrid에 접근하기 위한 ref 생성
+  const timeSelectionGridRef = useRef(null);
+
+  // 일정 등록 완료 버튼을 눌렀을 때 호출되는 함수
+  const handleSubmit = () => {
+    console.log(headerText);
+    router.push(`/joinEventGuestView/joinEventComplete?headerText=${encodeURIComponent(headerText)}`);
+  };
+
+  // 초기화 버튼을 눌렀을 때 호출되는 함수
+  const handleReset = () => {
+    if (timeSelectionGridRef.current) {
+      console.log('ref is working');
+      timeSelectionGridRef.current.resetSelection();  // 선택한 시간 초기화
+    } else {
+      console.log('ref is null');
+    }
+  };
 
   return (
     <View style={styles.container}>
         <View style={styles.headerBox}>
             <View style={styles.header}>
-            <Text style={styles.headerText}>2차 대면 회의</Text>
+            <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
                 <Text style={styles.meetingDuration}>1시간 30분</Text>
                 <Text style={styles.devide}> | </Text>
@@ -37,15 +60,15 @@ const ScheduleScreen = () => {
 
         <View style={styles.grayBG}>
             {/* 시간 선택 그리드 컴포넌트 사용 */}
-            <TimeSelectionGrid />
+            <TimeSelectionGrid ref={timeSelectionGridRef}/>
 
             <View style={styles.footer}>
-            <TouchableOpacity style={styles.resetButton}>
-                <Text style={styles.resetText}>초기화</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton}>
-                <Text style={styles.submitText}>일정 등록 완료</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+                  <Text style={styles.resetText}>초기화</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                  <Text style={styles.submitText}>일정 등록 완료</Text>
+              </TouchableOpacity>
             </View>
         </View>
     </View>
@@ -129,26 +152,37 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     backgroundColor: colors.lightGrayBG,
+    position: 'absolute',
+    top: 520,
+    left: 20,
+    right: 20,
   },
   resetButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 24,
+    flex: 1, // 1의 비율
+    backgroundColor: colors.ButtonDisableGray,
+    borderRadius: 8,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10, // 두 버튼 사이에 10px의 간격
   },
   resetText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.fontGray,
+    fontWeight: '600',
   },
   submitButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: '#00AEEF',
-    borderRadius: 24,
+    flex: 2, // 2의 비율
+    backgroundColor: colors.buttonAfterColor,
+    borderRadius: 8,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   submitText: {
     fontSize: 14,
-    color: '#FFF',
+    color: colors.white,
+    fontWeight: '600',
   },
 });
 
