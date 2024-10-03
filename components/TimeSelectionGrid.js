@@ -159,6 +159,7 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
       // 선택된 시간이 없으면 "시작" 및 "종료" 값을 '-'로 설정
       selectedStartTime = selectedStartTime || '-';
       selectedEndTime = selectedEndTime || '-';
+      console.log(`타임피커로 보내지는 데이터 : ${selectedStartTime} , ${selectedEndTime}`);
 
       setSelectedDate({
         date: selectedDate,
@@ -168,6 +169,55 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
       });
       setModalVisible(true); // 모달 열기
     }
+  };
+
+  // 모달에서 받아온 시간 구간 변경 함수
+  const timeStringToIndex = (timeString, timeRange) => {
+    const gridStartTime = timeRange[0];
+    console.log(`입력된 시간 문자열: ${timeString}`);
+    const [period, time] = timeString.replace(/\s+/g, ' ').trim().split(' ');
+    console.log(`period: ${period}, time: ${time}`);
+    const [hour, minute = '00'] = time.split(':').map(t => t.trim());
+    console.log(`hour: ${hour}, minute: ${minute}`);
+    let hourIndex = parseInt(hour, 10);
+  
+    // 오후면 시간에 12를 더해 24시간제처럼 계산 (오후 12시는 예외)
+    if (period === '오후' && hourIndex !== 12) {
+      hourIndex += 12;
+    }
+    if (period === '오전' && hourIndex === 12) {
+      hourIndex = 0; // 오전 12시는 0시로 처리
+    }
+  
+    const [gridStartHour, gridStartMinute] = gridStartTime.split(':').map(t => parseInt(t, 10));
+    const totalGridStartIndex = gridStartHour * 4 + (gridStartMinute / 15);  // 그리드 시작 시간의 인덱스
+    const minuteIndex = parseInt(minute, 10) / 15;
+    const calculatedIndex = (hourIndex * 4 + minuteIndex) - totalGridStartIndex;  // 그리드 시작 시간에 맞게 조정된 인덱스
+    
+    console.log(`시간: ${timeString}, 계산된 인덱스: ${calculatedIndex}`); // 디버깅 로그
+    return calculatedIndex;
+  };
+
+  const onApplyTimeSelection = (start, end) => {
+    console.log(`선택한 시간 범위: ${start} - ${end}`);
+    
+    // 시작 시간과 종료 시간을 인덱스로 변환
+    const startIndex = timeStringToIndex(start, time);  // time 배열을 전달
+    const endIndex = timeStringToIndex(end, time);  // time 배열을 전달
+  
+    // 선택된 시간 범위에 해당하는 블록들을 업데이트
+    setSelectedTimes((prevSelectedTimes) => {
+      const updatedTimes = { ...prevSelectedTimes };
+      for (let i = startIndex; i <= endIndex; i++) {
+        updatedTimes[`${selectedDayIndex}-${i}`] = true;
+      }
+      return updatedTimes;
+    });
+
+    setSelectedDayIndex(null); // 날짜 선택 해제
+    setSelectedDate(null);     // 날짜 상태 초기화
+  
+    setModalVisible(false); // 모달 닫기
   };
 
   return (
@@ -279,7 +329,7 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
           visible={isModalVisible}
           toggleModal={() => setModalVisible(false)}
           selectedDate={selectedDate}
-          onApplyTimeSelection={(start, end) => console.log(`선택한 시간 범위: ${start} - ${end}`)}
+          onApplyTimeSelection={onApplyTimeSelection}
         />
       )}
     </View>

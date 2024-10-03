@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     top: 132,
     left: 25,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 34,
     color: colors.black,
     textAlign: 'left',
@@ -150,14 +150,11 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
-    marginRight: 8,
-    position: 'absolute',
+    marginRight: 15,
     left: 10,
   },
   selectedFriendsContainer: {
-    paddingLeft: 40,
     alignItems: 'center',
-    height: '100%',
     justifyContent: 'center'
   },
   placeholderText: {

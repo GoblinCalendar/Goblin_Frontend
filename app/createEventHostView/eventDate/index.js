@@ -2,12 +2,12 @@ import React, { useState, useContext } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
 import ButtonComponent from '../../../components/Button';
 import BackButton from '../../../components/BackButton';
 import colors from '../../../styles/colors';
 import 'moment/locale/ko'; // 한국어 설정 추가
 import { EventContext } from '../../../context/EventContext';
+import TimePicker from '../../../components/TimePicker';
 
 // Locale 설정
 LocaleConfig.locales['ko'] = {
@@ -30,19 +30,13 @@ const EventDateScreen = () => {
   const [endDay, setEndDay] = useState(null);
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
   const [selectedText, setSelectedText] = useState('기간을 선택해주세요');
-  const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const [startTime, setStartTime] = useState('-');
   const [endTime, setEndTime] = useState('-');
-  const [selectedTime, setSelectedTime] = useState({ hour: '1', minute: '00', ampm: '오전' });
-  const [pickerType, setPickerType] = useState('');
   const [isTextCentered, setIsTextCentered] = useState(true); // 텍스트 초기 정렬 상태
   const router = useRouter();
   const { width } = useWindowDimensions(); 
   const horizontalPadding = (width - buttonWidth) / 2; 
   const { setEventDetails } = useContext(EventContext);
-
-  // 오늘 날짜 가져오기
-  const today = new Date().toISOString().split('T')[0];
 
   const handleDayPress = (day) => {
     let newSelectedDates = { ...selectedDates };
@@ -138,20 +132,6 @@ const EventDateScreen = () => {
     setIsTextCentered(false); // 텍스트 정렬 상태 변경
   };
 
-  const openTimePicker = (type) => {
-    setPickerType(type);
-    setIsTimePickerVisible(true);
-  };
-
-  const handleTimePickerConfirm = () => {
-    if (pickerType === 'start') {
-      setStartTime(`${selectedTime.ampm} ${selectedTime.hour} : ${selectedTime.minute}`);
-    } else {
-      setEndTime(`${selectedTime.ampm} ${selectedTime.hour} : ${selectedTime.minute}`);
-    }
-    setIsTimePickerVisible(false);
-  };
-
   const renderHeader = (date) => {
     const year = date?.getFullYear() || '';
     const month = date ? date.getMonth() + 1 : '';
@@ -224,65 +204,13 @@ const EventDateScreen = () => {
       )}
 
       {!isCalendarVisible && (
-        <View style={styles.timeSelection}>
-          <Image style={styles.icon} source={require('../../../assets/clock.png')} />
-          <Text style={styles.timeText}>시작</Text>
-          <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('start')}>
-            <Text style={styles.startTimeText}>{startTime}</Text>
-          </TouchableOpacity>
-          <Text style={styles.devide}>ㅣ</Text>
-          <Text style={[styles.timeText, { marginLeft: 10 }]}>종료</Text>
-          <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('end')}>
-            <Text style={styles.endTimeText}>{endTime}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      
-      {/* 시간선택 픽커뷰 */}
-      {isTimePickerVisible && (
-        <TouchableOpacity 
-        style={styles.overlay} 
-        activeOpacity={1} 
-        onPress={() => {
-          handleTimePickerConfirm();
-          setIsTimePickerVisible(false);
-        }}
-        >
-        <View style={styles.allpickerContainer}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedTime.ampm}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              onValueChange={(value) => setSelectedTime((prev) => ({ ...prev, ampm: value }))}
-            >
-              <Picker.Item label="오전" value="오전" />
-              <Picker.Item label="오후" value="오후" />
-            </Picker>
-            <Picker
-              selectedValue={selectedTime.hour}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              onValueChange={(value) => setSelectedTime((prev) => ({ ...prev, hour: value }))}
-            >
-              {[...Array(12).keys()].map((i) => (
-                <Picker.Item key={i} label={`${i + 1}`} value={`${i + 1}`} />
-              ))}
-            </Picker>
-            <Text style={styles.colonText}>:</Text>
-            <Picker
-              selectedValue={selectedTime.minute}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-              onValueChange={(value) => setSelectedTime((prev) => ({ ...prev, minute: value }))}
-            >
-              {['00', '15', '30', '45'].map((minute) => (
-                <Picker.Item key={minute} label={minute} value={minute} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        </TouchableOpacity>
+        <TimePicker
+          style={{ position: 'absolute', left: 30, top: 312 }}
+          startTime={startTime}
+          endTime={endTime}
+          setStartTime={setStartTime}
+          setEndTime={setEndTime}
+        />
       )}
 
       <ButtonComponent
@@ -297,26 +225,24 @@ const EventDateScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: colors.white,
     position: 'relative', 
-    alignSelf: 'center', 
   },
   titleText: {
     position: 'absolute',
     top: 132,
     left: 25,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 34,
     color: colors.black,
     textAlign: 'left',
   },
   subTitleText: {
     position: 'absolute',
-    top: 210,
+    top: 206,
     left: 25,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.gray,
     textAlign: 'left',
   },
@@ -325,7 +251,7 @@ const styles = StyleSheet.create({
     top: 260, 
     left: 30,
     width: buttonWidth,
-    height: 50,
+    height: 40,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.calendarColor,
@@ -391,82 +317,6 @@ const styles = StyleSheet.create({
   },
   footerTextReset: {
     color: colors.black,
-  },
-  timeSelection: {
-    position: 'absolute',
-    top: 320, 
-    left: 30,
-    width: buttonWidth,
-    height: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.calendarColor,
-    borderRadius: 12,
-    padding: 8,
-  },
-  devide: {
-    color: colors.font05Gray, 
-    fontSize: 16,
-    textAlign: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginBottom: 2
-  },
-  timeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    width: 80,
-    height: 26,
-    justifyContent: 'center',
-    marginHorizontal: 10, // 좌우 간격
-  },
-  timeText: {
-    fontSize: 14,
-    color: colors.black,
-  },
-  startTimeText: {
-    fontSize: 12, 
-    color: colors.black,
-    textAlign: 'center',
-  },
-  endTimeText: {
-    fontSize: 12,
-    color: colors.black, 
-    textAlign: 'center',
-  },
-  allpickerContainer: {
-    backgroundColor: colors.buttonBeforeColor,
-    alignItems: 'center',
-    marginTop: 20,
-    borderRadius: 12,
-    padding: 10,
-    position: 'absolute',
-    top: 360,
-    left: 20,
-    width: '90%',
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    paddingBottom: 15,
-    borderRadius: 12,
-    marginHorizontal: 5,
-  },
-  picker: {
-    width: 100,
-    height: 180,
-  },
-  pickerItem: {
-    height: 180, 
-    fontSize: 20,
-  },
-  colonText: {
-    fontSize: 25,
-    color: colors.gray,
-    paddingHorizontal: 10,
   },
   button: {
     position: 'absolute',

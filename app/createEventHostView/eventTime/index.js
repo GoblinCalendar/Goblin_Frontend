@@ -7,6 +7,7 @@ import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { EventContext } from '../../../context/EventContext';
+import Clock from '../../../assets/clock.svg';
 
 const durations = ['30분', '1시간', '2시간', '3시간', '1시간 30분', '2시간 30분', '3시간 30분'];
 const buttonWidth = 335; // 버튼의 고정 너비
@@ -97,7 +98,7 @@ const EventTimeScreen = () => {
         >
           <View style={styles.rectangle}>
             <View style={styles.detailContainer}>
-              <Image style={styles.icon} source={require('../../../assets/clock.png')} />
+              <Clock style={styles.icon} />
               <Text style={styles.detailText}>상세 시간 설정</Text>
             </View>
           </View>

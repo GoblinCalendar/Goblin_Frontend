@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     top: 132,
     left: 25,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 34,
     color: colors.black,
     textAlign: 'left',

@@ -33,5 +33,7 @@ export default {
     deleteButtonRed: '#DE5E56',
     font05Gray: '#999999',
     errorRed:'#DC0000',
+
+    font02Gray: '#484848',
   };
   
