@@ -34,7 +34,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <MonthIcon /> : <MonthOutlineIcon />}
-                <Text style={styles.text}>월별</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  월별
+                </Text>
               </View>
             ),
           }}
@@ -45,7 +47,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <DayIcon /> : <DayOutlineIcon />}
-                <Text style={styles.text}>일별</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  일별
+                </Text>
               </View>
             ),
           }}
@@ -62,7 +66,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <TodoIcon /> : <TodoOutlineIcon />}
-                <Text style={styles.text}>To Do</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  To Do
+                </Text>
               </View>
             ),
           }}
@@ -73,7 +79,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <SearchIcon /> : <SearchOutlineIcon />}
-                <Text style={styles.text}>검색</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  검색
+                </Text>
               </View>
             ),
           }}
@@ -90,7 +98,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    color: colors.skyBlue,
     fontSize: 11,
     fontWeight: "400",
     lineHeight: 16,
