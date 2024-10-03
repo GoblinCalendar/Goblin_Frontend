@@ -11,6 +11,7 @@ import SearchIcon from "../../assets/search_icon.svg";
 import SearchOutlineIcon from "../../assets/search_outline_icon.svg";
 import PlusIcon from "../../assets/plus_icon.svg";
 import PlusFocusedIcon from "../../assets/plus_focused_icon.svg";
+
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

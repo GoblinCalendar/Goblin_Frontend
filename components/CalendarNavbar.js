@@ -2,11 +2,14 @@ import { StyleSheet, Text, View } from "react-native";
 import Drawer from "../assets/drawer.svg";
 import People from "../assets/people.svg";
 import colors from "../styles/colors";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
-export default function CalendarNavbar({ title, currentMonth }) {
+export default function CalendarNavbar({ title, currentMonth, onPress }) {
   return (
     <View style={styles.navbar}>
-      <Drawer />
+      <TouchableOpacity onPress={onPress}>
+        <Drawer />
+      </TouchableOpacity>
       <Text style={styles.title} numberOfLines={1}>
         {title || "???"}
       </Text>
