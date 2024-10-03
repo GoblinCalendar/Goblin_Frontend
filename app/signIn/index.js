@@ -127,12 +127,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 56,
     color: colors.black,
+    marginLeft:25,
   },
   inputContainer: {
     marginBottom: -10,
   },
   input: {
     marginTop: 20,
+    marginLeft: 25,
   },
   submitButton: {
     position: 'absolute',
@@ -144,6 +146,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     position: 'absolute',
     alignSelf: 'center',
-    top: 680,
+    top: 690,
   },
 });

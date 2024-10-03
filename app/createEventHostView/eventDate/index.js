@@ -41,6 +41,9 @@ const EventDateScreen = () => {
   const horizontalPadding = (width - buttonWidth) / 2; 
   const { setEventDetails } = useContext(EventContext);
 
+  // 오늘 날짜 가져오기
+  const today = new Date().toISOString().split('T')[0];
+
   const handleDayPress = (day) => {
     let newSelectedDates = { ...selectedDates };
 
@@ -130,7 +133,7 @@ const EventDateScreen = () => {
       dates: dateArray,
     }));
   
-    setSelectedText(dateStrings.join(' | '));
+    setSelectedText(dateStrings.join(' ㅣ '));
     setIsCalendarVisible(false);
     setIsTextCentered(false); // 텍스트 정렬 상태 변경
   };
@@ -192,13 +195,17 @@ const EventDateScreen = () => {
             markedDates={selectedDates}
             markingType={'period'}
             theme={{
-              selectedDayBackgroundColor: colors.buttonAfterColor,
-              todayTextColor: colors.black,
-              arrowColor: colors.black,
-              textDayFontWeight: 'bold',
-              textSectionTitleColor: colors.gray,
-              selectedDayTextColor: colors.white,
-              textMonthFontWeight: 'bold',
+              backgroundColor: colors.calendarColor,  // 캘린더 배경색
+              calendarBackground: colors.calendarColor,  // 캘린더 전체 배경색
+              dayTextColor: colors.black,  // 날짜 텍스트 색상
+              textDisabledColor: colors.gray,  // 비활성화된 날짜 색상
+              selectedDayBackgroundColor: colors.buttonAfterColor,  // 선택된 날짜 배경색
+              selectedDayTextColor: colors.white,  // 선택된 날짜 텍스트 색상
+              arrowColor: colors.black,  // 화살표 색상
+              monthTextColor: colors.black,  // 월 텍스트 색상
+              textSectionTitleColor: colors.black,  // 요일 텍스트 색상
+              textDayFontWeight: 'nomal',
+              textMonthFontWeight: 'nomal',
               textMonthColor: 'black',
             }}
             style={styles.calendar}
@@ -223,8 +230,8 @@ const EventDateScreen = () => {
           <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('start')}>
             <Text style={styles.startTimeText}>{startTime}</Text>
           </TouchableOpacity>
-          <Text style={{ color: colors.gray, fontSize: 16 }}> |  </Text>
-          <Text style={styles.timeText}>종료</Text>
+          <Text style={styles.devide}>ㅣ</Text>
+          <Text style={[styles.timeText, { marginLeft: 10 }]}>종료</Text>
           <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('end')}>
             <Text style={styles.endTimeText}>{endTime}</Text>
           </TouchableOpacity>
@@ -353,15 +360,14 @@ const styles = StyleSheet.create({
     top: 320,
     left: 20,
     width: '90%',
+    height: 370,
     paddingHorizontal:10,
     backgroundColor: colors.calendarColor,
     borderRadius: 15,
     padding: 10,
   },
   calendar: {
-    borderRadius: 15, 
-    padding: 5,
-    backgroundColor: colors.white,
+    padding: 3,
   },
   header: {
     paddingBottom: 10,
@@ -397,6 +403,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.calendarColor,
     borderRadius: 12,
     padding: 8,
+  },
+  devide: {
+    color: colors.font05Gray, 
+    fontSize: 16,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 2
   },
   timeButton: {
     flexDirection: 'row',

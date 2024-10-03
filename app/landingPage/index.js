@@ -73,13 +73,13 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   button: {
-    marginTop: 182,
+    marginTop: 175,
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 17,
   },
   loginText: {
     fontSize: 16,

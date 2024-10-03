@@ -81,7 +81,7 @@ const MemberHostView = () => {
     return(
         <View style={styles.container}>
             {/* BackButton 컴포넌트 */}
-            <BackButton navigateTo='/'/>
+            <BackButton navigateTo='/monthly'/>
 
             {/* 모임 이름 */}
             <Text style={styles.titleText}>{groupName}</Text>

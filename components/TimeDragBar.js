@@ -32,8 +32,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.white,
     borderRadius: 2,
-    position: 'absolute',
-    top: 4,
   },
 });
 

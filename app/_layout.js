@@ -32,6 +32,7 @@ export default function RootLayout() {
             <Stack.Screen name="createEventHostView/eventPlace" />
             <Stack.Screen name="createEventHostView/eventComplete" />
             <Stack.Screen name="joinEventGuestView" />
+            <Stack.Screen name="memberHostView" />
             <Stack.Screen name="signUp" />
             </Stack>
           </NotificationProvider>
@@ -46,9 +47,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   screenContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
 });

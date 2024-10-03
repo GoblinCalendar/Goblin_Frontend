@@ -77,7 +77,9 @@ const TimeSelectionModal = ({ visible, toggleModal, selectedDate, onApplyTimeSel
     >
       <View style={styles.container}>
         <View style={styles.modalStart}></View>
-        <Text style={styles.modalDateText}>{date} ({dayOfWeek})</Text>
+        <Text style={styles.modalDateText}>
+          {selectedDate ? `${selectedDate.date}. ${selectedDate.dayOfWeek}` : ''}
+        </Text>
 
         {/* 시간 선택 */}
         <View style={styles.timeSelection}>
@@ -86,8 +88,8 @@ const TimeSelectionModal = ({ visible, toggleModal, selectedDate, onApplyTimeSel
           <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('start')}>
             <Text style={styles.startTimeText}>{startTime}</Text>
           </TouchableOpacity>
-          <Text style={{ color: colors.gray, fontSize: 16 }}> |  </Text>
-          <Text style={styles.timeText}>종료</Text>
+          <Text style={styles.devide}>ㅣ</Text>
+          <Text style={[styles.timeText, { marginLeft: 10 }]}>종료</Text>
           <TouchableOpacity style={styles.timeButton} onPress={() => openTimePicker('end')}>
             <Text style={styles.endTimeText}>{endTime}</Text>
           </TouchableOpacity>
@@ -159,24 +161,25 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 16,
-    height: 414,
+    height: 424,
     width: Dimensions.get('window').width,
   },
   modalStart: {
-    width: 70,
-    height: 2,
+    width: 75,
+    height: 4,
     borderRadius: 10,
     backgroundColor: colors.calendarColor,
     alignSelf: 'center',
-    marginTop: -9,
+    marginTop: -6,
   },
   modalDateText: {
     fontSize: 20,
     textAlign: 'center',
-    fontWeight: '400',
+    fontWeight: '500',
     marginBottom: 15,
     marginTop: 15,
     color: colors.black,
+    alignSelf: 'center',
   },
   icon: {
     width: 24,
@@ -193,6 +196,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 8,
     alignSelf: 'center',
+  },
+  devide: {
+    color: colors.gray, 
+    fontSize: 16,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 2
   },
   timeButton: {
     flexDirection: 'row',

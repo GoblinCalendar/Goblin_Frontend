@@ -4,10 +4,11 @@
     "slug": "goblinapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/appicon.png",
     "scheme": "goblinapp",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splashImg.png",
       "resizeMode": "contain",
       "backgroundColor": "#5DAED6"
     },

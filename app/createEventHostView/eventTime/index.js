@@ -164,16 +164,16 @@ const styles = StyleSheet.create({
     top: 132,
     left: 25,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 34,
     color: colors.black,
     textAlign: 'left',
   },
   subTitleText: {
     position: 'absolute',
-    top: 210,
+    top: 206,
     left: 25,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.gray,
     textAlign: 'left',
   },
@@ -181,9 +181,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 50,
     position: 'absolute',
-    top: 196,
+    top: 256,
   },
   timeButton: {
     borderWidth: 1,
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
   },
   detailButton: {
     position: 'absolute',
-    top: 378, // 위치 설정
+    top: 405, 
   },
   rectangle: {
     borderRadius: 12,

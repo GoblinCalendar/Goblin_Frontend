@@ -85,20 +85,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 335,
     height: 42,
+    textAlign: 'center',
   },
   headerText: {
     color: colors.white, // 하얀색 텍스트
     marginLeft: 4,
     fontWeight: '600',
     fontSize: 12,
-    height: 18,
+    textAlign: 'center',
   },
   confirmText: {
     color: colors.white,
     fontWeight: '500',
     fontSize: 12,
-    height: 18,
-    marginLeft: 110,
+    marginLeft: 108,
   },
   body: {
     height: 76,
@@ -108,15 +108,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     color: colors.fontGray,
-    height: 28,
     fontWeight: '500',
-    marginTop: 10,
+    marginTop: 14,
     marginLeft: 12,
   },
   detailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
     marginLeft: 12,
     height: 18,
   },

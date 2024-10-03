@@ -43,7 +43,7 @@ const EventPlaceScreen = () => {
             <Text style={styles.faceToFaceSectionTitle}>대면 장소</Text>
             {/* InputBox 컴포넌트 */}
             <InputBox 
-                style={[styles.inputBox, { left: horizontalPadding }]} 
+                style={styles.inputBox} 
                 onChangeText={setFaceToFaceLocation} 
                 value={faceToFaceLocation}
                 placeholder="대면 장소 이름을 작성해주세요!"
@@ -54,7 +54,7 @@ const EventPlaceScreen = () => {
             <Text style={styles.onlineLinkSectionTitle}>비대면 링크 주소</Text>
             {/* InputBox 컴포넌트 */}
             <InputBox 
-                style={[styles.inputBox, { left: horizontalPadding }]} 
+                style={styles.inputBox} 
                 onChangeText={setOnlineLink} 
                 value={onlineLink}
                 placeholder="비대면 링크를 작성해 주세요!"
@@ -97,6 +97,9 @@ const styles = StyleSheet.create({
     color: colors.gray,
     textAlign: 'left',
     fontWeight: 'bold',
+  },
+  inputBox: {
+    marginLeft: 25,
   },
   faceToFaceSection: {
     position: 'absolute',

@@ -7,6 +7,7 @@ import ButtonComponent from '../../components/Button';  // 가입 완료 버튼
 import colors from '../../styles/colors';  // 색상 스타일
 import { useRouter } from 'expo-router';
 import Toast from 'react-native-toast-message';
+import apiClient from '../../lib/api';
 
 export default function SignUp() {
   const [name, setName] = useState('');
@@ -21,6 +22,51 @@ export default function SignUp() {
 
   // 가입 완료 버튼 활성화 여부
   const isFormValid = name.length > 0 && userId.length > 0 && password.length > 0;
+
+  const signupAPICall = async () => {
+    try {
+      // 서버로 요청 보내기 전 로그 찍기
+      console.log('회원가입 요청 보냄:', {
+        username: name,
+        loginId: userId,
+        password: password,
+      });
+
+      // 회원가입 API 호출 - apiClient 사용
+      const response = await apiClient.post('/api/users/register', {
+        username: name,
+        loginId: userId,
+        password: password,
+      });
+
+      // 응답 데이터 로그
+      console.log('회원가입 응답:', response.data);
+
+      // 성공 메시지 표시
+      Toast.show({
+        type: 'info',
+        text1: '회원가입 성공!',
+        text2: '환영합니다! 🎉',
+        position: 'bottom',
+        visibilityTime: 2000,
+      });
+
+      // 2초 후 로그인 페이지로 이동
+      setTimeout(() => {
+        router.push('/signIn');
+      }, 2000);
+    } catch (error) {
+      // 에러 처리
+      console.error(error);
+      Toast.show({
+        type: 'error',
+        text1: '회원가입 실패',
+        text2: '다시 시도해 주세요.',
+        position: 'bottom',
+        visibilityTime: 2000,
+      });
+    }
+  }
 
   const handleSubmit = () => {
     let newErrors = { name: '', userId: '', password: '' };
@@ -48,19 +94,7 @@ export default function SignUp() {
     if (!valid) {
       setErrors(newErrors);
     } else {
-      // 성공 메시지
-    Toast.show({
-        type: 'info',
-        text1: '회원가입 성공!',
-        text2: '환영합니다! 🎉',
-        position: 'bottom',
-        visibilityTime: 2000,
-      });
-  
-      // 2초 후 이동
-      setTimeout(() => {
-        router.push('/signIn');
-      }, 2000);
+      signupAPICall();
     }
   };
 
@@ -134,16 +168,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     position: 'relative',
   },
-  backBtnContainer: {
-    position: 'relative',
-    top: 0,
-    left: -25,
-  },
   title: {
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 70,
+    marginBottom: 20,
     color: colors.black,
   },
   label: {
@@ -151,9 +181,11 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 32,
     color: colors.black,
+    marginLeft: 25,
   },
   inputContainer: {
-    marginBottom: 30,
+    marginBottom: 24,
+    marginLeft: 25,
   },
   input: {
     marginTop: 20,
@@ -166,6 +198,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.errorRed,
     fontSize: 13,
-    marginTop: 5,
+    marginTop: 14,
   },
 });

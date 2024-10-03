@@ -39,7 +39,7 @@ const EventNameScreen = () => {
 
             {/* InputBox 컴포넌트 */}
             <InputBox 
-                style={[styles.inputBox, { left: horizontalPadding }]} 
+                style={[styles.inputBox]} 
                 onChangeText={setInputValue} 
                 placeholder="일정 이름을 작성해 주세요!"
             />
@@ -65,17 +65,18 @@ const styles = StyleSheet.create({
     },
     titleText: {
         position: 'absolute',
-        top: 132,
-        left: 25,
-        fontSize: 24,
-        fontWeight: '400',
-        lineHeight: 34,
-        color: colors.black,
+        top: 152,
+        left: 24,
+        fontSize: 26,
+        fontWeight: '600',
+        lineHeight: 32,
+        color: colors.skyBlue,
         textAlign: 'left',
     },
     inputBox: {
         position: 'absolute',
-        top: 282,
+        top: 275,
+        left: 24,
         zIndex: 10,
     },
     button: {

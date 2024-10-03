@@ -1,9 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Drawer from "../assets/drawer.svg";
 import People from "../assets/people.svg";
 import colors from "../styles/colors";
+import { useRouter } from "expo-router";
 
 export default function CalendarNavbar({ title, currentMonth }) {
+  const router = useRouter();
+  
   return (
     <View style={styles.navbar}>
       <Drawer />
@@ -11,7 +14,9 @@ export default function CalendarNavbar({ title, currentMonth }) {
         {title || "???"}
       </Text>
       <View style={styles.indicators}>
-        <People style={styles.people} />
+        <TouchableOpacity onPress={() => router.push("/memberHostView")}>
+          <People style={styles.people} />
+        </TouchableOpacity>
         <View style={styles.monthIndicator}>
           <Text style={styles.monthIndicatorText}>{currentMonth || "?"}월</Text>
         </View>

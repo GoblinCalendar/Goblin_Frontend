@@ -72,7 +72,7 @@ const CandidateListModal = ({ visible, toggleModal }) => {
                 <View style={styles.oneBlock}>
                     <View style={styles.scheduleInfo}>
                         <Text style={styles.dateText}>{item.date}</Text>
-                        <Text style={{ color: colors.lightGrayBG, fontSize: 16 }}> |  </Text>
+                        <Text style={styles.devide}>ㅣ</Text>
                         <Text style={styles.timeText}>{item.time}</Text>
                     </View>
                     <View style={styles.participantContainer}>
@@ -142,24 +142,24 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
   },
   modalStart: {
-    width: 70,
-    height: 2,
+    width: 75,
+    height: 4,
     borderRadius: 10,
     backgroundColor: colors.calendarColor,
     alignSelf: 'center',
-    marginTop: -9,
+    marginTop: -6,
   },
   titleText: {
-    marginTop: 30,
+    marginTop: 25,
     height: 28,
-    fontWeight: '600',
+    fontWeight: '800',
     fontSize: 20,
     color: colors.black,
     marginLeft: 36,
     alignItems: 'center',
   },
   subTitleText: {
-    marginTop: 10,
+    marginTop: 4,
     height: 20,
     fontSize: 14,
     color: colors.fontGray,
@@ -214,19 +214,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 100,
     marginRight: 4,
+    marginTop: 3,
+    height: 17
     },
-    participantText: {
-        color: colors.white,
-        fontSize: 8,
-        fontWeight: '600',
-    },
-    extraParticipants: {
-        color: colors.coolGrayBlue,
-        fontSize: 11,
-        fontWeight: '500',
-    },
+  participantText: {
+    color: colors.white,
+    fontSize: 8,
+    fontWeight: '600',
+  },
+  devide: {
+    color: colors.calendarColor, 
+    fontSize: 16,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginBottom: 2
+  },
+  extraParticipants: {
+    color: colors.coolGrayBlue,
+    fontSize: 11,
+    fontWeight: '500',
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
   applyButton: {
-    marginBottom: 10,
+    marginBottom: 15,
     alignSelf: 'center',
   },
 });
