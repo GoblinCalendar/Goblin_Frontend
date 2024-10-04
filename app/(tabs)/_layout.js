@@ -11,6 +11,7 @@ import SearchIcon from "../../assets/search_icon.svg";
 import SearchOutlineIcon from "../../assets/search_outline_icon.svg";
 import PlusIcon from "../../assets/plus_icon.svg";
 import PlusFocusedIcon from "../../assets/plus_focused_icon.svg";
+
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -34,7 +35,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <MonthIcon /> : <MonthOutlineIcon />}
-                <Text style={styles.text}>월별</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  월별
+                </Text>
               </View>
             ),
           }}
@@ -45,7 +48,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <DayIcon /> : <DayOutlineIcon />}
-                <Text style={styles.text}>일별</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  일별
+                </Text>
               </View>
             ),
           }}
@@ -62,7 +67,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <TodoIcon /> : <TodoOutlineIcon />}
-                <Text style={styles.text}>To Do</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  To Do
+                </Text>
               </View>
             ),
           }}
@@ -73,7 +80,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <SearchIcon /> : <SearchOutlineIcon />}
-                <Text style={styles.text}>검색</Text>
+                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                  검색
+                </Text>
               </View>
             ),
           }}
@@ -90,7 +99,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    color: colors.skyBlue,
     fontSize: 11,
     fontWeight: "400",
     lineHeight: 16,

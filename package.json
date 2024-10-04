@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-picker/picker": "^2.8.1",
+    "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "axios": "^1.7.7",
@@ -25,6 +26,7 @@
     "react-dom": "18.2.0",
     "react-native": "0.74.5",
     "react-native-calendars": "github:rubiyh/react-native-calendars",
+    "react-native-reanimated": "~3.10.1",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.20.0",
     "react-native-modal": "^13.0.1",
@@ -32,6 +34,8 @@
     "react-native-screens": "3.31.1",
     "react-native-svg": "^15.7.1",
     "react-native-svg-transformer": "^1.5.0",
+    "react-native-swipe-list-view": "^3.2.9",
+    "react-native-swipeable-item": "^2.0.9",
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.10"
   },
