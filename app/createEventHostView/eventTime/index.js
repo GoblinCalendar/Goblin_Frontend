@@ -1,11 +1,13 @@
 // eventTime/index.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import BackButton from '../../../components/BackButton';
 import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
+import { EventContext } from '../../../context/EventContext';
+import Clock from '../../../assets/clock.svg';
 
 const durations = ['30분', '1시간', '2시간', '3시간', '1시간 30분', '2시간 30분', '3시간 30분'];
 const buttonWidth = 335; // 버튼의 고정 너비
@@ -18,6 +20,7 @@ const EventTimeScreen = () => {
   const router = useRouter();
   const { width } = useWindowDimensions(); // 현재 화면의 너비와 높이 가져오기
   const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
+  const { setEventDetails } = useContext(EventContext);
 
   const handleTimePress = (duration) => { // 시간버튼 이미 선택된 시간인 경우 선택 해제
     if (selectedTime === duration) {
@@ -35,14 +38,23 @@ const EventTimeScreen = () => {
 
   const handleNextPress = () => {
     if (selectedTime) {
+      setEventDetails((prevDetails) => ({
+        ...prevDetails,
+        duration: selectedTime,
+      }));
       router.push('/createEventHostView/eventDate');
     }
+  };
+
+  const handleTimePickerConfirm = () => {
+    setSelectedTime(`${customHour}시간 ${customMinute}분`);
+    setIsTimePickerVisible(false);
   };
 
   return (
     <View style={[styles.container, { width }]}>
       {/* BackButton 컴포넌트 */}
-      <BackButton />
+      <BackButton navigateTo='/createEventHostView/eventName'/>
 
       {/* 타이틀 문구 */}
       <Text style={styles.titleText}>
@@ -86,7 +98,7 @@ const EventTimeScreen = () => {
         >
           <View style={styles.rectangle}>
             <View style={styles.detailContainer}>
-              <Image style={styles.icon} source={require('../../../assets/clock.png')} />
+              <Clock style={styles.icon} />
               <Text style={styles.detailText}>상세 시간 설정</Text>
             </View>
           </View>
@@ -95,36 +107,46 @@ const EventTimeScreen = () => {
 
       {/* 타임 피커 */}
       {isTimePickerVisible && (
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={customHour}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-            onValueChange={(itemValue) => setCustomHour(itemValue)}
-          >
-            {[...Array(6).keys()].map((i) => (
-              <Picker.Item key={i} label={`${i}시간`} value={`${i}`} />
-            ))}
-          </Picker>
-          <Text style={styles.colonText}>:</Text>
-          <Picker
-            selectedValue={customMinute}
-            style={styles.picker}
-            itemStyle={styles.pickerItem}
-            onValueChange={(itemValue) => setCustomMinute(itemValue)}
-          >
-            {['00', '15', '30', '45'].map((minute) => (
-              <Picker.Item key={minute} label={`${minute}분`} value={minute} />
-            ))}
-          </Picker>
+        <TouchableOpacity 
+        style={styles.overlay} 
+        activeOpacity={1} 
+        onPress={() => {
+          handleTimePickerConfirm();
+        }}
+        >
+        <View style={styles.allpickerContainer}>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={customHour}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              onValueChange={(itemValue) => setCustomHour(itemValue)}
+            >
+              {[...Array(6).keys()].map((i) => (
+                <Picker.Item key={i} label={`${i}시간`} value={`${i}`} />
+              ))}
+            </Picker>
+            <Text style={styles.colonText}>:</Text>
+            <Picker
+              selectedValue={customMinute}
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              onValueChange={(itemValue) => setCustomMinute(itemValue)}
+            >
+              {['00', '15', '30', '45'].map((minute) => (
+                <Picker.Item key={minute} label={`${minute}분`} value={minute} />
+              ))}
+            </Picker>
+          </View>
         </View>
+        </TouchableOpacity>
       )}
 
       {/* 다음 버튼 */}
       <ButtonComponent
         title="다음"
         style={[styles.button, { left: horizontalPadding }]}
-        isActive={!!selectedTime || isTimePickerVisible} // 선택한 시간이 있으면 활성화
+        isActive={selectedTime !== ''}
         onPress={handleNextPress}
       />
     </View>
@@ -143,16 +165,16 @@ const styles = StyleSheet.create({
     top: 132,
     left: 25,
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 34,
     color: colors.black,
     textAlign: 'left',
   },
   subTitleText: {
     position: 'absolute',
-    top: 210,
+    top: 206,
     left: 25,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.gray,
     textAlign: 'left',
   },
@@ -160,9 +182,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginTop: 50,
     position: 'absolute',
-    top: 196,
+    top: 256,
   },
   timeButton: {
     borderWidth: 1,
@@ -186,7 +207,7 @@ const styles = StyleSheet.create({
   },
   detailButton: {
     position: 'absolute',
-    top: 378, // 위치 설정
+    top: 405, 
   },
   rectangle: {
     borderRadius: 12,
@@ -210,23 +231,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#5daed6',
   },
+  allpickerContainer: {
+    backgroundColor: colors.buttonBeforeColor,
+    alignItems: 'center',
+    marginTop: 20,
+    borderRadius: 12,
+    padding: 10,
+    position: 'absolute',
+    top: 360,
+    left: 20,
+    width: '90%',
+  },
   pickerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
-    backgroundColor: colors.buttonBeforeColor,
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 10,
-    position: 'absolute',
-    top: 370,
-    left: 25,
   },
   picker: {
     width: 150,
     height: 180,
-    backgroundColor : colors.white,
-    borderRadius: 12,
   },
   pickerItem: {
     height: 180, // 원하는 높이 설정

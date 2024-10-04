@@ -4,13 +4,13 @@
     "slug": "goblinapp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/appicon.png",
     "scheme": "goblinapp",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splashImg.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#5DAED6"
     },
     "ios": {
       "supportsTablet": true,
@@ -32,6 +32,9 @@
       }
     },
     "owner": "eazzzzzzy",
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
   }
 }

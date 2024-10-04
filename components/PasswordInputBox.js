@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import colors from '../styles/colors';
 
-const InputBox = ({ style, onChangeText, placeholder }) => {
+const PasswordInputBox = ({ style, onChangeText, placeholder, secureTextEntry = true }) => {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -25,6 +25,7 @@ const InputBox = ({ style, onChangeText, placeholder }) => {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         underlineColorAndroid="transparent" // Android에서 기본 underline 제거
+        secureTextEntry={secureTextEntry}
       />
     </View>
   );
@@ -44,4 +45,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InputBox;
+export default PasswordInputBox;
