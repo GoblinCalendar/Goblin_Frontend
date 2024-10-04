@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message';
 console.warn = () => {}; //warn 경고 안뜨게함
 
 export default function RootLayout() {
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}> 
       <SafeAreaProvider>
