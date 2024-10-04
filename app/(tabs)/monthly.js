@@ -5,11 +5,9 @@ import { LocaleKR } from "../../lib/LocaleConfig";
 import { useMemo, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import CalendarNavbar from "../../components/CalendarNavbar";
-import { createDrawerNavigator } from "@react-navigation/drawer";
 
 import Dot from "../../assets/dot.svg";
-
-import { SidebarDrawer } from "../../components/SidebarDrawer";
+import { DrawerWrapper } from "../../components/DrawerWrapper";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -19,33 +17,32 @@ export default function Monthly() {
 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
 
-  const Drawer = createDrawerNavigator();
-  //더미
-  const markedDates = {
-    "2024-09-29": [
-      {
-        marked: true,
-        title: "가나다라",
-      },
-      {
-        marked: true,
-        title: "마바사아",
-      },
-      {
-        marked: true,
-        title: "자차카타",
-      },
-      {
-        marked: true,
-        title: "파하",
-      },
-    ],
-    "2024-09-13": [{ marked: true, title: "test" }],
-  };
+  const MonthComponent = ({ navigation }) =>
+    useMemo(() => {
+      //더미
+      const markedDates = {
+        "2024-09-29": [
+          {
+            marked: true,
+            title: "가나다라",
+          },
+          {
+            marked: true,
+            title: "마바사아",
+          },
+          {
+            marked: true,
+            title: "자차카타",
+          },
+          {
+            marked: true,
+            title: "파하",
+          },
+        ],
+        "2024-09-13": [{ marked: true, title: "test" }],
+      };
 
-  const Monthly = ({ navigation }) =>
-    useMemo(
-      () => (
+      return (
         <View style={styles.container}>
           <CalendarNavbar
             title="성북뭉게해커톤"
@@ -143,38 +140,10 @@ export default function Monthly() {
             />
           </CalendarProvider>
         </View>
-      ),
-      [currentMonth]
-    );
+      );
+    }, [currentMonth]);
 
-  return (
-    <Drawer.Navigator
-      initialRouteName="main"
-      drawerContent={({ navigation }) => <SidebarDrawer navigation={navigation} />}
-      screenOptions={{
-        headerShown: false,
-        drawerPosition: "left",
-        drawerType: "front",
-        swipeEnabled: false,
-        overlayColor: "transparent",
-        drawerStyle: {
-          borderTopRightRadius: 24,
-          borderBottomRightRadius: 24,
-          borderColor: "#CEE7F3",
-          borderWidth: 1,
-          shadowColor: "black",
-          shadowOffset: {
-            height: 0,
-            width: 4,
-          },
-          shadowRadius: 4,
-          shadowOpacity: 0.04,
-        },
-      }}
-    >
-      <Drawer.Screen name="monthly">{Monthly}</Drawer.Screen>
-    </Drawer.Navigator>
-  );
+  return <DrawerWrapper screen={MonthComponent} />;
 }
 
 const styles = StyleSheet.create({
