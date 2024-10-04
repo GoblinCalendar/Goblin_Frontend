@@ -18,7 +18,7 @@ const EventNameScreen = () => {
 
     // 최대 글자 수 20자로 제한
     const handleTextChange = (text) => {
-        if (text.length <= 20) {
+        if (text.length <= 21) {
             setInputValue(text);
         }
     };
@@ -54,7 +54,7 @@ const EventNameScreen = () => {
             {/* 글자 수 표시 (입력 중일 때만 표시) */}
             {inputValue.length > 0 && (
                 <Text style={styles.charCount}>
-                    {inputValue.length}/20
+                    {inputValue.length > 20 ? '20+' : `${inputValue.length}/20`}
                 </Text>
             )}
 
@@ -62,7 +62,7 @@ const EventNameScreen = () => {
             <ButtonComponent 
                 title="다음" 
                 style={[styles.button, { left: horizontalPadding }]} 
-                isActive={!!inputValue} // 입력 여부에 따라 색상 변경
+                isActive={inputValue.length > 0 && inputValue.length <= 20}
                 onPress={handleNextPress}
             />
         </View>
