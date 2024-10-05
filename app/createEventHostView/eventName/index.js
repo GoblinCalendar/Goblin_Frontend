@@ -29,7 +29,7 @@ const EventNameScreen = () => {
     return(
         <View style={[styles.container, { width }]}>
             {/* BackButton 컴포넌트 */}
-            <BackButton navigateTo='/'/>
+            <BackButton navigateTo='/monthly'/>
 
             {/* 타이틀 문구 */}
             <Text style={styles.titleText}>
