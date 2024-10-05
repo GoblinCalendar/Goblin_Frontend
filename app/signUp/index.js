@@ -44,11 +44,9 @@ export default function SignUp() {
 
       // 성공 메시지 표시
       Toast.show({
-        type: 'info',
+        type: 'successToast',
         text1: '회원가입 성공!',
-        text2: '환영합니다! 🎉',
         position: 'bottom',
-        visibilityTime: 2000,
       });
 
       // 2초 후 로그인 페이지로 이동
@@ -74,11 +72,9 @@ export default function SignUp() {
       console.error('에러 설정:', error.config);
 
       Toast.show({
-        type: 'error',
-        text1: '회원가입 실패',
-        text2: '다시 시도해 주세요.',
+        type: 'errorToast',
+        text1: '회원가입 실패!',
         position: 'bottom',
-        visibilityTime: 2000,
       });
     }
   }

@@ -10,6 +10,19 @@ import Toast from 'react-native-toast-message';
 
 console.warn = () => {}; //warn 경고 안뜨게함
 
+const toastConfig = {
+  successToast: ({ text1 }) => (
+    <View style={{ height: 38, width: 162, backgroundColor: 'rgba(0, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', borderRadius: 4, marginBottom: 100,}}>
+      <Text style={{ color: 'white', fontSize: 12 }}>{text1}</Text>
+    </View>
+  ),
+  errorToast: ({ text1 }) => (
+    <View style={{ height: 38, width: 162, backgroundColor: 'rgba(255, 0, 0, 0.6)', justifyContent: 'center', alignItems: 'center', borderRadius: 4, marginBottom: 100,}}>
+      <Text style={{ color: 'white', fontSize: 12 }}>{text1}</Text>
+    </View>
+  ),
+};
+
 export default function RootLayout() {
 
   return (
@@ -44,7 +57,7 @@ export default function RootLayout() {
         </AuthProvider>
       </SafeAreaProvider>
       {/* Toast 설정 */}
-      <Toast ref={(ref) => Toast.setRef(ref)} />
+      <Toast config={toastConfig} ref={(ref) => Toast.setRef(ref)} />
     </GestureHandlerRootView>
   );
 }

@@ -38,6 +38,10 @@ export default function Index() {
         title="랜딩 페이지 보기" 
         onPress={() => router.push("/landingPage")} 
       />
+      <Button 
+        title="알람 테스트 가기" 
+        onPress={() => router.push("/notiTest")} 
+      />
     </View>
   );
 }
