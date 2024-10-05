@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import colors from "../../styles/colors";
 import { LocaleKR } from "../../lib/LocaleConfig";
@@ -14,6 +14,7 @@ import ClockGray from "../../assets/clock_gray.svg";
 import Pin from "../../assets/pin.svg";
 import PlusCircle from "../../assets/plus_circle.svg";
 import ArrowLeft from "../../assets/arrow_left.svg";
+import { ToggleButton } from "../../components/ToggleButton";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -51,7 +52,44 @@ export default function Monthly() {
     ],
   });
 
-  const [pinnedEvents, setPinnedEvents] = useState([]);
+  const [pinnedEvents, setPinnedEvents] = useState([
+    {
+      id: 1,
+      name: "학생 수업",
+      active: false,
+      color: "#F2EDD9",
+    },
+    {
+      id: 2,
+      name: "학생회",
+      active: true,
+      color: "#F1DAED",
+    },
+    {
+      id: 3,
+      name: "일상",
+      active: false,
+      color: "#E6E8E3",
+    },
+    {
+      id: 4,
+      name: "일상2",
+      active: false,
+      color: "#E6E8E3",
+    },
+    {
+      id: 5,
+      name: "일상3",
+      active: false,
+      color: "#E6E8E3",
+    },
+    {
+      id: 6,
+      name: "일상4",
+      active: false,
+      color: "#E6E8E3",
+    },
+  ]);
 
   // ref
   const bottomSheetRef = useRef(null);
@@ -210,49 +248,54 @@ export default function Monthly() {
           {modalMode === "view" && (
             <>
               <Text style={styles.eventsModalHeader}>{eventsModal?.date}</Text>
-              <View style={styles.eventsModalEventWrapper}>
-                {eventsModal?.events?.map((event, i) => (
-                  <View style={styles.eventsModalEventContainer} key={event?.id}>
-                    <View
-                      style={[
-                        styles.eventsModalEventDot,
-                        { backgroundColor: event?.backgroundColor },
-                      ]}
-                    ></View>
-                    <View style={{ flexDirection: "column" }}>
-                      <Text style={styles.eventsModalEventName} numberOfLines={1}>
-                        {event?.name}
-                      </Text>
-                      <Text style={styles.eventsModalEventMemo} numberOfLines={1}>
-                        {event?.memo}
-                      </Text>
-                      <View style={styles.eventsModalInfoWrapper}>
-                        <View style={styles.eventsModalEventChip}>
-                          <Text style={styles.eventsModalEventChipText}>{event?.creator}</Text>
-                        </View>
-                        <View style={styles.eventsModalEventDateWrapper}>
-                          <ClockGray width={12} height={12} />
-                          <Text style={styles.eventsModalEventDateText}>{event?.date}</Text>
+              <View style={styles.eventsModalContent}>
+                <ScrollView
+                  style={styles.eventsModalEventWrapper}
+                  contentContainerStyle={{ gap: 24 }}
+                >
+                  {eventsModal?.events?.map((event, i) => (
+                    <View style={styles.eventsModalEventContainer} key={event?.id}>
+                      <View
+                        style={[
+                          styles.eventsModalEventDot,
+                          { backgroundColor: event?.backgroundColor },
+                        ]}
+                      ></View>
+                      <View style={{ flexDirection: "column" }}>
+                        <Text style={styles.eventsModalEventName} numberOfLines={1}>
+                          {event?.name}
+                        </Text>
+                        <Text style={styles.eventsModalEventMemo} numberOfLines={1}>
+                          {event?.memo}
+                        </Text>
+                        <View style={styles.eventsModalInfoWrapper}>
+                          <View style={styles.eventsModalEventChip}>
+                            <Text style={styles.eventsModalEventChipText}>{event?.creator}</Text>
+                          </View>
+                          <View style={styles.eventsModalEventDateWrapper}>
+                            <ClockGray width={12} height={12} />
+                            <Text style={styles.eventsModalEventDateText}>{event?.date}</Text>
+                          </View>
                         </View>
                       </View>
                     </View>
-                  </View>
-                ))}
-              </View>
-              <View style={styles.eventsModalButtonWrapper}>
-                <TouchableOpacity
-                  style={[styles.eventsModalButton, { backgroundColor: colors.skyBlue }]}
-                  onPress={() => setModalMode("pin")}
-                >
-                  <Pin width={20} height={20} />
-                  <Text style={styles.eventsModalButtonText}>고정 일정</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.eventsModalButton, { backgroundColor: "#69CCA3" }]}
-                >
-                  <PlusCircle width={16} height={16} />
-                  <Text style={styles.eventsModalButtonText}>새 일정 추가</Text>
-                </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <View style={styles.eventsModalButtonWrapper}>
+                  <TouchableOpacity
+                    style={[styles.eventsModalButton, { backgroundColor: colors.skyBlue }]}
+                    onPress={() => setModalMode("pin")}
+                  >
+                    <Pin width={20} height={20} />
+                    <Text style={styles.eventsModalButtonText}>고정 일정</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.eventsModalButton, { backgroundColor: "#69CCA3" }]}
+                  >
+                    <PlusCircle width={16} height={16} />
+                    <Text style={styles.eventsModalButtonText}>새 일정 추가</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </>
           )}
@@ -260,10 +303,71 @@ export default function Monthly() {
           {modalMode === "pin" && (
             <>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalMode("view")}>
                   <ArrowLeft width={20} height={20} />
                 </TouchableOpacity>
                 <Text style={styles.eventsModalHeader}>고정 일정 선택</Text>
+              </View>
+              <View style={styles.eventsModalContent}>
+                <ScrollView style={[styles.eventsModalEventWrapper, { gap: 8 }]}>
+                  {pinnedEvents?.map((event, i) => (
+                    <View>
+                      <View style={styles.eventsModalPinnedEventContainer} key={event?.id}>
+                        <View style={styles.eventsModalPinnedEventContent}>
+                          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+                            <View
+                              style={[
+                                styles.eventsModalPinnedEventDot,
+                                { backgroundColor: event?.color },
+                              ]}
+                            ></View>
+                            <Text style={styles.eventsModalPinnedEventText} numberOfLines={1}>
+                              {event?.name}
+                            </Text>
+                          </View>
+                          <ToggleButton
+                            active={event?.active}
+                            containerStyle={{
+                              width: 36,
+                              height: 20,
+                              borderRadius: 10,
+                              backgroundColor: colors.lightGrayBG,
+                              borderWidth: 1,
+                              borderColor: event?.active ? colors.skyBlue : "#E5E5EC",
+                            }}
+                            buttonStyle={{
+                              margin: 2,
+                              width: 14,
+                              height: 14,
+                              borderRadius: "50%",
+                              backgroundColor: event?.active ? colors.skyBlue : "#E5E5EC",
+                            }}
+                            onPress={() =>
+                              setPinnedEvents((prev) => [
+                                ...prev.map((d) =>
+                                  d?.id === event?.id ? { ...d, active: !d?.active } : d
+                                ),
+                              ])
+                            }
+                          />
+                        </View>
+                      </View>
+                      <View style={styles.eventsModalPinnedEventDivider}></View>
+                    </View>
+                  ))}
+                </ScrollView>
+                <View style={[styles.eventsModalButtonWrapper]}>
+                  <TouchableOpacity
+                    style={[
+                      styles.eventsModalButton,
+                      { width: "auto", flex: 1, backgroundColor: colors.skyBlue },
+                    ]}
+                    onPress={() => setModalMode("pin")}
+                  >
+                    <PlusCircle width={15} height={15} />
+                    <Text style={styles.eventsModalButtonText}>고정 일정 추가</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </>
           )}
@@ -378,6 +482,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     letterSpacing: -0.35,
   },
+  eventsModalContent: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   eventsModalEventDot: {
     width: 6,
     height: 6,
@@ -433,9 +542,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   eventsModalButtonWrapper: {
-    position: "absolute",
-    bottom: 0,
-    padding: 20,
     marginTop: 24,
     flexDirection: "row",
     alignItems: "center",
@@ -457,5 +563,33 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 18,
     letterSpacing: -0.3,
+  },
+  eventsModalPinnedEventContainer: {
+    paddingVertical: 10,
+    flexDirection: "row",
+  },
+  eventsModalPinnedEventContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  eventsModalPinnedEventDot: {
+    width: 10,
+    height: 10,
+    borderRadius: "100%",
+  },
+  eventsModalPinnedEventText: {
+    color: colors.black,
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 20,
+    letterSpacing: -0.35,
+  },
+  eventsModalPinnedEventDivider: {
+    height: 1,
+    marginVertical: 8,
+    backgroundColor: colors.ButtonDisableGray,
   },
 });
