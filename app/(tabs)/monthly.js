@@ -112,7 +112,7 @@ export default function Monthly() {
                             state === "today"
                               ? colors.white
                               : state === "disabled"
-                              ? colors.darkGray
+                              ? colors.font04Gray
                               : colors.black,
                           ...(state === "today" && { fontWeight: "700" }),
                         },

@@ -35,7 +35,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <MonthIcon /> : <MonthOutlineIcon />}
-                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                <Text
+                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                >
                   월별
                 </Text>
               </View>
@@ -48,7 +50,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <DayIcon /> : <DayOutlineIcon />}
-                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                <Text
+                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                >
                   일별
                 </Text>
               </View>
@@ -67,7 +71,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <TodoIcon /> : <TodoOutlineIcon />}
-                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                <Text
+                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                >
                   To Do
                 </Text>
               </View>
@@ -80,7 +86,9 @@ export default function TabLayout() {
             tabBarIcon: ({ focused }) => (
               <View style={styles.menu}>
                 {focused ? <SearchIcon /> : <SearchOutlineIcon />}
-                <Text style={[styles.text, { color: focused ? colors.skyBlue : colors.darkGray }]}>
+                <Text
+                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                >
                   검색
                 </Text>
               </View>
