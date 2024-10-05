@@ -89,6 +89,7 @@ export default function SignIn() {
                 setErrors({ ...errors, userId: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={50}
         />
       </View>
 

@@ -133,6 +133,7 @@ export default function SignUp() {
                 setErrors({ ...errors, name: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={50}
         />
         {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
       </View>
@@ -147,6 +148,7 @@ export default function SignUp() {
                 setErrors({ ...errors, userId: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={20}
         />
         {errors.userId ? <Text style={styles.errorText}>{errors.userId}</Text> : null}
       </View>

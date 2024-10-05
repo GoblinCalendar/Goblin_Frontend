@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import colors from '../styles/colors';
 
-const InputBox = ({ style, onChangeText, placeholder }) => {
+const InputBox = ({ style, onChangeText, placeholder, maxLength}) => {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
   const handleTextChange = (newText) => {
-    setText(newText);
-    onChangeText(newText); // 입력 변경 시 부모 컴포넌트에 전달
+    // maxLength를 초과하지 않을 때만 상태를 업데이트
+    if (newText.length <= maxLength) {
+      setText(newText);
+      onChangeText(newText); // 입력 변경 시 부모 컴포넌트에 전달
+    }
   };
 
   return (
@@ -25,6 +28,7 @@ const InputBox = ({ style, onChangeText, placeholder }) => {
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         underlineColorAndroid="transparent" // Android에서 기본 underline 제거
+        maxLength={maxLength}
       />
     </View>
   );
