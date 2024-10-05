@@ -14,7 +14,7 @@ const EventCompleteScreen = () => {
     const { eventDetails } = useContext(EventContext);
 
     const handleNextPress = () => {
-        router.push('/');
+        router.push('/monthly');
     };
 
     // 날짜 배열을 그룹화하여 문자열로 변환

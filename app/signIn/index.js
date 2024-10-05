@@ -58,8 +58,11 @@ export default function SignIn() {
       await AsyncStorage.setItem('accessToken', accessToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
 
+      // 로그인 상태를 AsyncStorage에 저장
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+
       // 홈 화면으로 이동
-      router.push('/');
+      router.push('/monthly');
 
     } catch (error) {
       console.error(error);

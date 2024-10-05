@@ -2,8 +2,11 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Drawer from "../assets/drawer.svg";
 import People from "../assets/people.svg";
 import colors from "../styles/colors";
+import { useRouter } from "expo-router";
 
 export default function CalendarNavbar({ title, currentMonth, onPress }) {
+  const router = useRouter();
+  
   return (
     <View style={styles.navbar}>
       <TouchableOpacity onPress={onPress}>
