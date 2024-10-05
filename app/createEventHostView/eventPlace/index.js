@@ -47,6 +47,7 @@ const EventPlaceScreen = () => {
                 onChangeText={setFaceToFaceLocation} 
                 value={faceToFaceLocation}
                 placeholder="대면 장소 이름을 작성해주세요!"
+                maxLength={100}
             />
         </View>
 
@@ -58,6 +59,7 @@ const EventPlaceScreen = () => {
                 onChangeText={setOnlineLink} 
                 value={onlineLink}
                 placeholder="비대면 링크를 작성해 주세요!"
+                maxLength={100}
             />
         </View>
 

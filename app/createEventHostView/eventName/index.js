@@ -16,13 +16,6 @@ const EventNameScreen = () => {
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
     const { setEventDetails } = useContext(EventContext);
 
-    // 최대 글자 수 20자로 제한
-    const handleTextChange = (text) => {
-        if (text.length <= 21) {
-            setInputValue(text);
-        }
-    };
-
     const handleNextPress = () => {
         if (inputValue) {
             setEventDetails((prevDetails) => ({
@@ -47,8 +40,9 @@ const EventNameScreen = () => {
             {/* InputBox 컴포넌트 */}
             <InputBox 
                 style={[styles.inputBox]} 
-                onChangeText={handleTextChange} 
+                onChangeText={setInputValue} 
                 placeholder="일정 이름을 작성해 주세요!"
+                maxLength={20}
             />
 
             {/* 글자 수 표시 (입력 중일 때만 표시) */}
