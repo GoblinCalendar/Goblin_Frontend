@@ -170,7 +170,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.ButtonDisableGray,
-    marginTop: 70,
+    position: 'absolute',
+    top: 290,
     alignSelf: 'center',
   },
   inviteButtonText: {
