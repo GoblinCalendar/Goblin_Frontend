@@ -41,3 +41,45 @@ export default function Index() {
     </View>
   );
 }
+
+
+// import React, { useContext, useEffect } from "react";
+// import { useRouter } from "expo-router";
+// import { View, ActivityIndicator, StyleSheet } from "react-native";
+// import { AuthContext } from "../context/AuthContext"; // AuthContext를 가져옴
+// import LandingPage from "./landingPage"; // 랜딩 페이지 컴포넌트 가져옴
+
+// export default function Index() {
+//   const { isLoggedIn } = useContext(AuthContext); // 로그인 상태를 확인
+//   const router = useRouter();
+
+//   useEffect(() => {
+//     if (isLoggedIn === null) {
+//       // 로그인 상태를 로드 중인 경우
+//       return;
+//     } else {
+//       // 로그인되어 있지 않으면 랜딩 페이지로 이동
+//       router.replace("/landingPage");
+//     }
+//   }, [isLoggedIn]);
+
+//   if (isLoggedIn === null) {
+//     // 로그인 상태를 확인 중일 때 로딩 스피너 표시
+//     return (
+//       <View style={styles.loadingContainer}>
+//         <ActivityIndicator size="large" color="#0000ff" />
+//       </View>
+//     );
+//   }
+
+//   return null;
+// }
+
+// const styles = StyleSheet.create({
+//   loadingContainer: {
+//     flex: 1,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+// });
+

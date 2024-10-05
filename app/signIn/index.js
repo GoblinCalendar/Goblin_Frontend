@@ -7,6 +7,8 @@ import ButtonComponent from '../../components/Button';  // 로그인 버튼
 import LogoSvg from '../../assets/logo_blue.svg'; // 로고 SVG
 import colors from '../../styles/colors';  // 색상 스타일
 import { useRouter } from 'expo-router';
+import apiClient from '../../lib/api'; // API 요청을 위한 axios 인스턴스
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SignIn() {
   const [userId, setUserId] = useState('');
@@ -18,32 +20,53 @@ export default function SignIn() {
     password: '',
   });
 
-  // 임시 데이터
-  const VALID_USER_ID = 'useradmin';
-  const VALID_PASSWORD = 'useradmin12';
-
-  // 가입 완료 버튼 활성화 여부
+  // 로그인 버튼 활성화 여부
   const isFormValid = userId.length > 0 && password.length > 0;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let newErrors = { userId: '', password: '' };
     let valid = true;
 
-    // 입력된 값과 임시 데이터 비교
-    if (userId !== VALID_USER_ID || password !== VALID_PASSWORD) {
-      setLoginError('올바르지 않은 아이디와 비밀번호입니다.');
+    if (userId.length === 0) {
+      newErrors.userId = '아이디를 입력해 주세요';
       valid = false;
-    } else {
-      setLoginError('');
-      valid = true;
     }
 
-    // 오류가 있으면 상태 업데이트
+    if (password.length === 0) {
+      newErrors.password = '비밀번호를 입력해 주세요';
+      valid = false;
+    }
+
     if (!valid) {
       setErrors(newErrors);
-    } else {
-      // 조건을 만족하면 홈 화면으로 이동
-      router.push('/');
+      return;
+    }
+
+    try {
+      // 로그인 API 호출
+      const response = await apiClient.post('/api/users/login', {
+        loginId: userId,
+        password: password,
+      });
+
+      const { accessToken, refreshToken } = response.data;
+
+      // 콘솔에 로그인 성공 메시지와 토큰 정보 출력
+      console.log('로그인 성공:', response.data);
+
+      // 토큰 저장 (AsyncStorage에 저장)
+      await AsyncStorage.setItem('accessToken', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+
+      // 로그인 상태를 AsyncStorage에 저장
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+
+      // 홈 화면으로 이동
+      router.push('/monthly');
+
+    } catch (error) {
+      console.error(error);
+      setLoginError('로그인에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -69,6 +92,7 @@ export default function SignIn() {
                 setErrors({ ...errors, userId: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={50}
         />
       </View>
 

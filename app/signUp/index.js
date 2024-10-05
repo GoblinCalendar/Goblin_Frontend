@@ -56,8 +56,23 @@ export default function SignUp() {
         router.push('/signIn');
       }, 2000);
     } catch (error) {
-      // 에러 처리
-      console.error(error);
+      // 에러 처리: 자세한 에러 로그 추가
+      if (error.response) {
+        // 서버가 응답을 했지만, 에러 상태 코드가 반환된 경우
+        console.error('서버 응답 에러:', error.response.data);
+        console.error('상태 코드:', error.response.status);
+        console.error('헤더:', error.response.headers);
+      } else if (error.request) {
+        // 요청이 전송되었으나, 서버로부터 응답이 없을 경우
+        console.error('요청 전송 후 응답 없음:', error.request);
+      } else {
+        // 요청 설정 중에 에러가 발생한 경우
+        console.error('요청 설정 에러:', error.message);
+      }
+      
+      // 공통 에러 메시지 출력
+      console.error('에러 설정:', error.config);
+
       Toast.show({
         type: 'error',
         text1: '회원가입 실패',
@@ -118,6 +133,7 @@ export default function SignUp() {
                 setErrors({ ...errors, name: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={50}
         />
         {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
       </View>
@@ -132,6 +148,7 @@ export default function SignUp() {
                 setErrors({ ...errors, userId: '' }); // 입력 중 오류 메시지 초기화
             }}
             style={styles.input}
+            maxLength={20}
         />
         {errors.userId ? <Text style={styles.errorText}>{errors.userId}</Text> : null}
       </View>

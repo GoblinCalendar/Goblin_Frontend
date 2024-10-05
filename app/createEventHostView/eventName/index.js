@@ -16,13 +16,6 @@ const EventNameScreen = () => {
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
     const { setEventDetails } = useContext(EventContext);
 
-    // 최대 글자 수 20자로 제한
-    const handleTextChange = (text) => {
-        if (text.length <= 20) {
-            setInputValue(text);
-        }
-    };
-
     const handleNextPress = () => {
         if (inputValue) {
             setEventDetails((prevDetails) => ({
@@ -36,7 +29,7 @@ const EventNameScreen = () => {
     return(
         <View style={[styles.container, { width }]}>
             {/* BackButton 컴포넌트 */}
-            <BackButton navigateTo='/'/>
+            <BackButton navigateTo='/monthly'/>
 
             {/* 타이틀 문구 */}
             <Text style={styles.titleText}>
@@ -47,14 +40,15 @@ const EventNameScreen = () => {
             {/* InputBox 컴포넌트 */}
             <InputBox 
                 style={[styles.inputBox]} 
-                onChangeText={handleTextChange} 
+                onChangeText={setInputValue} 
                 placeholder="일정 이름을 작성해 주세요!"
+                maxLength={20}
             />
 
             {/* 글자 수 표시 (입력 중일 때만 표시) */}
             {inputValue.length > 0 && (
                 <Text style={styles.charCount}>
-                    {inputValue.length}/20
+                    {inputValue.length > 20 ? '20+' : `${inputValue.length}/20`}
                 </Text>
             )}
 
@@ -62,7 +56,7 @@ const EventNameScreen = () => {
             <ButtonComponent 
                 title="다음" 
                 style={[styles.button, { left: horizontalPadding }]} 
-                isActive={!!inputValue} // 입력 여부에 따라 색상 변경
+                isActive={inputValue.length > 0 && inputValue.length <= 20}
                 onPress={handleNextPress}
             />
         </View>
