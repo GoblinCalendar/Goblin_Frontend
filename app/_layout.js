@@ -1,19 +1,18 @@
 import { Stack } from "expo-router";
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { EventProvider } from '../context/EventContext';
+import { View, Text, Button, StyleSheet } from "react-native";
+import { EventProvider } from "../context/EventContext";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { NotificationProvider } from '../context/NotificationContext';
-import { AuthProvider } from '../context/AuthContext';
-import NotificationCard from '../components/NotificationCard';
-import Toast from 'react-native-toast-message';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { NotificationProvider } from "../context/NotificationContext";
+import { AuthProvider } from "../context/AuthContext";
+import NotificationCard from "../components/NotificationCard";
+import Toast from "react-native-toast-message";
 
 console.warn = () => {}; //warn 경고 안뜨게함
 
 export default function RootLayout() {
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}> 
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
           <EventProvider>
@@ -26,18 +25,18 @@ export default function RootLayout() {
                   contentStyle: styles.screenContent,
                 }}
               >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="landingPage" />
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="createEventHostView/eventDate" />
-              <Stack.Screen name="createEventHostView/eventName" />
-              <Stack.Screen name="createEventHostView/eventPeople" />
-              <Stack.Screen name="createEventHostView/eventTime" />
-              <Stack.Screen name="createEventHostView/eventPlace" />
-              <Stack.Screen name="createEventHostView/eventComplete" />
-              <Stack.Screen name="joinEventGuestView" />
-              <Stack.Screen name="memberHostView" />
-              <Stack.Screen name="signUp" />
+                <Stack.Screen name="index" />
+                <Stack.Screen name="landingPage" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="createEventHostView/eventDate" />
+                <Stack.Screen name="createEventHostView/eventName" />
+                <Stack.Screen name="createEventHostView/eventPeople" />
+                <Stack.Screen name="createEventHostView/eventTime" />
+                <Stack.Screen name="createEventHostView/eventPlace" />
+                <Stack.Screen name="createEventHostView/eventComplete" />
+                <Stack.Screen name="joinEventGuestView" />
+                <Stack.Screen name="memberHostView" />
+                <Stack.Screen name="signUp" />
               </Stack>
             </NotificationProvider>
           </EventProvider>
@@ -52,6 +51,6 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   screenContent: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
 });
