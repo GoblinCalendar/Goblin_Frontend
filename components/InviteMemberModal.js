@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-nativ
 import Modal from 'react-native-modal';
 import SvgSearchIcon from '../assets/reading_glasses.svg'; // 검색 아이콘을 SVG로 불러옴
 import colors from '../styles/colors';
+import Toast from 'react-native-toast-message';
 
 const InviteMemberModal = ({ isVisible, onClose }) => {
   const [memberId, setMemberId] = useState('');
@@ -11,6 +12,11 @@ const InviteMemberModal = ({ isVisible, onClose }) => {
 
   const handleInvite = () => {
     // 멤버 초대 로직을 여기에 추가
+    Toast.show({
+      type: 'successToast',
+      text1: '멤버 초대가 완료되었습니다!',
+      position: 'bottom',
+  });
     onClose(); // 초대 버튼을 누르면 모달을 닫음
   };
 
