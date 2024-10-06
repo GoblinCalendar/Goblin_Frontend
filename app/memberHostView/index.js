@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import MemberManageButton from '../../components/MemberManageButton';
 import SvgCheckMark from '../../assets/check.svg';
 import InviteMemberModal from '../../components/InviteMemberModal';
+import InviteMemberLinkModal from '../../components/InviteMenberLinkModal';
 
 // 가상의 멤버 데이터
 const initialMemberData = [
@@ -22,6 +23,7 @@ const MemberHostView = () => {
     const [deleteMode, setDeleteMode] = useState(false); // 삭제 모드 활성화 여부
     const [memberData, setMemberData] = useState(initialMemberData); // 멤버 데이터 관리
     const [isInviteModalVisible, setInviteModalVisible] = useState(false); // 초대 모달 상태 관리
+    const [isInviteLinkModalVisible, setInviteLinkModalVisible] = useState(false); // 초대 링크 모달 상태 관리
     const router = useRouter();
 
     const groupName = '성북구름뭉게톤';  // 모임 이름
@@ -53,6 +55,15 @@ const MemberHostView = () => {
 
     const closeInviteModal = () => {
         setInviteModalVisible(false);
+    };
+
+    // 초대 링크 모달 열기/닫기
+    const openInviteLinkModal = () => {
+        setInviteLinkModalVisible(true);
+    };
+
+    const closeInviteLinkModal = () => {
+        setInviteLinkModalVisible(false);
     };
 
     const renderMemberItem = ({ item }) => (
@@ -106,11 +117,15 @@ const MemberHostView = () => {
                 contentContainerStyle={styles.memberList}
             />
 
-            {/* MemberManageButton */}
-            <MemberManageButton setDeleteMode={setDeleteMode} openInviteModal={openInviteModal}/>
-
-            {/* InviteMemberModal 모달 */}
+            <MemberManageButton
+                setDeleteMode={setDeleteMode}
+                openInviteModal={openInviteModal}
+                openInviteLinkModal={openInviteLinkModal}  // 초대 링크 모달 열기 전달
+            />
             <InviteMemberModal isVisible={isInviteModalVisible} onClose={closeInviteModal} />
+            <InviteMemberLinkModal isVisible={isInviteLinkModalVisible} onClose={closeInviteLinkModal} />
+
+
         </View>
     )
     
