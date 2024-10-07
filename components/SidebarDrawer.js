@@ -11,10 +11,11 @@ import X from "../assets/x.svg";
 import AddCircleOutline from "../assets/add_circle_outline.svg";
 import Pencil from "../assets/pencil.svg";
 import Trash from "../assets/trash.svg";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import apiClient from "../lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAsyncStorage from "../hooks/useAsyncStorage";
+import { GroupContext, GroupCotext } from "../context/GroupContext";
 
 export const SidebarDrawer = ({ navigation }) => {
   //더미
@@ -36,8 +37,10 @@ export const SidebarDrawer = ({ navigation }) => {
   }, []);
 
   const [username, setUsername] = useAsyncStorage("username");
-
+  // TODO 리렌더링 고치기
   console.log(username);
+
+  const { groupId, setGroupId } = useContext(GroupContext);
 
   const [editName, setEditName] = useState({ id: null, name: "" });
 
@@ -106,9 +109,24 @@ export const SidebarDrawer = ({ navigation }) => {
           <Text style={drawerStyles.calendarLabel}>내 캘린더</Text>
           <Pressable
             style={[drawerStyles.calendarContainer, { paddingLeft: 4 }]}
-            onPress={() => console.log("me")}
+            onPress={() => setGroupId(null)}
           >
-            <Text style={drawerStyles.calendarText}>{username}님의 캘린더</Text>
+            {groupId === null && <View style={drawerStyles.calendarIndicator}></View>}
+            <Text
+              style={[
+                drawerStyles.calendarText,
+                ...(groupId === null
+                  ? [
+                      {
+                        color: colors.skyBlue,
+                        fontWeight: "600",
+                      },
+                    ]
+                  : []),
+              ]}
+            >
+              {username}님의 캘린더
+            </Text>
           </Pressable>
         </View>
         <View style={drawerStyles.teamCalendarWrapper}>
@@ -118,8 +136,11 @@ export const SidebarDrawer = ({ navigation }) => {
             disableRightSwipe={true}
             data={groupList}
             renderItem={(data, rowMap) => (
-              <Pressable style={drawerStyles.calendarContainer} onPress={() => console.log("team")}>
-                <View style={drawerStyles.calendarIndicator}></View>
+              <Pressable
+                style={drawerStyles.calendarContainer}
+                onPress={() => setGroupId(data?.item?.id)}
+              >
+                {groupId === data?.item?.id && <View style={drawerStyles.calendarIndicator}></View>}
                 {data?.item?.id === editName?.id ? (
                   <View style={drawerStyles.editCalendarNameWrapper}>
                     <TextInput
@@ -147,7 +168,14 @@ export const SidebarDrawer = ({ navigation }) => {
                   <Text
                     style={[
                       drawerStyles.calendarText,
-                      { color: colors.skyBlue, fontWeight: "600" },
+                      ...(groupId === data?.item?.id
+                        ? [
+                            {
+                              color: colors.skyBlue,
+                              fontWeight: "600",
+                            },
+                          ]
+                        : []),
                     ]}
                   >
                     {data.item.name}
