@@ -21,7 +21,7 @@ import ButtonComponent from "./Button";
 import TimePicker from "./TimePicker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-export const NewEventBottomSheet = ({ setIsBottomSheetOpen }) => {
+export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
   const bottomSheetRef = useRef(null);
 

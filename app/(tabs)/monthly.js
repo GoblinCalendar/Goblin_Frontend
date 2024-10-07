@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import colors from "../../styles/colors";
 import { LocaleKR } from "../../lib/LocaleConfig";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import CalendarNavbar from "../../components/CalendarNavbar";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
@@ -14,7 +14,10 @@ import Pin from "../../assets/pin.svg";
 import PlusCircle from "../../assets/plus_circle.svg";
 import ArrowLeft from "../../assets/arrow_left.svg";
 import { ToggleButton } from "../../components/ToggleButton";
-import { NewEventBottomSheet } from "../../components/NewEventBottomSheet";
+import { NewCommonEventBottomSheet } from "../../components/NewCommonEventBottomSheet";
+import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottomSheet";
+import apiClient from "../../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -360,7 +363,10 @@ export default function Monthly() {
                       styles.eventsModalButton,
                       { width: "auto", flex: 1, backgroundColor: colors.skyBlue },
                     ]}
-                    onPress={() => setModalMode("pin")}
+                    onPress={() => {
+                      setIsBottomSheetOpen(true);
+                      setBottomSheetMode("new_pinned_event");
+                    }}
                   >
                     <PlusCircle width={15} height={15} />
                     <Text style={styles.eventsModalButtonText}>고정 일정 추가</Text>
@@ -375,7 +381,10 @@ export default function Monthly() {
       {isBottomSheetOpen && (
         <>
           {bottomSheetMode === "new_common_event" && (
-            <NewEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+            <NewCommonEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+          )}
+          {bottomSheetMode === "new_pinned_event" && (
+            <NewPinnedEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
           )}
         </>
       )}
