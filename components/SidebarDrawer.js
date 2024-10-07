@@ -11,13 +11,13 @@ import X from "../assets/x.svg";
 import AddCircleOutline from "../assets/add_circle_outline.svg";
 import Pencil from "../assets/pencil.svg";
 import Trash from "../assets/trash.svg";
-import { useContext, useEffect, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import apiClient from "../lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAsyncStorage from "../hooks/useAsyncStorage";
 import { GroupContext, GroupCotext } from "../context/GroupContext";
 
-export const SidebarDrawer = ({ navigation }) => {
+export const SidebarDrawer = memo(({ navigation }) => {
   //더미
   // const data = Array(20)
   //   .fill("")
@@ -233,7 +233,7 @@ export const SidebarDrawer = ({ navigation }) => {
       </View>
     </View>
   );
-};
+});
 
 const drawerStyles = StyleSheet.create({
   wrapper: {

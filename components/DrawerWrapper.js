@@ -1,13 +1,20 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { SidebarDrawer } from "./SidebarDrawer";
+import { useCallback } from "react";
 
 export const DrawerWrapper = ({ screen }) => {
   const Drawer = createDrawerNavigator();
 
+  // Memoize the drawer content to avoid unnecessary re-renders
+  const renderDrawerContent = useCallback(
+    ({ navigation }) => <SidebarDrawer navigation={navigation} />,
+    []
+  );
+
   return (
     <Drawer.Navigator
       initialRouteName="screen"
-      drawerContent={({ navigation }) => <SidebarDrawer navigation={navigation} />}
+      drawerContent={renderDrawerContent}
       screenOptions={{
         headerShown: false,
         drawerPosition: "left",
