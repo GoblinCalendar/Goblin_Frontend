@@ -134,7 +134,7 @@ const EventCompleteScreen = () => {
 
             {/* 다음 버튼 */}
             <ButtonComponent
-                title="홈으로 가기"
+                title="일정 공유하기"
                 style={[styles.button, { left: horizontalPadding }]}
                 isActive='true'
                 onPress={handleNextPress}
@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
   },
   timeBox: {
     backgroundColor: colors.buttonAfterColor,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
     borderRadius: 6,
-    marginHorizontal: 5,
     height: 26,
     width: 85,
+    alignItems: 'center',
+    justifyContent: 'center',
+  marginLeft: 10,
   },
   timeLabel: {
     fontSize: 14,
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    top: 714, 
+    top: 734, 
   },
 });
 

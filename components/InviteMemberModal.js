@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 14,
+    marginTop: 17,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     height: 28,
   },
   closeButton: {
-    fontSize: 24,
+    fontSize: 30,
     color: colors.black,
     position: 'absolute',
     left: 290,

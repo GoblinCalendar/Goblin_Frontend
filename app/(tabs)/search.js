@@ -35,7 +35,7 @@ export default function Search() {
   // 빈 상태를 렌더링하는 컴포넌트
   const renderEmptyState = () => (
     <View style={styles.emptyStateContainer}>
-      <IconGray width={120} height={120} />
+      <IconGray width={120} height={120} style={{ opacity: 0.5 }} />
       <Text style={styles.emptyStateText}>일정 이름을 검색해보세요!</Text>
     </View>
   );

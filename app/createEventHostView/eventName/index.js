@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     },
     button: {
         position: 'absolute',
-        top: 714, 
+        bottom: 46, 
         zIndex: 10,
     },
 });

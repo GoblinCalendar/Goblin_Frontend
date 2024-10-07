@@ -5,6 +5,8 @@ import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { EventContext } from '../../../context/EventContext';
+import apiClient from '../../../lib/api';
+
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
