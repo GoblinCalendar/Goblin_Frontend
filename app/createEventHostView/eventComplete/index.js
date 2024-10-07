@@ -4,6 +4,11 @@ import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { EventContext } from '../../../context/EventContext';
+import SandGlass from '../../../assets/sandglass.svg';
+import Member from '../../../assets/member.svg';
+import CalendarGray from '../../../assets/calendar_darkgray.svg';
+import ClockGray from '../../../assets/clock_darkgray.svg';
+import Place from '../../../assets/place.svg';
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
@@ -61,40 +66,31 @@ const EventCompleteScreen = () => {
                 {/* 소요 시간 문구 */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
-                        <Image 
-                            source={require('../../../assets/sandglass.png')}
-                            style={styles.icon} 
-                        />
-                        <Text style={styles.infoValue}>{eventDetails.duration} 소요 예상</Text>
+                      <SandGlass style={styles.icon} />
+                      <Text style={styles.infoValue}>{eventDetails.duration} 소요 예상</Text>
                     </View>
                 </View>
                 
                 {/* 참여자 이름 문구 */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
-                        <Image 
-                            source={require('../../../assets/membergray.png')}
-                            style={styles.icon} 
-                        />
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                            <View style={styles.participants}>
-                                {eventDetails.participants.map((participant, index) => (
-                                    <View key={index} style={styles.participantTag}>
-                                        <Text style={styles.participantName}>{participant}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </ScrollView>
+                      <Member style={styles.icon} />
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                          <View style={styles.participants}>
+                              {eventDetails.participants.map((participant, index) => (
+                                  <View key={index} style={styles.participantTag}>
+                                      <Text style={styles.participantName}>{participant}</Text>
+                                  </View>
+                              ))}
+                          </View>
+                      </ScrollView>
                     </View>
                 </View>
 
                 {/* 선택 날짜 문구 */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
-                        <Image 
-                            source={require('../../../assets/calendargray.png')}
-                            style={styles.icon} 
-                        />
+                      <CalendarGray style={styles.icon} />
                         <Text style={styles.infoValue}>{getGroupedDates()}</Text>
                     </View>
                 </View>
@@ -102,10 +98,7 @@ const EventCompleteScreen = () => {
                 {/* 시작,종료 시간 문구 */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
-                        <Image 
-                            source={require('../../../assets/clockgray.png')}
-                            style={styles.icon} 
-                        />
+                        <ClockGray style={styles.icon}/>
                         <View style={styles.timeContainer}>
                             <Text style={styles.timeLabel}>시작</Text>
                             <View style={styles.timeBox}>
@@ -123,10 +116,7 @@ const EventCompleteScreen = () => {
                 {/* 장소 문구 */}
                 <View style={styles.infoRow}>
                     <View style={styles.iconContainer}>
-                        <Image 
-                            source={require('../../../assets/place.png')}
-                            style={styles.icon} 
-                        />
+                        <Place style={styles.icon}/>
                         <Text style={styles.infoValue}>{eventDetails.place ? eventDetails.place : '-'}</Text>
                     </View>
                 </View>
@@ -248,7 +238,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    top: 734, 
+    top: 754, 
   },
 });
 
