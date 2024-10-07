@@ -21,7 +21,7 @@ const CustomArrowButton = ({ onPress, style }) => {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    width: 32,
+    width: 44,
     height: 12,
     backgroundColor: colors.calendarColor,
     borderTopLeftRadius: 5,

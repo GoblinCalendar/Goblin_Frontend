@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    top: 714, 
+    top: 754,
   },
 });
 

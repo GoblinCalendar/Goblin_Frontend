@@ -149,9 +149,9 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: colors.lightGrayBG,
     position: 'absolute',
-    top: 520,
-    left: 20,
+    top: 545,
     right: 20,
+    alignSelf: 'center',
   },
 });
 

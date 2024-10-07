@@ -102,7 +102,10 @@ const EventDateScreen = () => {
           <Text 
             style={[
               styles.text, 
-              { textAlign: 'center', color: isTextCentered ? colors.gray : colors.black }
+              { 
+                textAlign: isTextCentered ? 'center' : 'left', // 텍스트 정렬을 상태에 따라 변경
+                color: isTextCentered ? colors.gray : colors.black 
+              }
             ]}
             numberOfLines={1} // 한 줄로 표시
             ellipsizeMode="tail" // 텍스트가 길어지면 끝에 '...' 추가
@@ -191,14 +194,13 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
-    marginRight: 8,
   },
   textContainer: {
     justifyContent: 'center', // 수직 가운데 정렬
     alignItems: 'center', // 수평 가운데 정렬
-    width: '100%',
+    width: 290,
     position: 'absolute',
-    left: 0,
+    left: 35,
   },
   text: {
     fontSize: 14,
@@ -211,7 +213,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: 'absolute',
-    top: 714,
+    top: 754,
   },
 });
 
