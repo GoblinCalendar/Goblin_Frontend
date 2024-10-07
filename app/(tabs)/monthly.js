@@ -18,6 +18,7 @@ import { NewCommonEventBottomSheet } from "../../components/NewCommonEventBottom
 import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottomSheet";
 import apiClient from "../../lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { convertToMarkedDates } from "../../lib/convertToMarkedDates";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -26,6 +27,15 @@ export default function Monthly() {
   const [today, setToday] = useState(new Date());
 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
+
+  const [markedDates, setMarkedDates] = useState([]);
+  useEffect(() => {
+    apiClient
+      .get(`/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`)
+      .then((response) => {
+        setMarkedDates(convertToMarkedDates(response.data));
+      });
+  }, []);
 
   // 2-2, 2-3
   const [modalMode, setModalMode] = useState(null);
@@ -99,27 +109,27 @@ export default function Monthly() {
   const MonthComponent = ({ navigation }) =>
     useMemo(() => {
       //더미
-      const markedDates = {
-        "2024-09-29": [
-          {
-            marked: true,
-            title: "가나다라",
-          },
-          {
-            marked: true,
-            title: "마바사아",
-          },
-          {
-            marked: true,
-            title: "자차카타",
-          },
-          {
-            marked: true,
-            title: "파하",
-          },
-        ],
-        "2024-09-13": [{ marked: true, title: "test" }],
-      };
+      // const markedDates = {
+      //   "2024-09-29": [
+      //     {
+      //       marked: true,
+      //       title: "가나다라",
+      //     },
+      //     {
+      //       marked: true,
+      //       title: "마바사아",
+      //     },
+      //     {
+      //       marked: true,
+      //       title: "자차카타",
+      //     },
+      //     {
+      //       marked: true,
+      //       title: "파하",
+      //     },
+      //   ],
+      //   "2024-09-13": [{ marked: true, title: "test" }],
+      // };
 
       return (
         <View style={styles.container}>
@@ -226,7 +236,7 @@ export default function Monthly() {
           </CalendarProvider>
         </View>
       );
-    }, [currentMonth]);
+    }, [currentMonth, markedDates]);
 
   return (
     <>
