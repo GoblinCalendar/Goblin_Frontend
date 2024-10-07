@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { seState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, ScrollView } from 'react-native';
 import ButtonComponent from '../../../components/Button';
 import colors from '../../../styles/colors';
@@ -9,6 +9,9 @@ import Member from '../../../assets/member.svg';
 import CalendarGray from '../../../assets/calendar_darkgray.svg';
 import ClockGray from '../../../assets/clock_darkgray.svg';
 import Place from '../../../assets/place.svg';
+import apiClient from '../../../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GroupContext } from '../../../context/GroupContext';
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
@@ -17,6 +20,7 @@ const EventCompleteScreen = () => {
     const { width } = useWindowDimensions(); // 현재 화면의 너비와 높이 가져오기
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산 
     const { eventDetails } = useContext(EventContext);
+    const { groupId } = useContext(GroupContext);
 
     const handleNextPress = () => {
         router.push('/monthly');
@@ -50,7 +54,89 @@ const EventCompleteScreen = () => {
                 return `${start.getMonth() + 1}.${start.getDate()} ~ ${end.getMonth() + 1}.${end.getDate()}`;
             }
         }).join(' | ');
+      };
+
+      // 소요 시간을 분 단위로 변환하는 함수
+      const convertDurationToMinutes = (duration) => {
+        const [hours, minutes] = duration.split(' ');
+        const totalMinutes = parseInt(hours) * 60 + (minutes ? parseInt(minutes.replace('분', '')) : 0);
+        return totalMinutes;
     };
+
+    // 시간을 AM/PM 형식으로 변환하는 함수
+    const convertTimeToAmPm = (time) => {
+        const [hourMinute, ampm] = time.split(' ');
+        const [hour, minute] = hourMinute.split(':').map(Number);
+        return {
+            amPm: ampm,
+            hour: hour % 12 === 0 ? 12 : hour % 12, // 12시간 형식
+            minute,
+        };
+    };
+
+    // API 호출을 위한 데이터를 변환하는 함수
+    const prepareEventDetailsForApi = () => {
+      const { name, dates, duration, startTime, endTime, place, participants } = eventDetails;
+      
+      const groupedDates = dates.map(date => new Date(date).toISOString().slice(0, 10)); // YYYY-MM-DD 형식 변환
+      
+      const durationInMinutes = convertDurationToMinutes(duration);
+      
+      const start = convertTimeToAmPm(startTime);
+      const end = convertTimeToAmPm(endTime);
+
+      let placeField = place;
+      let linkField = null;
+      
+      // 장소에 http가 포함되어 있으면 링크로 설정
+      if (place && place.includes('http')) {
+          linkField = place;
+          placeField = null;
+      }
+
+      const eventData = {
+          title: name,
+          dates: groupedDates,
+          duration: durationInMinutes,
+          timeRange: {
+              startAmPm: start.amPm,
+              startHour: start.hour,
+              startMinute: start.minute,
+              endAmPm: end.amPm,
+              endHour: end.hour,
+              endMinute: end.minute,
+          },
+          place: placeField,
+          link: linkField,
+          note: null, // 노트는 null로 보냄
+          participants: participants,
+      };
+
+      console.log("보내지는 데이터:", eventData); // 보내는 데이터 로그 출력
+      return eventData;
+    };
+
+    // API 호출 함수
+    const submitEventToApi = async () => {
+        const token = await AsyncStorage.getItem('accessToken');
+        const eventData = prepareEventDetailsForApi();
+
+        try {
+            await apiClient.post(`/api/groups/${groupId}/calendar`, eventData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log("그룹 일정 등록이 완료되었습니다.");
+        } catch (error) {
+            console.error("API 호출 중 오류 발생:", error);
+        }
+    };
+
+    useEffect(() => {
+        submitEventToApi(); // 컴포넌트가 로드될 때 API 호출
+    }, []);
+
 
     return (
         <View style={[styles.container, { width }]}>

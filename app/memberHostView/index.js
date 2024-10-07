@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect, useContext  } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity  } from 'react-native';
 import BackButton from '../../components/BackButton';
 import colors from '../../styles/colors';
@@ -9,19 +9,7 @@ import InviteMemberModal from '../../components/InviteMemberModal';
 import InviteMemberLinkModal from '../../components/InviteMenberLinkModal';
 import apiClient from '../../lib/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// 가상의 멤버 데이터
-// const initialMemberData = [
-//     { id: '1', name: '김민지', username: 'abcd1234' },
-//     { id: '2', name: '강민지', username: 'abcd1234' },
-//     { id: '3', name: '송민지', username: 'abcd1234' },
-//     { id: '4', name: '이민지', username: 'abcd1234' },
-//     { id: '5', name: '장민지', username: 'abcd1234' },
-//     { id: '6', name: '박민지', username: 'abcd1234' },
-// ];
-
-// 임의로 groupId를 1로 설정
-const groupId = 1;
+import { GroupContext } from '../../context/GroupContext';
 
 const MemberHostView = () => {
     const [selectedMembers, setSelectedMembers] = useState([]); // 선택된 멤버들 저장
@@ -29,32 +17,60 @@ const MemberHostView = () => {
     const [memberData, setMemberData] = useState([]); // 멤버 데이터 관리
     const [isInviteModalVisible, setInviteModalVisible] = useState(false); // 초대 모달 상태 관리
     const [isInviteLinkModalVisible, setInviteLinkModalVisible] = useState(false); // 초대 링크 모달 상태 관리
+    const [isMaster, setIsMaster] = useState(false); // 현재 사용자가 마스터인지 여부
     const router = useRouter();
-
-    const groupName = '성북구름뭉게톤';  // 모임 이름
+    const [groupName, setGroupName] = useState('');  // 그룹 이름 관리
+    const { groupId } = useContext(GroupContext);
     const memberCount = memberData.length;  // 멤버 수
 
     // API 호출하여 멤버 데이터를 가져오는 함수
-    const fetchMemberData = async () => {
+    const fetchGroupAndMemberData = async () => {
         try {
-            await AsyncStorage.getItem('accessToken');
-    
-            await apiClient.get(`/api/groups/${groupId}/members`);
-    
-            const formattedData = response.data.map((member, index) => ({
-                id: index.toString(),
+            const token = await AsyncStorage.getItem('accessToken');
+            const currentUserId = await AsyncStorage.getItem('userId');
+            const responseGroups = await apiClient.get(`/api/groups`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            // groupId에 해당하는 그룹 찾기
+            const group = responseGroups.data.find((group) => group.groupId === groupId);
+
+            if (group) {
+                setGroupName(group.groupName);  // 그룹 이름 설정
+            }
+
+            const responseMembers = await apiClient.get(`/api/groups/${groupId}/members`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const formattedData = responseMembers.data.map((member) => ({
+                id: member.loginId,
                 name: member.username,
                 username: member.loginId,
+                role: member.role,
             }));
+
             setMemberData(formattedData);  // API에서 받은 데이터를 memberData로 설정
+
+            // 현재 사용자가 마스터인지 확인
+            const currentUser = formattedData.find((member) => member.username === currentUserId);
+            if (currentUser?.role === "MASTER") {
+                setIsMaster(true); // 현재 사용자가 마스터라면 isMaster 설정
+            }
         } catch (error) {
             console.error("API 호출 에러:", error);
         }
     };
 
     useEffect(() => {
-        fetchMemberData();  // 화면이 로드될 때 멤버 데이터를 가져옴
-    }, []);
+        if (groupId) {
+            fetchGroupAndMemberData();  // groupId가 있을 때만 API 호출
+        }
+    }, [groupId]);
 
     const toggleMemberSelection = (id) => {
         if (selectedMembers.includes(id)) {
@@ -65,14 +81,28 @@ const MemberHostView = () => {
     };
 
     // 멤버 강제 퇴장 처리
-    const handleRemoveMembers = () => {
-        // 선택된 멤버들을 제외한 나머지 멤버들로 상태 업데이트
-        setMemberData(memberData.filter(member => !selectedMembers.includes(member.id)));
-        // 선택된 멤버 초기화
-        setSelectedMembers([]);
-        // 삭제 모드 해제
-        setDeleteMode(false);
-        // setIsOpen(false);
+    const handleRemoveMembers = async () => {
+        const token = await AsyncStorage.getItem('accessToken'); // 토큰 가져오기
+    
+        try {
+            // 선택된 멤버들을 삭제하는 API 호출
+            for (const memberId of selectedMembers) {
+                await apiClient.delete(`/api/groups/${groupId}/members/${memberId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            }
+    
+            // 선택된 멤버들을 제외한 나머지 멤버들로 상태 업데이트
+            setMemberData(memberData.filter(member => !selectedMembers.includes(member.id)));
+            
+            // 선택된 멤버 초기화
+            setSelectedMembers([]);
+            setDeleteMode(false);  // 삭제 모드 해제
+        } catch (error) {
+            console.error("멤버 삭제 중 오류 발생:", error);
+        }
     };
 
     // 초대 모달 열기/닫기
@@ -144,12 +174,19 @@ const MemberHostView = () => {
                 contentContainerStyle={styles.memberList}
             />
 
-            <MemberManageButton
-                setDeleteMode={setDeleteMode}
-                openInviteModal={openInviteModal}
-                openInviteLinkModal={openInviteLinkModal}  // 초대 링크 모달 열기 전달
+            {isMaster && (
+                <MemberManageButton
+                    setDeleteMode={setDeleteMode}
+                    openInviteModal={openInviteModal}
+                    openInviteLinkModal={openInviteLinkModal}  // 초대 링크 모달 열기 전달
+                />
+            )}
+
+            <InviteMemberModal
+                isVisible={isInviteModalVisible}
+                onClose={closeInviteModal}
+                fetchGroupAndMemberData={fetchGroupAndMemberData}
             />
-            <InviteMemberModal isVisible={isInviteModalVisible} onClose={closeInviteModal} />
             <InviteMemberLinkModal isVisible={isInviteLinkModalVisible} onClose={closeInviteLinkModal} />
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions, ScrollView } from 'react-native';
 import BackButton from '../../../components/BackButton';
 import ButtonComponent from '../../../components/Button';
@@ -6,23 +6,42 @@ import colors from '../../../styles/colors';
 import { useRouter } from 'expo-router';
 import { EventContext } from '../../../context/EventContext';
 import apiClient from '../../../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GroupContext } from '../../../context/GroupContext';
 
 
 const buttonWidth = 335; // 버튼의 고정 너비
 
 const EventPeopleScreen = () => {
     const [selectedFriends, setSelectedFriends] = useState([]);
+    const [friends, setFriends] = useState([]);
     const router = useRouter();
     const { width } = useWindowDimensions(); // 현재 화면의 너비와 높이 가져오기
     const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산 
     const { setEventDetails } = useContext(EventContext);
+    const { groupId } = useContext(GroupContext);
 
-    // 더미 데이터
-  const friends = [
-    "김민수", "박지영", "이준호", "최은지", "강현우", 
-    "허윤호", "오세훈", "윤서진", "신동민", "권지현",
-    "김현서", "강민서", "권기남", "서현은", "이지원"
-  ];
+  // API 호출로 친구 목록을 가져오는 함수
+  const fetchFriends = async () => {
+    try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const response = await apiClient.get(`/api/groups/${groupId}/members`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        // 서버로부터 받은 친구 목록을 이름으로 변환하여 저장
+        const friendList = response.data.map(member => member.username);
+        setFriends(friendList);
+    } catch (error) {
+        console.error("친구 목록을 가져오는 중 오류 발생:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFriends(); // 컴포넌트가 마운트될 때 API 호출
+  }, []);
 
   const handleFriendSelect = (friend) => {
     if (selectedFriends.includes(friend)) {
