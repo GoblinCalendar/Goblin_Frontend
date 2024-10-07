@@ -2,10 +2,9 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import colors from "../../styles/colors";
 import { LocaleKR } from "../../lib/LocaleConfig";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import CalendarNavbar from "../../components/CalendarNavbar";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
 import Modal from "react-native-modal";
 
@@ -15,6 +14,10 @@ import Pin from "../../assets/pin.svg";
 import PlusCircle from "../../assets/plus_circle.svg";
 import ArrowLeft from "../../assets/arrow_left.svg";
 import { ToggleButton } from "../../components/ToggleButton";
+import { NewCommonEventBottomSheet } from "../../components/NewCommonEventBottomSheet";
+import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottomSheet";
+import apiClient from "../../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -26,7 +29,9 @@ export default function Monthly() {
 
   // 2-2, 2-3
   const [modalMode, setModalMode] = useState(null);
-  const [isModelOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bottomSheetMode, setBottomSheetMode] = useState(null);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   const [eventsModal, setEventsModal] = useState({
     date: "9월 20일 (금)",
@@ -90,14 +95,6 @@ export default function Monthly() {
       color: "#E6E8E3",
     },
   ]);
-
-  // ref
-  const bottomSheetRef = useRef(null);
-
-  // callbacks
-  const handleSheetChanges = useCallback((index) => {
-    console.log("handleSheetChanges", index);
-  }, []);
 
   const MonthComponent = ({ navigation }) =>
     useMemo(() => {
@@ -236,7 +233,7 @@ export default function Monthly() {
       <DrawerWrapper screen={MonthComponent} />
 
       <Modal
-        isVisible={isModelOpen}
+        isVisible={isModalOpen}
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0}
@@ -291,6 +288,10 @@ export default function Monthly() {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.eventsModalButton, { backgroundColor: "#69CCA3" }]}
+                    onPress={() => {
+                      setIsBottomSheetOpen(true);
+                      setBottomSheetMode("new_common_event");
+                    }}
                   >
                     <PlusCircle width={16} height={16} />
                     <Text style={styles.eventsModalButtonText}>새 일정 추가</Text>
@@ -311,8 +312,8 @@ export default function Monthly() {
               <View style={styles.eventsModalContent}>
                 <ScrollView style={[styles.eventsModalEventWrapper, { gap: 8 }]}>
                   {pinnedEvents?.map((event, i) => (
-                    <View>
-                      <View style={styles.eventsModalPinnedEventContainer} key={event?.id}>
+                    <View key={event?.id}>
+                      <View style={styles.eventsModalPinnedEventContainer}>
                         <View style={styles.eventsModalPinnedEventContent}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
                             <View
@@ -362,7 +363,10 @@ export default function Monthly() {
                       styles.eventsModalButton,
                       { width: "auto", flex: 1, backgroundColor: colors.skyBlue },
                     ]}
-                    onPress={() => setModalMode("pin")}
+                    onPress={() => {
+                      setIsBottomSheetOpen(true);
+                      setBottomSheetMode("new_pinned_event");
+                    }}
                   >
                     <PlusCircle width={15} height={15} />
                     <Text style={styles.eventsModalButtonText}>고정 일정 추가</Text>
@@ -373,15 +377,17 @@ export default function Monthly() {
           )}
         </View>
       </Modal>
-
-      {/* <BottomSheet
-            ref={bottomSheetRef}
-            onChange={handleSheetChanges}
-            snapPoints={["50%"]}
-            enablePanDownToClose={true}
-          >
-            <BottomSheetView style={{ flex: 1 }}></BottomSheetView>
-          </BottomSheet> */}
+      {/* 새 일반 일정 추가 */}
+      {isBottomSheetOpen && (
+        <>
+          {bottomSheetMode === "new_common_event" && (
+            <NewCommonEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+          )}
+          {bottomSheetMode === "new_pinned_event" && (
+            <NewPinnedEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+          )}
+        </>
+      )}
     </>
   );
 }
@@ -451,6 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 99,
   },
   eventsModalContainer: {
     position: "relative",
