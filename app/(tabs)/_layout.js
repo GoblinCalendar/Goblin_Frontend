@@ -15,88 +15,91 @@ import PlusFocusedIcon from "../../assets/plus_focused_icon.svg";
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 export default function TabLayout() {
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.white }}
-      edges={["top", "right", "left"]}
-    >
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: colors.skyBlue,
-          tabBarShowLabel: false,
-        }}
+    <BottomSheetModalProvider>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: colors.white }}
+        edges={["top", "right", "left"]}
       >
-        <Tabs.Screen
-          name="monthly"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={styles.menu}>
-                {focused ? <MonthIcon /> : <MonthOutlineIcon />}
-                <Text
-                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
-                >
-                  월별
-                </Text>
-              </View>
-            ),
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: colors.skyBlue,
+            tabBarShowLabel: false,
           }}
-        />
-        <Tabs.Screen
-          name="daily"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={styles.menu}>
-                {focused ? <DayIcon /> : <DayOutlineIcon />}
-                <Text
-                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
-                >
-                  일별
-                </Text>
-              </View>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="new"
-          options={{
-            tabBarIcon: ({ focused }) => (focused ? <PlusFocusedIcon /> : <PlusIcon />),
-          }}
-        />
-        <Tabs.Screen
-          name="todo"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={styles.menu}>
-                {focused ? <TodoIcon /> : <TodoOutlineIcon />}
-                <Text
-                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
-                >
-                  To Do
-                </Text>
-              </View>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="search"
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={styles.menu}>
-                {focused ? <SearchIcon /> : <SearchOutlineIcon />}
-                <Text
-                  style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
-                >
-                  검색
-                </Text>
-              </View>
-            ),
-          }}
-        />
-      </Tabs>
-    </SafeAreaView>
+        >
+          <Tabs.Screen
+            name="monthly"
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View style={styles.menu}>
+                  {focused ? <MonthIcon /> : <MonthOutlineIcon />}
+                  <Text
+                    style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                  >
+                    월별
+                  </Text>
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="daily"
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View style={styles.menu}>
+                  {focused ? <DayIcon /> : <DayOutlineIcon />}
+                  <Text
+                    style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                  >
+                    일별
+                  </Text>
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="new"
+            options={{
+              tabBarIcon: ({ focused }) => (focused ? <PlusFocusedIcon /> : <PlusIcon />),
+            }}
+          />
+          <Tabs.Screen
+            name="todo"
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View style={styles.menu}>
+                  {focused ? <TodoIcon /> : <TodoOutlineIcon />}
+                  <Text
+                    style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                  >
+                    To Do
+                  </Text>
+                </View>
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="search"
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View style={styles.menu}>
+                  {focused ? <SearchIcon /> : <SearchOutlineIcon />}
+                  <Text
+                    style={[styles.text, { color: focused ? colors.skyBlue : colors.font04Gray }]}
+                  >
+                    검색
+                  </Text>
+                </View>
+              ),
+            }}
+          />
+        </Tabs>
+      </SafeAreaView>
+    </BottomSheetModalProvider>
   );
 }
 

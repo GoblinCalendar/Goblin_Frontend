@@ -1,32 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
-import colors from '../styles/colors';
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import colors from "../styles/colors";
+import { LocaleKR } from "../lib/LocaleConfig";
 
 // Locale 설정
-LocaleConfig.locales['ko'] = {
-  monthNames: [
-    '1월', '2월', '3월', '4월', '5월', '6월',
-    '7월', '8월', '9월', '10월', '11월', '12월'
-  ],
-  monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
-  dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
-  today: '오늘'
-};
-LocaleConfig.defaultLocale = 'ko';
+LocaleConfig.locales.kr = LocaleKR;
+LocaleConfig.defaultLocale = "kr";
 
-const CalendarPicker = ({ 
-    selectedDates, 
-    setSelectedDates, 
-    startDay, 
-    setStartDay, 
-    endDay, 
-    setEndDay, 
-    handleComplete, 
-    handleReset,
-    style
-  }) => {
+const CalendarPicker = ({
+  selectedDates,
+  setSelectedDates,
+  startDay,
+  setStartDay,
+  endDay,
+  setEndDay,
+  handleComplete,
+  handleReset,
+  style,
+  customHeader,
+}) => {
   const handleDayPress = (day) => {
     let newSelectedDates = { ...selectedDates };
 
@@ -35,7 +28,7 @@ const CalendarPicker = ({
       setEndDay(null);
       newSelectedDates = {
         ...newSelectedDates,
-        [day.dateString]: { startingDay: true, endingDay: true, color: colors.buttonAfterColor }
+        [day.dateString]: { startingDay: true, endingDay: true, color: colors.buttonAfterColor },
       };
     } else {
       const markedDates = {};
@@ -43,11 +36,13 @@ const CalendarPicker = ({
       while (currentDate <= day.dateString) {
         markedDates[currentDate] = {
           color: colors.buttonAfterColor,
-          textColor: 'white',
+          textColor: "white",
           ...(currentDate === startDay && { startingDay: true }),
           ...(currentDate === day.dateString && { endingDay: true }),
         };
-        currentDate = new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)).toISOString().split('T')[0];
+        currentDate = new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1))
+          .toISOString()
+          .split("T")[0];
       }
       newSelectedDates = { ...newSelectedDates, ...markedDates };
       setEndDay(day.dateString);
@@ -57,8 +52,8 @@ const CalendarPicker = ({
   };
 
   const renderHeader = (date) => {
-    const year = date?.getFullYear() || '';
-    const month = date ? date.getMonth() + 1 : '';
+    const year = date?.getFullYear() || "";
+    const month = date ? date.getMonth() + 1 : "";
     return (
       <View style={styles.header}>
         <Text style={styles.headerText}>{`${year} ${month}월`}</Text>
@@ -71,21 +66,21 @@ const CalendarPicker = ({
       <Calendar
         onDayPress={handleDayPress}
         markedDates={selectedDates}
-        markingType={'period'}
+        markingType={"period"}
         theme={{
-          backgroundColor: colors.calendarColor, 
-          calendarBackground: colors.calendarColor, 
-          dayTextColor: colors.black, 
-          textDisabledColor: colors.gray, 
-          selectedDayBackgroundColor: colors.buttonAfterColor, 
-          selectedDayTextColor: colors.white, 
-          arrowColor: colors.black, 
-          monthTextColor: colors.black, 
-          textSectionTitleColor: colors.black, 
+          backgroundColor: colors.calendarColor,
+          calendarBackground: colors.calendarColor,
+          dayTextColor: colors.black,
+          textDisabledColor: colors.gray,
+          selectedDayBackgroundColor: colors.buttonAfterColor,
+          selectedDayTextColor: colors.white,
+          arrowColor: colors.black,
+          monthTextColor: colors.black,
+          textSectionTitleColor: colors.black,
         }}
         style={styles.calendar}
-        locale={'ko'}
-        renderHeader={renderHeader}
+        locale={"ko"}
+        renderHeader={customHeader || renderHeader}
       />
       <View style={styles.footer}>
         <TouchableOpacity onPress={handleReset}>
@@ -101,9 +96,9 @@ const CalendarPicker = ({
 
 const styles = StyleSheet.create({
   calendarContainer: {
-    width: '90%',
+    width: "90%",
     height: 370,
-    paddingHorizontal:10,
+    paddingHorizontal: 10,
     backgroundColor: colors.calendarColor,
     borderRadius: 15,
     padding: 10,
@@ -113,17 +108,17 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.black,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 10,
   },
