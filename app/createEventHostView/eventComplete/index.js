@@ -22,56 +22,61 @@ const EventCompleteScreen = () => {
     const { eventDetails } = useContext(EventContext);
     const { groupId } = useContext(GroupContext);
 
+    // EventDetails 데이터 로그 찍기
+    // useEffect(() => {
+    //   console.log("EventDetails 데이터:", eventDetails);
+    // }, [eventDetails]);
+
     const handleNextPress = () => {
         router.push('/monthly');
     };
 
     // 날짜 배열을 그룹화하여 문자열로 변환
     const getGroupedDates = () => {
-        const dateArray = eventDetails.dates.sort();
-        const groupedDates = [];
-        let tempGroup = [dateArray[0]];
+      const dateArray = eventDetails.dates.sort();
+      const groupedDates = [];
+      let tempGroup = [dateArray[0]];
 
-        for (let i = 1; i < dateArray.length; i++) {
-            const prevDate = new Date(tempGroup[tempGroup.length - 1]);
-            const currentDate = new Date(dateArray[i]);
+      for (let i = 1; i < dateArray.length; i++) {
+          const prevDate = new Date(tempGroup[tempGroup.length - 1]);
+          const currentDate = new Date(dateArray[i]);
 
-            if ((currentDate - prevDate) / (1000 * 60 * 60 * 24) === 1) {
-                tempGroup.push(dateArray[i]);
-            } else {
-                groupedDates.push([...tempGroup]);
-                tempGroup = [dateArray[i]];
-            }
-        }
-        groupedDates.push([...tempGroup]);
+          if ((currentDate - prevDate) / (1000 * 60 * 60 * 24) === 1) {
+              tempGroup.push(dateArray[i]);
+          } else {
+              groupedDates.push([...tempGroup]);
+              tempGroup = [dateArray[i]];
+          }
+      }
+      groupedDates.push([...tempGroup]);
 
-        return groupedDates.map(group => {
-            if (group.length === 1) {
-                return `${new Date(group[0]).getMonth() + 1}.${new Date(group[0]).getDate()}`;
-            } else {
-                const start = new Date(group[0]);
-                const end = new Date(group[group.length - 1]);
-                return `${start.getMonth() + 1}.${start.getDate()} ~ ${end.getMonth() + 1}.${end.getDate()}`;
-            }
-        }).join(' | ');
-      };
+      return groupedDates.map(group => {
+          if (group.length === 1) {
+              return `${new Date(group[0]).getMonth() + 1}.${new Date(group[0]).getDate()}`;
+          } else {
+              const start = new Date(group[0]);
+              const end = new Date(group[group.length - 1]);
+              return `${start.getMonth() + 1}.${start.getDate()} ~ ${end.getMonth() + 1}.${end.getDate()}`;
+          }
+      }).join(' | ');
+    };
 
-      // 소요 시간을 분 단위로 변환하는 함수
-      const convertDurationToMinutes = (duration) => {
-        const [hours, minutes] = duration.split(' ');
-        const totalMinutes = parseInt(hours) * 60 + (minutes ? parseInt(minutes.replace('분', '')) : 0);
-        return totalMinutes;
+    // 소요 시간을 분 단위로 변환하는 함수
+    const convertDurationToMinutes = (duration) => {
+      const [hours] = duration.split(' ');
+      const totalMinutes = parseInt(hours) * 60;
+      return totalMinutes;
     };
 
     // 시간을 AM/PM 형식으로 변환하는 함수
     const convertTimeToAmPm = (time) => {
-        const [hourMinute, ampm] = time.split(' ');
-        const [hour, minute] = hourMinute.split(':').map(Number);
-        return {
-            amPm: ampm,
-            hour: hour % 12 === 0 ? 12 : hour % 12, // 12시간 형식
-            minute,
-        };
+      const [hourMinute, ampm] = time.split(' ');
+      const [hour, minute] = hourMinute.split(':').map(Number);
+      return {
+          amPm: ampm === '오전' ? 'AM' : 'PM',
+          hour: isNaN(hour) ? null : (hour % 12 === 0 ? 12 : hour % 12), // 12시간 형식
+          minute: isNaN(minute) ? 0 : minute, // NaN일 경우 0으로
+      };
     };
 
     // API 호출을 위한 데이터를 변환하는 함수
@@ -90,8 +95,10 @@ const EventCompleteScreen = () => {
       
       // 장소에 http가 포함되어 있으면 링크로 설정
       if (place && place.includes('http')) {
-          linkField = place;
-          placeField = null;
+        linkField = place;
+        placeField = null;
+      } else if (!place || place.trim() === "") {
+          placeField = ""; // 장소가 비어있으면 null로 설정
       }
 
       const eventData = {
@@ -112,7 +119,7 @@ const EventCompleteScreen = () => {
           participants: participants,
       };
 
-      console.log("보내지는 데이터:", eventData); // 보내는 데이터 로그 출력
+      // console.log("보내지는 데이터:", eventData); // 보내는 데이터 로그 출력
       return eventData;
     };
 
@@ -129,7 +136,10 @@ const EventCompleteScreen = () => {
             });
             console.log("그룹 일정 등록이 완료되었습니다.");
         } catch (error) {
-            console.error("API 호출 중 오류 발생:", error);
+          console.error("API 호출 중 오류 발생:", error.message);
+          if (error.response && error.response.data) {
+              console.error("응답 에러 데이터:", error.response.data); // 에러 응답 본문도 로그 출력
+          }
         }
     };
 
