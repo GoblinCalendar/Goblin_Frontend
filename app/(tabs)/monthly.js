@@ -190,7 +190,6 @@ export default function Monthly() {
                         ...(state === "today" && {
                           backgroundColor: colors.skyBlue,
                           borderRadius: 5,
-                          marginBottom: 8,
                         }),
                       },
                     ]}
@@ -439,7 +438,7 @@ const styles = StyleSheet.create({
   dayNumberWrapper: {
     width: 24,
     height: 24,
-    marginTop: 8,
+    marginVertical: 8,
     justifyContent: "center",
     alignItems: "center",
   },
