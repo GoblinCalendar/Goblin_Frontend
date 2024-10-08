@@ -141,7 +141,7 @@ export default function Monthly() {
             onPress={() => navigation.openDrawer()}
           />
           <CalendarProvider
-            date="2024-09-29"
+            date={`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`}
             onMonthChange={(date) => setCurrentMonth(date?.month)}
           >
             <ExpandableCalendar
