@@ -1,5 +1,4 @@
 import Modal from "react-native-modal";
-import { ScrollView } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { TouchableOpacity } from "react-native";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -9,13 +8,12 @@ import Icon from "../assets/icon.svg";
 import Goblin from "../assets/goblin.svg";
 import X from "../assets/x.svg";
 import AddCircleOutline from "../assets/add_circle_outline.svg";
-import Pencil from "../assets/pencil.svg";
 import Trash from "../assets/trash.svg";
 import { memo, useContext, useEffect, useState } from "react";
 import apiClient from "../lib/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import useAsyncStorage from "../hooks/useAsyncStorage";
 import { GroupContext, GroupCotext } from "../context/GroupContext";
+import { SwipeListButton } from "./SwipeListButton";
 
 export const SidebarDrawer = memo(({ navigation }) => {
   //더미
@@ -184,39 +182,17 @@ export const SidebarDrawer = memo(({ navigation }) => {
               </Pressable>
             )}
             renderHiddenItem={(data, rowMap) => (
-              <View style={drawerStyles.sideButtonWrapper}>
-                <TouchableOpacity
-                  style={[
-                    drawerStyles.sideButton,
-                    {
-                      borderTopLeftRadius: 10,
-                      borderBottomLeftRadius: 10,
-                      backgroundColor: "#7BB872",
-                    },
-                  ]}
-                  onPress={() => {
-                    setEditName(() => ({ id: data?.item?.id, name: `${data?.item?.name}` }));
-                    rowMap[data?.item?.key]?.closeRow();
-                  }}
-                >
-                  <Pencil />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    drawerStyles.sideButton,
-                    {
-                      borderTopRightRadius: 10,
-                      borderBottomRightRadius: 10,
-                      backgroundColor: "#DE5E56",
-                    },
-                  ]}
-                  onPress={() =>
-                    setDeleteCalendar({ open: true, id: data?.item?.id, name: data?.item?.name })
-                  }
-                >
-                  <Trash />
-                </TouchableOpacity>
-              </View>
+              <SwipeListButton
+                data={data}
+                rowMap={rowMap}
+                onEditPress={() => {
+                  setEditName(() => ({ id: data?.item?.id, name: `${data?.item?.name}` }));
+                  rowMap[data?.item?.key]?.closeRow();
+                }}
+                onDeletePress={() =>
+                  setDeleteCalendar({ open: true, id: data?.item?.id, name: data?.item?.name })
+                }
+              />
             )}
             rightOpenValue={-80}
             previewRowKey={"0"}
@@ -269,6 +245,7 @@ const drawerStyles = StyleSheet.create({
     letterSpacing: -0.25,
   },
   calendarContainer: {
+    height: 40,
     flexDirection: "row",
     paddingVertical: 10,
     paddingRight: 24,
@@ -313,19 +290,6 @@ const drawerStyles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 18,
     letterSpacing: -0.3,
-  },
-  sideButtonWrapper: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  sideButton: {
-    width: 40,
-    height: 40,
-    padding: 12,
-    justifyContent: "center",
-    alignItems: "center",
   },
   editCalendarNameWrapper: {
     flex: 1,
