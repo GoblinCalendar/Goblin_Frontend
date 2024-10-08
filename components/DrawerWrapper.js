@@ -5,14 +5,14 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import { TouchableOpacity } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Modal from "react-native-modal";
+import { useState } from "react";
+import { SwipeListButton } from "./SwipeListButton";
 
 import Icon from "../assets/icon.svg";
 import Goblin from "../assets/goblin.svg";
 import X from "../assets/x.svg";
 import AddCircleOutline from "../assets/add_circle_outline.svg";
-import Pencil from "../assets/pencil.svg";
 import Trash from "../assets/trash.svg";
-import { useState } from "react";
 
 const SidebarDrawer = ({ navigation }) => {
   //더미
@@ -137,39 +137,17 @@ const SidebarDrawer = ({ navigation }) => {
               </Pressable>
             )}
             renderHiddenItem={(data, rowMap) => (
-              <View style={drawerStyles.sideButtonWrapper}>
-                <TouchableOpacity
-                  style={[
-                    drawerStyles.sideButton,
-                    {
-                      borderTopLeftRadius: 10,
-                      borderBottomLeftRadius: 10,
-                      backgroundColor: "#7BB872",
-                    },
-                  ]}
-                  onPress={() => {
-                    setEditName(() => ({ id: data?.item?.id, name: `${data?.item?.name}` }));
-                    rowMap[data?.item?.key]?.closeRow();
-                  }}
-                >
-                  <Pencil />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    drawerStyles.sideButton,
-                    {
-                      borderTopRightRadius: 10,
-                      borderBottomRightRadius: 10,
-                      backgroundColor: "#DE5E56",
-                    },
-                  ]}
-                  onPress={() =>
-                    setDeleteCalendar({ open: true, id: data?.item?.id, name: data?.item?.name })
-                  }
-                >
-                  <Trash />
-                </TouchableOpacity>
-              </View>
+              <SwipeListButton
+                data={data}
+                rowMap={rowMap}
+                onEditPress={() => {
+                  setEditName(() => ({ id: data?.item?.id, name: `${data?.item?.name}` }));
+                  rowMap[data?.item?.key]?.closeRow();
+                }}
+                onDeletePress={() =>
+                  setDeleteCalendar({ open: true, id: data?.item?.id, name: data?.item?.name })
+                }
+              />
             )}
             rightOpenValue={-80}
             previewRowKey={"0"}
@@ -266,19 +244,6 @@ const drawerStyles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 18,
     letterSpacing: -0.3,
-  },
-  sideButtonWrapper: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  sideButton: {
-    width: 40,
-    height: 40,
-    padding: 12,
-    justifyContent: "center",
-    alignItems: "center",
   },
   editCalendarNameWrapper: {
     flex: 1,

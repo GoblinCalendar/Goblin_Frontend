@@ -16,6 +16,8 @@ import ArrowLeft from "../../assets/arrow_left.svg";
 import { ToggleButton } from "../../components/ToggleButton";
 import { NewCommonEventBottomSheet } from "../../components/NewCommonEventBottomSheet";
 import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottomSheet";
+import { SwipeListView } from "react-native-swipe-list-view";
+import { SwipeListButton } from "../../components/SwipeListButton";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -308,43 +310,46 @@ export default function Monthly() {
                 <Text style={styles.eventsModalHeader}>고정 일정 선택</Text>
               </View>
               <View style={styles.eventsModalContent}>
-                <ScrollView style={[styles.eventsModalEventWrapper, { gap: 8 }]}>
-                  {pinnedEvents?.map((event, i) => (
-                    <View key={event?.id}>
+                <SwipeListView
+                  style={[styles.eventsModalEventWrapper, { gap: 8 }]}
+                  disableRightSwipe={true}
+                  data={pinnedEvents}
+                  renderItem={(data, rowMap) => (
+                    <View key={data?.item?.id} style={{ backgroundColor: colors.white }}>
                       <View style={styles.eventsModalPinnedEventContainer}>
                         <View style={styles.eventsModalPinnedEventContent}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
                             <View
                               style={[
                                 styles.eventsModalPinnedEventDot,
-                                { backgroundColor: event?.color },
+                                { backgroundColor: data?.item?.color },
                               ]}
                             ></View>
                             <Text style={styles.eventsModalPinnedEventText} numberOfLines={1}>
-                              {event?.name}
+                              {data?.item?.name}
                             </Text>
                           </View>
                           <ToggleButton
-                            active={event?.active}
+                            active={data?.item?.active}
                             containerStyle={{
                               width: 36,
                               height: 20,
                               borderRadius: 10,
                               backgroundColor: colors.lightGrayBG,
                               borderWidth: 1,
-                              borderColor: event?.active ? colors.skyBlue : "#E5E5EC",
+                              borderColor: data?.item?.active ? colors.skyBlue : "#E5E5EC",
                             }}
                             buttonStyle={{
                               margin: 2,
                               width: 14,
                               height: 14,
                               borderRadius: "50%",
-                              backgroundColor: event?.active ? colors.skyBlue : "#E5E5EC",
+                              backgroundColor: data?.item?.active ? colors.skyBlue : "#E5E5EC",
                             }}
                             onPress={() =>
                               setPinnedEvents((prev) => [
                                 ...prev.map((d) =>
-                                  d?.id === event?.id ? { ...d, active: !d?.active } : d
+                                  d?.id === data?.item?.id ? { ...d, active: !d?.active } : d
                                 ),
                               ])
                             }
@@ -353,8 +358,20 @@ export default function Monthly() {
                       </View>
                       <View style={styles.eventsModalPinnedEventDivider}></View>
                     </View>
-                  ))}
-                </ScrollView>
+                  )}
+                  renderHiddenItem={(data, rowMap) => (
+                    <SwipeListButton
+                      data={data}
+                      rowMap={rowMap}
+                      onEditPress={() => console.log("edit")}
+                      onDeletePress={() => console.log("delete")}
+                    />
+                  )}
+                  rightOpenValue={-88}
+                  previewRowKey={"0"}
+                  previewOpenValue={-40}
+                />
+
                 <View style={[styles.eventsModalButtonWrapper]}>
                   <TouchableOpacity
                     style={[
