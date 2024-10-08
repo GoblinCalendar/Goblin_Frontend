@@ -7,7 +7,7 @@ import { NotificationProvider } from "../context/NotificationContext";
 import { AuthProvider } from "../context/AuthContext";
 import NotificationCard from "../components/NotificationCard";
 import Toast from "react-native-toast-message";
-import { GroupProvider } from "../context/GroupContext";
+import { UserProvider } from "../context/UserContext";
 
 console.warn = () => {}; //warn 경고 안뜨게함
 
@@ -49,7 +49,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <GroupProvider>
+          <UserProvider>
             <EventProvider>
               <NotificationProvider>
                 {/* 모든 화면에서 NotificationCard를 렌더링 */}
@@ -75,7 +75,7 @@ export default function RootLayout() {
                 </Stack>
               </NotificationProvider>
             </EventProvider>
-          </GroupProvider>
+          </UserProvider>
         </AuthProvider>
       </SafeAreaProvider>
       {/* Toast 설정 */}
