@@ -8,5 +8,11 @@ export default function useAsyncStorage(name) {
     AsyncStorage.getItem(name).then((result) => setValue(result));
   }, []);
 
-  return [value, setValue];
+  const update = (newValue) => {
+    AsyncStorage.setItem(name, newValue).then(() => {
+      setValue(newValue);
+    });
+  };
+
+  return [value, update];
 }
