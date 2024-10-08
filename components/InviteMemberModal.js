@@ -1,36 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import SvgSearchIcon from '../assets/reading_glasses.svg'; // 검색 아이콘을 SVG로 불러옴
 import colors from '../styles/colors';
 import Toast from 'react-native-toast-message';
+import apiClient from '../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GroupContext } from '../context/GroupContext';
 
-const InviteMemberModal = ({ isVisible, onClose }) => {
+const InviteMemberModal = ({ isVisible, onClose, fetchGroupAndMemberData }) => {
   const [memberId, setMemberId] = useState('');
   const [isFocused, setIsFocused] = useState(false); // 입력 필드가 포커스되었는지 상태 관리
   const [selectedMember, setSelectedMember] = useState(null); // 선택된 멤버 상태 관리
+  const { groupId } = useContext(GroupContext); // groupId 불러오기
 
-  const handleInvite = () => {
-    // 멤버 초대 로직을 여기에 추가
-    Toast.show({
-      type: 'successToast',
-      text1: '멤버 초대가 완료되었습니다!',
-      position: 'bottom',
-  });
-    onClose(); // 초대 버튼을 누르면 모달을 닫음
+  const handleInvite = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken'); // 토큰 가져오기
+  
+      // 멤버 초대 API 호출
+      await apiClient.post(`/api/groups/${groupId}/invite`, {
+        loginId: selectedMember.username,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      Toast.show({
+        type: 'successToast',
+        text1: '멤버 초대가 완료되었습니다!',
+        position: 'bottom',
+      });
+
+      fetchGroupAndMemberData(); // 초대가 완료된 후 멤버 목록 다시 불러오기
+      onClose(); // 모달 닫기
+    } catch (error) {
+      console.error("멤버 초대 중 오류 발생:", error);
+    }
   };
 
   const handleMemberIdChange = (text) => {
     setMemberId(text);
+  };
 
-    // 입력 완료 시 사용자 정보가 자동으로 표시되도록 조건 추가
-    if (text === '김민지') {
-      setSelectedMember({
-        name: '김민지',
-        username: 'abcd1234',
+  // 입력이 완료되었을 때 호출되는 함수 (검색 API 호출)
+  const handleSearch = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken'); // 저장된 토큰 가져오기
+
+      // 멤버 검색 API 호출
+      const response = await apiClient.get(`/api/users/search`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          loginId: memberId, // 검색 쿼리로 입력된 텍스트 전달
+        },
       });
-    } else {
-      setSelectedMember(null); // 일치하지 않으면 초기화
+
+      // 검색된 멤버가 있으면 설정, 없으면 초기화
+      if (response.data && response.data.length > 0) {
+        setSelectedMember({
+          name: response.data[0].username,
+          username: response.data[0].loginId,
+        });
+      } else {
+        setSelectedMember(null);
+      }
+    } catch (error) {
+      console.error("사용자 검색 중 오류 발생:", error);
+      setSelectedMember(null); // 오류 발생 시에도 초기화
     }
   };
 
@@ -63,6 +103,7 @@ const InviteMemberModal = ({ isVisible, onClose }) => {
             onChangeText={handleMemberIdChange}
             onFocus={() => setIsFocused(true)} // 포커스되었을 때
             onBlur={() => setIsFocused(false)} // 포커스가 벗어났을 때
+            onSubmitEditing={handleSearch}
           />
         </View>
 
@@ -119,6 +160,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 290,
     top: 10,
+    zIndex: 20,
   },
   label: {
     fontSize: 14,
