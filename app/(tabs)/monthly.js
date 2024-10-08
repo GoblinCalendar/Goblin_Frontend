@@ -16,8 +16,6 @@ import ArrowLeft from "../../assets/arrow_left.svg";
 import { ToggleButton } from "../../components/ToggleButton";
 import { NewCommonEventBottomSheet } from "../../components/NewCommonEventBottomSheet";
 import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottomSheet";
-import apiClient from "../../lib/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";

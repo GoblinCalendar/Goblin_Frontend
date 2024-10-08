@@ -6,41 +6,35 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { Portal } from "@gorhom/portal";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { FullWindowOverlay } from "react-native-screens";
 import colors from "../styles/colors";
 import { BottomSheetModalComponent } from "./BottomSheetModalComponent";
-import CalendarPicker from "./CalendarPicker";
-import moment from "moment";
-
-import CalendarIcon from "../assets/calendar.svg";
-import CalendarBlack from "../assets/calendar_black.svg";
-import ClockIcon from "../assets/clock.svg";
-import ClockBlack from "../assets/clock_black.svg";
-import ButtonComponent from "./Button";
 import TimePicker from "./TimePicker";
 import { TouchableOpacity } from "react-native-gesture-handler";
+
+import ButtonComponent from "./Button";
+import Radio from "../assets/radio.svg";
+import RadioActive from "../assets/radio_active.svg";
 
 export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
   const bottomSheetRef = useRef(null);
 
   // 일정 이름 및 메모
-  const [newEvent, setNewEvent] = useState({ name: "", memo: "" });
-  const [selectMode, setSelectMode] = useState("calendar");
+  const [newEvent, setNewEvent] = useState({ name: "" });
+  const [selectMode, setSelectMode] = useState("time");
 
-  // 날짜 선택
-  const [selectedDates, setSelectedDates] = useState({
-    [moment().format("YYYY-MM-DD")]: { color: "#5DAED6", endingDay: true, startingDay: true },
-  });
-  const [startDay, setStartDay] = useState(null);
-  const [endDay, setEndDay] = useState(null);
-
-  const handleReset = () => {
-    setSelectedDates({});
-    setStartDay(null);
-    setEndDay(null);
-  };
+  // 날 선택
+  const [days, setDays] = useState([
+    { day: "일", selected: false },
+    { day: "월", selected: false },
+    { day: "화", selected: false },
+    { day: "수", selected: false },
+    { day: "목", selected: false },
+    { day: "금", selected: false },
+    { day: "토", selected: false },
+  ]);
 
   //시간 선택
   const [startTime, setStartTime] = useState("-");
@@ -48,17 +42,20 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
 
   console.log(startTime, endTime);
 
+  //색 선택
+  const [selectedColor, setSelectedColor] = useState(null);
+
   return (
     <BottomSheetModalComponent
       setIsBottomSheetOpen={setIsBottomSheetOpen}
       bottomSheetRef={bottomSheetRef}
-      height={selectMode === "calendar" ? 617 : 512}
+      height={selectMode === "time" ? 510 : 352}
     >
       <View style={styles.headerWrapper}>
         <TextInput
           value={newEvent?.name}
           style={styles.header}
-          placeholder="일정 이름을 입력하세요"
+          placeholder="고정 일정 이름을 입력하세요"
           numberOfLines={1}
           maxLength={18}
           placeholderTextColor={colors.font05Gray}
@@ -68,81 +65,91 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
         />
         <Text style={styles.maxLengthText}>{newEvent?.name?.length || 0}/18</Text>
       </View>
-      <TextInput
-        value={newEvent?.memo}
-        style={styles.memo}
-        placeholder="메모를 입력하세요 (선택)"
-        numberOfLines={1}
-        maxLength={22}
-        placeholderTextColor={colors.font04Gray}
-        onChangeText={(text) => setNewEvent((prev) => ({ ...prev, memo: text?.trim() }))}
-        returnKeyType="done"
-      />
-      <View style={styles.selectorWrapper}>
-        {selectMode === "calendar" ? (
-          <CalendarIcon width={20} height={20} />
-        ) : (
-          <TouchableOpacity onPress={() => setSelectMode("calendar")}>
-            <CalendarBlack width={20} height={20} />
-          </TouchableOpacity>
-        )}
-        <View style={styles.calendarDateTextWrapper}>
-          <Text style={styles.calendarDateText}>
-            {Object.keys(selectedDates).length > 0
-              ? Object.keys(selectedDates).length > 1
-                ? "다중 기간"
-                : moment(Object.keys(selectedDates)?.[0])?.format("M월 D일")
-              : "날짜를 선택하세요"}
-          </Text>
-        </View>
-
-        {selectMode === "time" ? (
-          <ClockIcon width={20} height={20} style={{ marginLeft: 12 }} />
-        ) : (
-          <TouchableOpacity onPress={() => setSelectMode("time")}>
-            <ClockBlack width={20} height={20} style={{ marginLeft: 12 }} />
-          </TouchableOpacity>
-        )}
-      </View>
 
       <View style={styles.content}>
-        {selectMode === "calendar" && (
-          <>
-            <CalendarPicker
-              startDay={startDay}
-              setStartDay={setStartDay}
-              endDay={endDay}
-              setEndDay={setEndDay}
-              selectedDates={selectedDates}
-              setSelectedDates={setSelectedDates}
-              handleReset={handleReset}
-              style={{ width: "100%" }}
-              customHeader={customHeader}
-            />
-            <ButtonComponent
-              style={{ marginTop: 24, width: "auto" }}
-              title="다음"
-              isActive={newEvent?.name?.length > 0}
-              onPress={() => setSelectMode("time")}
-            />
-          </>
-        )}
-
         {selectMode === "time" && (
           <>
+            <View style={styles.daysWrapper}>
+              {days.map((d, i) => (
+                <TouchableOpacity
+                  style={[
+                    styles.daysButton,
+                    ...(d.selected ? [{ backgroundColor: colors.skyBlue }] : []),
+                  ]}
+                  key={d.day}
+                  onPress={() =>
+                    setDays((prev) => [
+                      ...prev.map((m) => (m.day === d.day ? { ...m, selected: !m.selected } : m)),
+                    ])
+                  }
+                >
+                  <Text
+                    style={[styles.daysLabel, ...(d.selected ? [{ color: colors.white }] : [])]}
+                  >
+                    {d.day}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <TimePicker
-              style={{ height: 258, alignSelf: "center" }}
+              style={{ marginTop: 24, height: 258, alignSelf: "center" }}
               startTime={startTime}
               setStartTime={setStartTime}
               endTime={endTime}
               setEndTime={setEndTime}
             />
             <ButtonComponent
-              style={{ marginTop: 24, width: "" }}
+              style={{ marginTop: 24, width: "auto" }}
+              title="다음"
+              isActive={
+                newEvent?.name?.length > 0 &&
+                startTime !== "-" &&
+                endTime !== "-" &&
+                days.some((d) => d.selected)
+              }
+              onPress={() => setSelectMode("color")}
+            />
+          </>
+        )}
+
+        {selectMode === "color" && (
+          <>
+            <Text style={styles.selectColorText}>5가지 색상 중 1개를 선택해 주세요</Text>
+            <View style={styles.colorsWrapper}>
+              {[
+                { id: "1", color: "#F3DAD8" },
+                { id: "2", color: "#F1DAED" },
+                { id: "3", color: "#F2EDD9" },
+                { id: "4", color: "#EBEBE3" },
+                { id: "5", color: "#B1B0B5" },
+              ].map((c, i) => (
+                <View style={styles.colorsContainer} key={c.id}>
+                  <View style={[styles.colorsCircle, { backgroundColor: c.color }]}></View>
+                  <TouchableOpacity
+                    style={styles.colorsRadioButton}
+                    onPress={() => setSelectedColor(() => (selectedColor?.id === c.id ? null : c))}
+                  >
+                    {selectedColor?.id === c.id ? (
+                      <RadioActive width={24} height={24} />
+                    ) : (
+                      <Radio width={24} height={24} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+            <ButtonComponent
+              style={{ marginTop: 48, width: "auto" }}
               title="추가하기"
-              isActive={startTime !== "-" && endTime !== "-"}
+              isActive={
+                newEvent?.name?.length > 0 &&
+                startTime !== "-" &&
+                endTime !== "-" &&
+                days.some((d) => d.selected) &&
+                selectedColor !== null
+              }
               onPress={() => {
-                console.log("add new event!");
+                console.log("add new pinned event!");
                 setIsBottomSheetOpen(false);
               }}
             />
@@ -150,37 +157,6 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
         )}
       </View>
     </BottomSheetModalComponent>
-  );
-};
-
-const customHeader = (date) => {
-  const year = date?.getFullYear() || "";
-  const month = date ? date.getMonth() + 1 : "";
-  return (
-    <View style={{ alignItems: "center" }}>
-      <Text
-        style={{
-          color: colors.font04Gray,
-          fontSize: 12,
-          fontWeight: "400",
-          lineHeight: 18,
-          letterSpacing: -0.3,
-        }}
-      >
-        {year}
-      </Text>
-      <Text
-        style={{
-          color: colors.black,
-          fontSize: 18,
-          fontWeight: "600",
-          lineHeight: 28,
-          letterSpacing: -0.45,
-        }}
-      >
-        {month}월
-      </Text>
-    </View>
   );
 };
 
@@ -207,34 +183,54 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     lineHeight: 16,
   },
-  memo: {
-    marginTop: 4,
-    color: colors.font04Gray,
-    fontSize: 12,
-    fontWeight: "400",
-    lineHeight: 18,
-    letterSpacing: -0.3,
-  },
   selectorWrapper: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 16,
   },
-  calendarDateTextWrapper: {
-    marginLeft: 4,
-    paddingVertical: 2,
-    paddingHorizontal: 21,
+  daysWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  daysButton: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 5,
-    backgroundColor: colors.calendarColor,
+    borderRadius: 8,
   },
-  calendarDateText: {
-    color: colors.black,
+  daysLabel: {
+    color: colors.font05Gray,
     textAlign: "center",
-    fontSize: 12,
-    fontWeight: "500",
-    lineHeight: 18,
-    letterSpacing: -0.3,
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+    letterSpacing: -0.4,
+  },
+  selectColorText: {
+    color: colors.font04Gray,
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 20,
+    lterr: -0.35,
+  },
+  colorsWrapper: {
+    marginTop: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 24,
+  },
+  colorsContainer: {
+    alignItems: "center",
+    gap: 24,
+  },
+  colorsCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: "100%",
   },
 });
