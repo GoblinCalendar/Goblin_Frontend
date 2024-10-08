@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity  } from 'react-native';
 import BackButton from '../../components/BackButton';
 import colors from '../../styles/colors';
@@ -6,26 +6,55 @@ import { useRouter } from 'expo-router';
 import MemberManageButton from '../../components/MemberManageButton';
 import SvgCheckMark from '../../assets/check.svg';
 import InviteMemberModal from '../../components/InviteMemberModal';
+import InviteMemberLinkModal from '../../components/InviteMenberLinkModal';
+import apiClient from '../../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 가상의 멤버 데이터
-const initialMemberData = [
-    { id: '1', name: '김민지', username: 'abcd1234' },
-    { id: '2', name: '강민지', username: 'abcd1234' },
-    { id: '3', name: '송민지', username: 'abcd1234' },
-    { id: '4', name: '이민지', username: 'abcd1234' },
-    { id: '5', name: '장민지', username: 'abcd1234' },
-    { id: '6', name: '박민지', username: 'abcd1234' },
-];
+// const initialMemberData = [
+//     { id: '1', name: '김민지', username: 'abcd1234' },
+//     { id: '2', name: '강민지', username: 'abcd1234' },
+//     { id: '3', name: '송민지', username: 'abcd1234' },
+//     { id: '4', name: '이민지', username: 'abcd1234' },
+//     { id: '5', name: '장민지', username: 'abcd1234' },
+//     { id: '6', name: '박민지', username: 'abcd1234' },
+// ];
+
+// 임의로 groupId를 1로 설정
+const groupId = 1;
 
 const MemberHostView = () => {
     const [selectedMembers, setSelectedMembers] = useState([]); // 선택된 멤버들 저장
     const [deleteMode, setDeleteMode] = useState(false); // 삭제 모드 활성화 여부
-    const [memberData, setMemberData] = useState(initialMemberData); // 멤버 데이터 관리
+    const [memberData, setMemberData] = useState([]); // 멤버 데이터 관리
     const [isInviteModalVisible, setInviteModalVisible] = useState(false); // 초대 모달 상태 관리
+    const [isInviteLinkModalVisible, setInviteLinkModalVisible] = useState(false); // 초대 링크 모달 상태 관리
     const router = useRouter();
 
     const groupName = '성북구름뭉게톤';  // 모임 이름
     const memberCount = memberData.length;  // 멤버 수
+
+    // API 호출하여 멤버 데이터를 가져오는 함수
+    const fetchMemberData = async () => {
+        try {
+            await AsyncStorage.getItem('accessToken');
+    
+            await apiClient.get(`/api/groups/${groupId}/members`);
+    
+            const formattedData = response.data.map((member, index) => ({
+                id: index.toString(),
+                name: member.username,
+                username: member.loginId,
+            }));
+            setMemberData(formattedData);  // API에서 받은 데이터를 memberData로 설정
+        } catch (error) {
+            console.error("API 호출 에러:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMemberData();  // 화면이 로드될 때 멤버 데이터를 가져옴
+    }, []);
 
     const toggleMemberSelection = (id) => {
         if (selectedMembers.includes(id)) {
@@ -55,6 +84,15 @@ const MemberHostView = () => {
         setInviteModalVisible(false);
     };
 
+    // 초대 링크 모달 열기/닫기
+    const openInviteLinkModal = () => {
+        setInviteLinkModalVisible(true);
+    };
+
+    const closeInviteLinkModal = () => {
+        setInviteLinkModalVisible(false);
+    };
+
     const renderMemberItem = ({ item }) => (
         <View style={styles.memberItem}>
             {/* 삭제 모드일 때만 체크박스 표시 */}
@@ -67,7 +105,7 @@ const MemberHostView = () => {
                         { backgroundColor: selectedMembers.includes(item.id) ? colors.buttonAfterColor : colors.checkBoxGray },
                     ]}
                     >
-                        {selectedMembers.includes(item.id) && <SvgCheckMark width={16} height={16} />}
+                        <SvgCheckMark width={16} height={16}/>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -106,11 +144,15 @@ const MemberHostView = () => {
                 contentContainerStyle={styles.memberList}
             />
 
-            {/* MemberManageButton */}
-            <MemberManageButton setDeleteMode={setDeleteMode} openInviteModal={openInviteModal}/>
-
-            {/* InviteMemberModal 모달 */}
+            <MemberManageButton
+                setDeleteMode={setDeleteMode}
+                openInviteModal={openInviteModal}
+                openInviteLinkModal={openInviteLinkModal}  // 초대 링크 모달 열기 전달
+            />
             <InviteMemberModal isVisible={isInviteModalVisible} onClose={closeInviteModal} />
+            <InviteMemberLinkModal isVisible={isInviteLinkModalVisible} onClose={closeInviteLinkModal} />
+
+
         </View>
     )
     

@@ -10,7 +10,7 @@ import ActiveSvgAddButton from '../assets/invite_member_active.svg'; // 멤버 �
 import ActiveSvgLinkButton from '../assets/link_active.svg'; // 링크 보내기 버튼 SVG
 import colors from '../styles/colors';
 
-const MemberManageButton = ({ setDeleteMode , openInviteModal }) => {
+const MemberManageButton = ({ setDeleteMode , openInviteModal, openInviteLinkModal }) => {
   const rotateAnim = useRef(new Animated.Value(0)).current; // 회전을 위한 애니메이션 값
   const [isOpen, setIsOpen] = useState(false); // 버튼이 열렸는지 닫혔는지 상태 저장
   const [activeButton, setActiveButton] = useState(null); // 현재 활성화된 버튼 상태
@@ -38,6 +38,8 @@ const MemberManageButton = ({ setDeleteMode , openInviteModal }) => {
         setDeleteMode(true); // 삭제 모드로 전환
     } else if (buttonName === 'invite') {
         openInviteModal(); // 초대 모달 열기
+    } else if (buttonName === 'link') {
+      openInviteLinkModal();  // 초대 링크 모달 열기
     }
   };
 

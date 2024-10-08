@@ -49,14 +49,17 @@ export default function SignIn() {
         password: password,
       });
 
-      const { accessToken, refreshToken } = response.data;
-
+      const { accessToken, refreshToken, loginId, username } = response.data;
+      const userRole = "USER";
       // 콘솔에 로그인 성공 메시지와 토큰 정보 출력
       console.log('로그인 성공:', response.data);
 
       // 토큰 저장 (AsyncStorage에 저장)
       await AsyncStorage.setItem('accessToken', accessToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
+      await AsyncStorage.setItem('userId', loginId);
+      await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('userRole', userRole);
 
       // 로그인 상태를 AsyncStorage에 저장
       await AsyncStorage.setItem('isLoggedIn', 'true');

@@ -241,12 +241,12 @@ const styles = StyleSheet.create({
     arrowButtonTop: {
         position: 'absolute',
         top: 65, 
-        left: 35, 
+        left: 30, 
     },
     arrowButtonBottom: {
         position: 'absolute',
         top: 475, 
-        left: 35,
+        left: 30,
     },
     arrowSideButtonLeft: {
         position: 'absolute',

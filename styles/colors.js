@@ -35,5 +35,6 @@ export default {
     errorRed:'#DC0000',
 
     font02Gray: '#484848',
+    listDotBlue: '#DDE9EE',
   };
   

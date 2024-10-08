@@ -28,8 +28,8 @@ const generateTimeGrid = (start, end) => {
 const time = ['11:00', '21:00'];
 const hours = generateTimeGrid(time[0], time[1]);
 
-const days = ['화', '수', '목', '금', '일'];
-const dates = ['9. 10', '9. 11', '9. 12', '9. 13', '9. 15'];
+const days = ['화', '수', '목', '금', '일', '월'];
+const dates = ['9. 10', '9. 11', '9. 12', '9. 13', '9. 15', '9.20'];
 
 const TimeSelectionGrid = forwardRef((props, ref) => {
   const [visibleStartHour, setVisibleStartHour] = useState(0);
@@ -420,12 +420,12 @@ const styles = StyleSheet.create({
   arrowButtonTop: {
     position: 'absolute',
     top: 65, 
-    left: 35, 
+    left: 30, 
   },
   arrowButtonBottom: {
     position: 'absolute',
     top: 475, 
-    left: 35,
+    left: 30,
   },
   arrowSideButtonLeft: {
     position: 'absolute',
