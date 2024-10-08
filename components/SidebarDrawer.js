@@ -11,8 +11,7 @@ import AddCircleOutline from "../assets/add_circle_outline.svg";
 import Trash from "../assets/trash.svg";
 import { memo, useContext, useEffect, useState } from "react";
 import apiClient from "../lib/api";
-import useAsyncStorage from "../hooks/useAsyncStorage";
-import { GroupContext, GroupCotext } from "../context/GroupContext";
+import { UserContext } from "../context/UserContext";
 import { SwipeListButton } from "./SwipeListButton";
 
 export const SidebarDrawer = memo(({ navigation }) => {
@@ -34,11 +33,9 @@ export const SidebarDrawer = memo(({ navigation }) => {
     });
   }, []);
 
-  const [username, setUsername] = useAsyncStorage("username");
-  // TODO 리렌더링 고치기
-  console.log(username);
-
-  const { groupId, setGroupId } = useContext(GroupContext);
+  const { username, groupId, setGroupId } = useContext(UserContext);
+  // TODO 리렌더링 줄이기
+  // console.log(username);
 
   const [editName, setEditName] = useState({ id: null, name: "" });
 

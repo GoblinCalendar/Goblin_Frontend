@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { CalendarProvider, ExpandableCalendar, LocaleConfig } from "react-native-calendars";
 import colors from "../../styles/colors";
 import { LocaleKR } from "../../lib/LocaleConfig";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import CalendarNavbar from "../../components/CalendarNavbar";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
@@ -19,8 +19,8 @@ import { NewPinnedEventBottomSheet } from "../../components/NewPinnedEventBottom
 import { SwipeListView } from "react-native-swipe-list-view";
 import { SwipeListButton } from "../../components/SwipeListButton";
 import apiClient from "../../lib/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { convertToMarkedDates } from "../../lib/convertToMarkedDates";
+import { UserContext } from "../../context/UserContext";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -31,11 +31,19 @@ export default function Monthly() {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
 
   const [markedDates, setMarkedDates] = useState([]);
+
+  const { username } = useContext(UserContext);
+
   useEffect(() => {
+    // 개인 일반 일정
     apiClient
       .get(`/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`)
       .then((response) => {
-        setMarkedDates(convertToMarkedDates(response.data));
+        setMarkedDates(
+          convertToMarkedDates(
+            response.data?.map((d) => ({ ...d, type: "general", creator: username }))
+          )
+        );
       });
   }, []);
 
@@ -213,11 +221,20 @@ export default function Monthly() {
                     styles={styles.dayMarkWrapper}
                     onPress={() => {
                       setIsModalOpen(true);
+                      setEventsModal({
+                        date: `${date?.month}월 ${date?.day}일 (${
+                          ["일", "월", "화", "수", "목", "금", "토"][
+                            new Date(date?.dateString)?.getDay()
+                          ]
+                        })`,
+                        events: markedDates?.[date?.dateString],
+                      });
                       setModalMode("view");
                     }}
                   >
                     {(marking?.length > 3 ? marking?.slice(0, 3) : marking)?.map((mark) => (
                       <View key={mark?.title} style={styles.dayMarker}>
+                        {mark?.type === "general" && <View style={styles.dayMarkerGeneral}></View>}
                         <Text style={styles.dayMarkerText} numberOfLines={1}>
                           {mark?.title}
                         </Text>
@@ -264,18 +281,17 @@ export default function Monthly() {
                   {eventsModal?.events?.map((event, i) => (
                     <View style={styles.eventsModalEventContainer} key={event?.id}>
                       <View
-                        style={[
-                          styles.eventsModalEventDot,
-                          { backgroundColor: event?.backgroundColor },
-                        ]}
+                        style={[styles.eventsModalEventDot, { backgroundColor: event?.color }]}
                       ></View>
                       <View style={{ flexDirection: "column" }}>
                         <Text style={styles.eventsModalEventName} numberOfLines={1}>
-                          {event?.name}
+                          {event?.title}
                         </Text>
-                        <Text style={styles.eventsModalEventMemo} numberOfLines={1}>
-                          {event?.memo}
-                        </Text>
+                        {event?.memo && (
+                          <Text style={styles.eventsModalEventMemo} numberOfLines={1}>
+                            {event?.memo}
+                          </Text>
+                        )}
                         <View style={styles.eventsModalInfoWrapper}>
                           <View style={styles.eventsModalEventChip}>
                             <Text style={styles.eventsModalEventChipText}>{event?.creator}</Text>
@@ -454,19 +470,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dayMarker: {
-    width: 49,
+    width: 50,
     marginBottom: 4,
     marginHorizontal: 2,
     paddingHorizontal: 4,
     paddingVertical: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    backgroundColor: colors.primaryLight,
     borderRadius: 4,
+  },
+  dayMarkerGeneral: {
+    marginRight: 3,
+    width: 1,
+    height: 10,
+    backgroundColor: "#CCD7E5",
   },
   dayMarkerText: {
     color: "#505050",
+    textAlign: "center",
     fontSize: 11,
     fontWeight: "400",
     lineHeight: 16,
@@ -483,7 +506,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 99,
   },
   eventsModalContainer: {
     position: "relative",
@@ -494,7 +516,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.lightGray,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 12,
