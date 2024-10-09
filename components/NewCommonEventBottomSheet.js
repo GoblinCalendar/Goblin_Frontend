@@ -17,6 +17,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import apiClient from "../lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BottomSheetTextInput } from "./BottomSheetTextInput";
+import { convertToAmPm } from "../lib/convertToAmPm";
 
 export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
@@ -54,12 +55,12 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
       scheduleName: newEvent?.name,
       note: newEvent?.memo,
       date: Object.keys(selectedDates),
-      amPmStart: startTimeFrags?.[0],
-      startHour: startTimeFrags?.[1],
-      startMinute: startTimeFrags?.[3],
-      amPmEnd: endTimeFrags?.[0],
-      endHour: endTimeFrags?.[1],
-      endMinute: endTimeFrags?.[3],
+      amPmStart: convertToAmPm(startTimeFrags?.[0]),
+      startHour: parseInt(startTimeFrags?.[1]),
+      startMinute: parseInt(startTimeFrags?.[3]),
+      amPmEnd: convertToAmPm(endTimeFrags?.[0]),
+      endHour: parseInt(endTimeFrags?.[1]),
+      endMinute: parseInt(endTimeFrags?.[3]),
     });
   };
 
