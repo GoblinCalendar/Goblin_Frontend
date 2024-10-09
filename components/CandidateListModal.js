@@ -6,6 +6,9 @@ import colors from '../styles/colors';
 import ButtonComponent from '../components/Button';
 import { useRouter } from 'expo-router';
 
+// /api/groups/calendar/{groupId}/{calendarId}/optimal-time
+// /api/groups/{groupId}/calendar/{calendarId}/confirm
+
 // 임시 데이터
 const scheduleData = [
     {

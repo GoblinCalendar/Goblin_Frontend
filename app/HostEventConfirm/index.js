@@ -7,6 +7,8 @@ import ButtonComponent from '../../components/Button';
 import CandidateListModal from '../../components/CandidateListModal';
 
 const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
+// /api/groups/{groupId}/calendar/{calendarId}/participants
+// /api/groups/{groupId}/calendar/{calendarId}/available-times
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

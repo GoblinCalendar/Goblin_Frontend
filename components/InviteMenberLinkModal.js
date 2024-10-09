@@ -1,12 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import colors from '../styles/colors';
 import Toast from 'react-native-toast-message';
 import * as Clipboard from 'expo-clipboard';
+import apiClient from '../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from "../context/UserContext";
 
 const InviteMemberLinkModal = ({ isVisible, onClose }) => {
     const link = 'https://abcd.ef/goblin_calender'; // 임의 링크 설정
+    const { groupId } = useContext(UserContext);
+    // const [link, setLink] = useState(''); // API로 받은 링크를 저장할 상태
+
+    // useEffect(() => {
+    //     // API 호출 함수
+    //     const fetchInviteLink = async () => {
+    //         try {
+    //             const token = await AsyncStorage.getItem('accessToken');
+    //             const response = await apiClient.post(`/api/groups/${groupId}/invite-link`, {}, {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             });
+    //             setLink(response.data.inviteLink); // 응답받은 링크 설정
+    //             console.log("초대링크: ",link);
+    //         } catch (error) {
+    //             console.error("초대 링크를 가져오는 중 오류 발생:", error);
+    //         }
+    //     };
+
+    //     if (isVisible) {
+    //         fetchInviteLink(); // 모달이 열릴 때만 호출
+    //     }
+    // }, [isVisible, groupId]);
+
 
     // 링크 복사 함수
     const handleCopyLink = async () => {

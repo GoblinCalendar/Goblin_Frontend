@@ -1,4 +1,4 @@
-import React, { seState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -29,11 +29,6 @@ const EventCompleteScreen = () => {
   const horizontalPadding = (width - buttonWidth) / 2; // 기기 너비에 따른 좌우 여백 계산
   const { eventDetails } = useContext(EventContext);
   const { groupId } = useContext(UserContext);
-
-  // EventDetails 데이터 로그 찍기
-  // useEffect(() => {
-  //   console.log("EventDetails 데이터:", eventDetails);
-  // }, [eventDetails]);
 
   const handleNextPress = () => {
     router.push("/monthly");
@@ -131,7 +126,6 @@ const EventCompleteScreen = () => {
       participants: participants,
     };
 
-    // console.log("보내지는 데이터:", eventData); // 보내는 데이터 로그 출력
     return eventData;
   };
 
@@ -181,9 +175,9 @@ const EventCompleteScreen = () => {
             <Member style={styles.icon} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.participants}>
-                {eventDetails.participants.map((participant, index) => (
+                {eventDetails.participantsDetails.map((participant, index) => (
                   <View key={index} style={styles.participantTag}>
-                    <Text style={styles.participantName}>{participant}</Text>
+                    <Text style={styles.participantName}>{participant.username}</Text>
                   </View>
                 ))}
               </View>
@@ -278,10 +272,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: "row",
     alignItems: "center",
-    // borderBottomWidth: 1,
-    // borderColor: colors.eventCompleteLine,
-    // width: '100%',
-    // marginBottom: 10,
   },
   icon: {
     width: 24,

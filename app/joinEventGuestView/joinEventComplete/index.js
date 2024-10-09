@@ -13,7 +13,7 @@ const JoinEventComplete = () => {
 
   // "홈으로 가기" 버튼을 눌렀을 때 호출될 함수
   const handleGoHome = () => {
-    router.push('/'); // 홈 화면으로 이동
+    router.push('/monthly'); // 홈 화면으로 이동
   };
 
   return (
