@@ -100,6 +100,10 @@ export const SidebarDrawer = memo(({ navigation }) => {
     },
   });
 
+  useEffect(() => {
+    if (!isJoinModalOpen) setInviteLink("");
+  }, [isJoinModalOpen]);
+
   return (
     <View style={drawerStyles.wrapper}>
       <View style={{ flex: 1 }}>
@@ -280,7 +284,9 @@ export const SidebarDrawer = memo(({ navigation }) => {
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0.6}
-        onBackdropPress={() => setIsJoinModalOpen(false)}
+        onBackdropPress={() => {
+          setIsJoinModalOpen(false);
+        }}
         style={drawerStyles.joinModalWrapper}
       >
         <View style={drawerStyles.joinModalContainer}>
