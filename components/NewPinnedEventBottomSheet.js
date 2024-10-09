@@ -1,7 +1,6 @@
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetModal,
-  BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { Portal } from "@gorhom/portal";
@@ -16,6 +15,9 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import ButtonComponent from "./Button";
 import Radio from "../assets/radio.svg";
 import RadioActive from "../assets/radio_active.svg";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { BottomSheetTextInput } from "./BottomSheetTextInput";
+import apiClient from "../lib/api";
 
 export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
@@ -27,23 +29,53 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
 
   // 날 선택
   const [days, setDays] = useState([
-    { day: "일", selected: false },
-    { day: "월", selected: false },
-    { day: "화", selected: false },
-    { day: "수", selected: false },
-    { day: "목", selected: false },
-    { day: "금", selected: false },
-    { day: "토", selected: false },
+    { day: "일", id: "SUNDAY", selected: false },
+    { day: "월", id: "MONDAY", selected: false },
+    { day: "화", id: "TUESDAY", selected: false },
+    { day: "수", id: "WEDNESDAY", selected: false },
+    { day: "목", id: "THURSDAY", selected: false },
+    { day: "금", id: "FRIDAY", selected: false },
+    { day: "토", id: "SATURDAY", selected: false },
   ]);
 
   //시간 선택
   const [startTime, setStartTime] = useState("-");
   const [endTime, setEndTime] = useState("-");
 
-  console.log(startTime, endTime);
+  // console.log(startTime, endTime);
 
   //색 선택
   const [selectedColor, setSelectedColor] = useState(null);
+
+  // 고정 일정 추가
+  const createNewPinnedEvent = () => {
+    const startTimeFrags = startTime?.split(" ");
+    const endTimeFrags = endTime?.split(" ");
+
+    mutation.mutate({
+      scheduleName: newEvent?.name,
+      dayOfWeek: days.filter((d) => d.selected).map((d) => d.id),
+      amPmStart: startTimeFrags?.[0],
+      startHour: startTimeFrags?.[1],
+      startMinute: startTimeFrags?.[3],
+      amPmEnd: endTimeFrags?.[0],
+      endHour: endTimeFrags?.[1],
+      endMinute: endTimeFrags?.[3],
+      colorCode: selectedColor,
+      public: true, //기본값 공개
+    });
+  };
+
+  //mutate
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data) => apiClient.post("/api/fixed/create", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
+      setIsBottomSheetOpen(false);
+    },
+  });
 
   return (
     <BottomSheetModalComponent
@@ -52,14 +84,14 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
       height={selectMode === "time" ? 510 : 352}
     >
       <View style={styles.headerWrapper}>
-        <TextInput
+        <BottomSheetTextInput
           value={newEvent?.name}
           style={styles.header}
           placeholder="고정 일정 이름을 입력하세요"
           numberOfLines={1}
           maxLength={18}
           placeholderTextColor={colors.font05Gray}
-          onChangeText={(text) => setNewEvent((prev) => ({ ...prev, name: text?.trim() }))}
+          onChangeText={(text) => setNewEvent((prev) => ({ ...prev, name: text }))}
           autoFocus={true}
           returnKeyType="done"
         />
@@ -97,6 +129,7 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
               setStartTime={setStartTime}
               endTime={endTime}
               setEndTime={setEndTime}
+              keepOpened={true}
             />
             <ButtonComponent
               style={{ marginTop: 24, width: "auto" }}
@@ -117,11 +150,11 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
             <Text style={styles.selectColorText}>5가지 색상 중 1개를 선택해 주세요</Text>
             <View style={styles.colorsWrapper}>
               {[
-                { id: "1", color: "#F3DAD8" },
-                { id: "2", color: "#F1DAED" },
-                { id: "3", color: "#F2EDD9" },
-                { id: "4", color: "#EBEBE3" },
-                { id: "5", color: "#B1B0B5" },
+                { id: 1, color: "#F3DAD8" },
+                { id: 2, color: "#F1DAED" },
+                { id: 3, color: "#F2EDD9" },
+                { id: 4, color: "#EBEBE3" },
+                { id: 5, color: "#B1B0B5" },
               ].map((c, i) => (
                 <View style={styles.colorsContainer} key={c.id}>
                   <View style={[styles.colorsCircle, { backgroundColor: c.color }]}></View>
@@ -148,10 +181,7 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
                 days.some((d) => d.selected) &&
                 selectedColor !== null
               }
-              onPress={() => {
-                console.log("add new pinned event!");
-                setIsBottomSheetOpen(false);
-              }}
+              onPress={() => createNewPinnedEvent()}
             />
           </>
         )}

@@ -34,11 +34,7 @@ export default function Monthly() {
   const { username } = useContext(UserContext);
 
   //개인 일반 일정
-  const {
-    isPending,
-    error,
-    data: markedDates,
-  } = useQuery({
+  const { data: markedDates } = useQuery({
     queryKey: ["getGeneralEvents"],
     queryFn: () =>
       apiClient
@@ -57,67 +53,76 @@ export default function Monthly() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   const [eventsModal, setEventsModal] = useState({
-    date: "9월 20일 (금)",
+    date: null,
     events: [
-      {
-        id: 1,
-        date: "오후 1:00 ~ 오후 8:00",
-        name: "동아리 OT",
-        memo: "18시로 일정이 잡힌다면 30분 정도 참여 가능",
-        creator: "홍길동",
-        backgroundColor: "#B0CDD4",
-        personalEvent: true,
-      },
-      {
-        id: 2,
-        date: "오후 1:00 ~ 오후 8:00",
-        name: "동아리 OT",
-        memo: "18시로 일정이 잡힌다면 30분 정도 참여 가능",
-        creator: "홍길동",
-        backgroundColor: "#B0CDD4",
-        personalEvent: true,
-      },
+      // {
+      //   id: 1,
+      //   date: "오후 1:00 ~ 오후 8:00",
+      //   name: "동아리 OT",
+      //   memo: "18시로 일정이 잡힌다면 30분 정도 참여 가능",
+      //   creator: "홍길동",
+      //   backgroundColor: "#B0CDD4",
+      //   personalEvent: true,
+      // },
+      // {
+      //   id: 2,
+      //   date: "오후 1:00 ~ 오후 8:00",
+      //   name: "동아리 OT",
+      //   memo: "18시로 일정이 잡힌다면 30분 정도 참여 가능",
+      //   creator: "홍길동",
+      //   backgroundColor: "#B0CDD4",
+      //   personalEvent: true,
+      // },
     ],
   });
 
-  const [pinnedEvents, setPinnedEvents] = useState([
-    {
-      id: 1,
-      name: "학생 수업",
-      active: false,
-      color: "#F2EDD9",
-    },
-    {
-      id: 2,
-      name: "학생회",
-      active: true,
-      color: "#F1DAED",
-    },
-    {
-      id: 3,
-      name: "일상",
-      active: false,
-      color: "#E6E8E3",
-    },
-    {
-      id: 4,
-      name: "일상2",
-      active: false,
-      color: "#E6E8E3",
-    },
-    {
-      id: 5,
-      name: "일상3",
-      active: false,
-      color: "#E6E8E3",
-    },
-    {
-      id: 6,
-      name: "일상4",
-      active: false,
-      color: "#E6E8E3",
-    },
-  ]);
+  //개인 고정 일정
+  const { data: pinnedEvents } = useQuery({
+    queryKey: ["getPinnedEvents"],
+    queryFn: () =>
+      apiClient
+        .get(`/api/fixed/user`)
+        .then((response) => convertToMarkedDates(response.data?.map((d) => ({})))),
+  });
+
+  // const [pinnedEvents, setPinnedEvents] = useState([
+  //   {
+  //     id: 1,
+  //     name: "학생 수업",
+  //     active: false,
+  //     color: "#F2EDD9",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "학생회",
+  //     active: true,
+  //     color: "#F1DAED",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "일상",
+  //     active: false,
+  //     color: "#E6E8E3",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "일상2",
+  //     active: false,
+  //     color: "#E6E8E3",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "일상3",
+  //     active: false,
+  //     color: "#E6E8E3",
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "일상4",
+  //     active: false,
+  //     color: "#E6E8E3",
+  //   },
+  // ]);
 
   const MonthComponent = ({ navigation }) =>
     useMemo(() => {
@@ -277,44 +282,58 @@ export default function Monthly() {
             <>
               <Text style={styles.eventsModalHeader}>{eventsModal?.date}</Text>
               <View style={styles.eventsModalContent}>
-                <ScrollView
+                <SwipeListView
+                  disableRightSwipe={true}
+                  data={eventsModal?.events}
                   style={styles.eventsModalEventWrapper}
                   contentContainerStyle={{ gap: 24 }}
-                >
-                  {eventsModal?.events?.map((event, i) => (
-                    <View style={styles.eventsModalEventContainer} key={event?.id}>
+                  renderItem={(data, rowMap) => (
+                    <View style={styles.eventsModalEventContainer} key={data?.item?.id}>
                       <View
-                        style={[styles.eventsModalEventDot, { backgroundColor: event?.color }]}
+                        style={[styles.eventsModalEventDot, { backgroundColor: data?.item?.color }]}
                       ></View>
                       <View style={{ flexDirection: "column" }}>
                         <Text style={styles.eventsModalEventName} numberOfLines={1}>
-                          {event?.title}
+                          {data?.item?.title}
                         </Text>
-                        {event?.memo && (
+                        {data?.item?.memo && (
                           <Text style={styles.eventsModalEventMemo} numberOfLines={1}>
-                            {event?.memo}
+                            {data?.item?.memo}
                           </Text>
                         )}
                         <View style={styles.eventsModalInfoWrapper}>
                           <View style={styles.eventsModalEventChip}>
-                            <Text style={styles.eventsModalEventChipText}>{event?.creator}</Text>
+                            <Text style={styles.eventsModalEventChipText}>
+                              {data?.item?.creator}
+                            </Text>
                           </View>
                           <View style={styles.eventsModalEventDateWrapper}>
                             <ClockGray width={12} height={12} />
-                            <Text style={styles.eventsModalEventDateText}>{event?.date}</Text>
+                            <Text style={styles.eventsModalEventDateText}>{data?.item?.date}</Text>
                           </View>
                         </View>
                       </View>
                     </View>
-                  ))}
-                </ScrollView>
+                  )}
+                  renderHiddenItem={(data, rowMap) => (
+                    <SwipeListButton
+                      data={data}
+                      rowMap={rowMap}
+                      onEditPress={() => console.log("Edit")}
+                      onDeletePress={() => null}
+                    />
+                  )}
+                  rightOpenValue={-80}
+                  previewRowKey={"0"}
+                  previewOpenValue={-40}
+                />
                 <View style={styles.eventsModalButtonWrapper}>
                   <TouchableOpacity
                     style={[styles.eventsModalButton, { backgroundColor: colors.skyBlue }]}
                     onPress={() => setModalMode("pin")}
                   >
                     <Pin width={20} height={20} />
-                    <Text style={styles.eventsModalButtonText}>고정 일정</Text>
+                    <Text style={styles.eventsModalButtonText}>고정일정 관리</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.eventsModalButton, { backgroundColor: "#69CCA3" }]}
@@ -535,6 +554,7 @@ const styles = StyleSheet.create({
   eventsModalEventContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
+    backgroundColor: colors.white,
   },
   eventsModalHeader: {
     color: colors.font02Gray,
