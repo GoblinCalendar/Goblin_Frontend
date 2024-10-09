@@ -15,6 +15,8 @@ import ButtonComponent from "./Button";
 import TimePicker from "./TimePicker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import apiClient from "../lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { BottomSheetTextInput } from "./BottomSheetTextInput";
 
 export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
@@ -44,27 +46,33 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // console.log(startTime, endTime);
 
   // 일정 추가 API
-  const createNewEvent = async () => {
+  const createNewEvent = () => {
     const startTimeFrags = startTime?.split(" ");
     const endTimeFrags = endTime?.split(" ");
 
-    await apiClient
-      .post("/api/calendar/user/save", {
-        scheduleName: newEvent?.name,
-        note: newEvent?.memo,
-        date: Object.keys(selectedDates),
-        amPmStart: startTimeFrags?.[0],
-        startHour: startTimeFrags?.[1],
-        startMinute: startTimeFrags?.[3],
-        amPmEnd: endTimeFrags?.[0],
-        endHour: endTimeFrags?.[1],
-        endMinute: endTimeFrags?.[3],
-      })
-      .then((response) => {
-        setIsBottomSheetOpen(false);
-        // refresh
-      });
+    mutation.mutate({
+      scheduleName: newEvent?.name,
+      note: newEvent?.memo,
+      date: Object.keys(selectedDates),
+      amPmStart: startTimeFrags?.[0],
+      startHour: startTimeFrags?.[1],
+      startMinute: startTimeFrags?.[3],
+      amPmEnd: endTimeFrags?.[0],
+      endHour: endTimeFrags?.[1],
+      endMinute: endTimeFrags?.[3],
+    });
   };
+
+  //mutate
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data) => apiClient.post("/api/calendar/user/save", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getGeneralEvents"] });
+      setIsBottomSheetOpen(false);
+    },
+  });
 
   return (
     <BottomSheetModalComponent
@@ -73,7 +81,7 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
       height={selectMode === "calendar" ? 617 : 512}
     >
       <View style={styles.headerWrapper}>
-        <TextInput
+        <BottomSheetTextInput
           value={newEvent?.name}
           style={styles.header}
           placeholder="일정 이름을 입력하세요"
@@ -86,7 +94,7 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
         />
         <Text style={styles.maxLengthText}>{newEvent?.name?.length || 0}/18</Text>
       </View>
-      <TextInput
+      <BottomSheetTextInput
         value={newEvent?.memo}
         style={styles.memo}
         placeholder="메모를 입력하세요 (선택)"
