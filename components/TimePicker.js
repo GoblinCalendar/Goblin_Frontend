@@ -8,7 +8,7 @@ const TimePicker = ({ style, startTime, endTime, setStartTime, setEndTime, keepO
   const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState(""); // 'start' or 'end'
   const [selectedTime, setSelectedTime] = useState({
-    hour: "1",
+    hour: "12",
     minute: "00",
     ampm: "오전",
   });

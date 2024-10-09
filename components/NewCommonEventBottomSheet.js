@@ -1,9 +1,3 @@
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetTextInput,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
 import { Portal } from "@gorhom/portal";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
@@ -20,6 +14,7 @@ import ClockBlack from "../assets/clock_black.svg";
 import ButtonComponent from "./Button";
 import TimePicker from "./TimePicker";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import apiClient from "../lib/api";
 
 export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
@@ -46,7 +41,30 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   const [startTime, setStartTime] = useState("-");
   const [endTime, setEndTime] = useState("-");
 
-  console.log(startTime, endTime);
+  // console.log(startTime, endTime);
+
+  // 일정 추가 API
+  const createNewEvent = async () => {
+    const startTimeFrags = startTime?.split(" ");
+    const endTimeFrags = endTime?.split(" ");
+
+    await apiClient
+      .post("/api/calendar/user/save", {
+        scheduleName: newEvent?.name,
+        note: newEvent?.memo,
+        date: Object.keys(selectedDates),
+        amPmStart: startTimeFrags?.[0],
+        startHour: startTimeFrags?.[1],
+        startMinute: startTimeFrags?.[3],
+        amPmEnd: endTimeFrags?.[0],
+        endHour: endTimeFrags?.[1],
+        endMinute: endTimeFrags?.[3],
+      })
+      .then((response) => {
+        setIsBottomSheetOpen(false);
+        // refresh
+      });
+  };
 
   return (
     <BottomSheetModalComponent
@@ -99,7 +117,13 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
         {selectMode === "time" ? (
           <ClockIcon width={20} height={20} style={{ marginLeft: 12 }} />
         ) : (
-          <TouchableOpacity onPress={() => setSelectMode("time")}>
+          <TouchableOpacity
+            onPress={() =>
+              newEvent?.name?.length > 0 &&
+              Object.keys(selectedDates).length &&
+              setSelectMode("time")
+            }
+          >
             <ClockBlack width={20} height={20} style={{ marginLeft: 12 }} />
           </TouchableOpacity>
         )}
@@ -122,7 +146,7 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
             <ButtonComponent
               style={{ marginTop: 24, width: "auto" }}
               title="다음"
-              isActive={newEvent?.name?.length > 0}
+              isActive={newEvent?.name?.length > 0 && Object.keys(selectedDates).length}
               onPress={() => setSelectMode("time")}
             />
           </>
@@ -136,13 +160,14 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
               setStartTime={setStartTime}
               endTime={endTime}
               setEndTime={setEndTime}
+              keepOpened={true}
             />
             <ButtonComponent
               style={{ marginTop: 24, width: "" }}
               title="추가하기"
               isActive={startTime !== "-" && endTime !== "-"}
               onPress={() => {
-                console.log("add new event!");
+                createNewEvent();
                 setIsBottomSheetOpen(false);
               }}
             />
