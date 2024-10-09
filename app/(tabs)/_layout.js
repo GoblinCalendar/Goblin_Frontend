@@ -49,6 +49,7 @@ export default function TabLayout() {
           <Tabs.Screen
             name="daily"
             options={{
+              unmountOnBlur: true,
               tabBarIcon: ({ focused }) => (
                 <View style={styles.menu}>
                   {focused ? <DayIcon /> : <DayOutlineIcon />}
