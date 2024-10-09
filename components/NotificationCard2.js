@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { NotificationContext } from '../context/NotificationContext';
 import ArrowRight from '../assets/arrow_right.svg';
 
-const NotificationCard = () => {
+const NotificationCard2 = () => {
     const router = useRouter();
     const { showNotification, setShowNotification } = useContext(NotificationContext); // 전역 상태에서 알림 표시 여부를 가져옴
     const slideAnim = useRef(new Animated.Value(-150)).current;
@@ -31,9 +31,10 @@ const NotificationCard = () => {
 
     if (!showNotification) return null; // 알림을 표시할 필요가 없으면 렌더링하지 않음
 
+    // "일정 확정하기" 버튼을 눌렀을 때 호출될 함수
   const handleConfirmPress = () => {
     setShowNotification(false);
-    router.push('/joinEventGuestView');
+    router.push('/HostEventConfirm'); // HostEventConfirm 페이지로 이동
   };
 
   return (
@@ -41,7 +42,7 @@ const NotificationCard = () => {
       {/* 상단 배경 박스와 알림 텍스트 */}
       <View style={styles.header}>
         <BellIcon width={24} height={24} marginLeft={12} />
-        <Text style={styles.headerText}>새로운 모임 일정이 왔어요!</Text>
+        <Text style={styles.headerText}>일정을 확정해주세요!</Text>
       </View>
 
       {/* 하단 본문 내용 */}
@@ -144,4 +145,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NotificationCard;
+export default NotificationCard2;

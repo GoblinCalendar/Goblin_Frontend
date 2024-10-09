@@ -4,9 +4,11 @@ import BellIcon from '../assets/bell.svg';
 import colors from '../styles/colors';
 import { useRouter } from 'expo-router';
 import { NotificationContext } from '../context/NotificationContext';
-import ArrowRight from '../assets/arrow_right.svg';
+import CalendarSVG from '../assets/calendar_gray.svg';
+import ClockSVG from '../assets/clock_gray.svg';
+import CheckButtonSVG from '../assets/check_button.svg';
 
-const NotificationCard = () => {
+const NotificationCard3 = () => {
     const router = useRouter();
     const { showNotification, setShowNotification } = useContext(NotificationContext); // 전역 상태에서 알림 표시 여부를 가져옴
     const slideAnim = useRef(new Animated.Value(-150)).current;
@@ -33,7 +35,6 @@ const NotificationCard = () => {
 
   const handleConfirmPress = () => {
     setShowNotification(false);
-    router.push('/joinEventGuestView');
   };
 
   return (
@@ -41,19 +42,21 @@ const NotificationCard = () => {
       {/* 상단 배경 박스와 알림 텍스트 */}
       <View style={styles.header}>
         <BellIcon width={24} height={24} marginLeft={12} />
-        <Text style={styles.headerText}>새로운 모임 일정이 왔어요!</Text>
+        <Text style={styles.headerText}>모임 일정이 확정됐어요!</Text>
       </View>
 
       {/* 하단 본문 내용 */}
       <View style={styles.body}>
         <Text style={styles.title}>성북뭉게구름톤</Text>
         <View style={styles.detailsRow}>
-          <Text style={styles.duration}>1시간 30분</Text>
-          <Text style={styles.divider}>ㅣ</Text>
-          <Text style={styles.date}>24.09.10 ~ 24.09.15</Text>
+            <CalendarSVG width={12} height={12}/>
+            <Text style={styles.date}>24.09.10</Text>
+            <Text style={styles.divider}>ㅣ</Text>
+            <ClockSVG width={12} height={12}/>
+            <Text style={styles.time}>오전 10시 ~ 오후 6시</Text>
         </View>
         <TouchableOpacity style={styles.confirmButtonContainer} onPress={handleConfirmPress}>
-          <ArrowRight style={styles.confirmButton}></ArrowRight>
+          <CheckButtonSVG style={styles.confirmButton}></CheckButtonSVG>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -129,7 +132,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     height: 18,
   },
-  duration: {
+  date: {
     color: colors.fontGray,
     fontSize: 10,
   },
@@ -138,10 +141,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     fontSize: 10,
   },
-  date: {
+  time: {
     color: colors.fontGray,
     fontSize: 10,
   },
 });
 
-export default NotificationCard;
+export default NotificationCard3;
