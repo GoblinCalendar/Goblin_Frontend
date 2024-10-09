@@ -5,18 +5,21 @@ import { convertToTimeGrid } from "../../lib/convertToTimeGrid";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getDay } from "../../lib/getDay";
+import { useQuery } from "@tanstack/react-query";
+import { getColorsByColorId } from "../../lib/getColorsByColorId";
+import apiClient from "../../lib/api";
 
 export default function Daily() {
-  const [date, setDate] = useState(new Date());
+  const [today, setToday] = useState(new Date());
 
   // now
   const [now, setNow] = useState({
-    hour: date.getHours() % 12 || 12,
-    minute: date.getMinutes(),
+    hour: today.getHours() % 12 || 12,
+    minute: today.getMinutes(),
     yOffset:
-      48 * (date.getHours() % 12 || 12) +
-      4 * (date.getHours() % 12 || 12) +
-      48 * Number((date.getMinutes() / 60).toFixed(2)),
+      48 * (today.getHours() % 12 || 12) +
+      4 * (today.getHours() % 12 || 12) +
+      48 * Number((today.getMinutes() / 60).toFixed(2)),
   });
 
   // 현재 시각 separator의 y값 계산
@@ -35,7 +38,7 @@ export default function Daily() {
   // 현재 시간 업데이트
   useEffect(() => {
     // mount 되었을 때 남은 초 계산
-    const currentSeconds = date.getSeconds(); // Get the current seconds (0-59)
+    const currentSeconds = today.getSeconds(); // Get the current seconds (0-59)
     let beforeMountSeconds = 60 - currentSeconds;
 
     const initialTimer = new Promise((resolve, reject) =>
@@ -60,55 +63,81 @@ export default function Daily() {
   }, []);
 
   //더미
-  const [schedule, setSchedule] = useState([
-    {
-      id: "X",
-      title: "X 02:30 ~ 03:30",
-      startTime: "02:30",
-      endTime: "03:30",
-      backgroundColor: "#E8C5E3",
-    },
-    {
-      id: "Y",
-      title: "Y 02:00 ~ 04:00",
-      startTime: "02:00",
-      endTime: "04:00",
-      backgroundColor: "#F9EDEB",
-    },
-    {
-      id: "Z",
-      title: "Z 04:00 ~ 04:30",
-      startTime: "04:00",
-      endTime: "04:30",
-      backgroundColor: "#B1B0B5",
-    },
-    {
-      id: "W",
-      title: "W 05:30 ~ 08:00",
-      startTime: "05:30",
-      endTime: "08:00",
-      backgroundColor: "#A5B4DB",
-    },
-    {
-      id: "A",
-      title: "A 03:30 ~ 05:00",
-      startTime: "03:30",
-      endTime: "05:00",
-      backgroundColor: "#E8C5E3",
-    },
-    {
-      id: "B",
-      title: "B 02:00 ~ 03:00",
-      startTime: "02:00",
-      endTime: "03:00",
-      backgroundColor: "#DDE9EE",
-    },
-  ]);
+  // const [schedule, setSchedule] = useState([
+  //   {
+  //     id: "X",
+  //     title: "X 02:30 ~ 03:30",
+  //     startTime: "02:30",
+  //     endTime: "03:30",
+  //     backgroundColor: "#E8C5E3",
+  //   },
+  //   {
+  //     id: "Y",
+  //     title: "Y 02:00 ~ 04:00",
+  //     startTime: "02:00",
+  //     endTime: "04:00",
+  //     backgroundColor: "#F9EDEB",
+  //   },
+  //   {
+  //     id: "Z",
+  //     title: "Z 04:00 ~ 04:30",
+  //     startTime: "04:00",
+  //     endTime: "04:30",
+  //     backgroundColor: "#B1B0B5",
+  //   },
+  //   {
+  //     id: "W",
+  //     title: "W 05:30 ~ 08:00",
+  //     startTime: "05:30",
+  //     endTime: "08:00",
+  //     backgroundColor: "#A5B4DB",
+  //   },
+  //   {
+  //     id: "A",
+  //     title: "A 03:30 ~ 05:00",
+  //     startTime: "03:30",
+  //     endTime: "05:00",
+  //     backgroundColor: "#E8C5E3",
+  //   },
+  //   {
+  //     id: "B",
+  //     title: "B 02:00 ~ 03:00",
+  //     startTime: "02:00",
+  //     endTime: "03:00",
+  //     backgroundColor: "#DDE9EE",
+  //   },
+  // ]);
 
   // console.log(scheduleDummy);
 
-  const DailyComponent = ({ navigation }) =>
-    useMemo(() => {
+  const DailyComponent = ({ navigation }) => {
+    // 일별 일정 조회
+    const { data: schedule = [], isLoading: isScheduleLoading } = useQuery({
+      queryKey: ["getDailyEvents"],
+      queryFn: () =>
+        apiClient
+          .get(
+            `/api/calendar/user/view-day?year=${today?.getFullYear()}&month=${
+              today?.getMonth() + 1
+            }&day=${today?.getDate()}`
+          )
+          .then((response) =>
+            response.data?.map((d) => {
+              const startTimeDate = new Date(d?.startTime);
+              const endTimeDate = new Date(d?.endTime);
+
+              return {
+                id: String(d?.id),
+                title: d?.title,
+                startTime: `${startTimeDate?.getHours()}:${startTimeDate?.getMinutes()}`,
+                endTime: `${endTimeDate?.getHours()}:${endTimeDate?.getMinutes()}`,
+                backgroundColor: getColorsByColorId(d?.colorCode),
+              };
+            })
+          ),
+    });
+
+    return useMemo(() => {
       /* 
         TODO 성능 개선..?
       */
@@ -167,36 +196,38 @@ export default function Daily() {
               {label}
             </Text>
             <View style={_styles.timeScheduleWrapper}>
-              {scheduleDummy
-                ?.filter((s) => parseInt(s?.startTime?.split(":")?.[0]) === hour)
-                ?.map((schedule, i) => {
-                  const initialWidth = Dimensions?.get("window").width - 20 * 2 - (42 - 4) - 4 * 2;
-                  const blockWidth =
-                    initialWidth *
-                      (schedule?.columns > 1
-                        ? 1 / (schedule?.columns < maxColumns ? maxColumns : schedule.columns)
-                        : 1) -
-                    4;
-                  const xOffset = 4 + (blockWidth + 4) * schedule?.push;
+              {scheduleDummy?.length > 0 &&
+                scheduleDummy
+                  ?.filter((s) => parseInt(s?.startTime?.split(":")?.[0]) === hour)
+                  ?.map((schedule, i) => {
+                    const initialWidth =
+                      Dimensions?.get("window").width - 20 * 2 - (42 - 4) - 4 * 2;
+                    const blockWidth =
+                      initialWidth *
+                        (schedule?.columns > 1
+                          ? 1 / (schedule?.columns < maxColumns ? maxColumns : schedule.columns)
+                          : 1) -
+                      4;
+                    const xOffset = 4 + (blockWidth + 4) * schedule?.push;
 
-                  return (
-                    <View
-                      key={schedule?.id}
-                      style={[
-                        _styles.timeScheduleBlock,
-                        {
-                          top: schedule?.yOffset,
-                          left: xOffset,
-                          width: blockWidth || "auto",
-                          height: schedule?.calculatedHeight || "auto",
-                          backgroundColor: schedule?.backgroundColor,
-                        },
-                      ]}
-                    >
-                      <Text style={_styles.timeScheduleBlockText}>{schedule?.title}</Text>
-                    </View>
-                  );
-                })}
+                    return (
+                      <View
+                        key={schedule?.id}
+                        style={[
+                          _styles.timeScheduleBlock,
+                          {
+                            top: schedule?.yOffset,
+                            left: xOffset,
+                            width: blockWidth || "auto",
+                            height: schedule?.calculatedHeight || "auto",
+                            backgroundColor: schedule?.backgroundColor,
+                          },
+                        ]}
+                      >
+                        <Text style={_styles.timeScheduleBlockText}>{schedule?.title}</Text>
+                      </View>
+                    );
+                  })}
             </View>
           </View>
         );
@@ -211,7 +242,7 @@ export default function Daily() {
           />
           <View style={styles.dateHeaderContainer}>
             <Text style={styles.dateHeaderText}>
-              {date.getDate()}일 {getDay(date.getDay())}요일
+              {today.getDate()}일 {getDay(today.getDay())}요일
             </Text>
           </View>
           <ScrollView style={styles.timeContainer}>
@@ -230,7 +261,8 @@ export default function Daily() {
           </ScrollView>
         </View>
       );
-    }, [schedule, now?.yOffset]);
+    }, [isScheduleLoading, now?.yOffset]);
+  };
 
   return <DrawerWrapper screen={DailyComponent} />;
 }
