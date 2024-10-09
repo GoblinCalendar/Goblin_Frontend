@@ -3,16 +3,17 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import { TouchableOpacity } from "react-native";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../styles/colors";
-
-import Icon from "../assets/icon.svg";
-import Goblin from "../assets/goblin.svg";
-import X from "../assets/x.svg";
-import AddCircleOutline from "../assets/add_circle_outline.svg";
-import Trash from "../assets/trash.svg";
 import { memo, useContext, useEffect, useState } from "react";
 import apiClient from "../lib/api";
 import { UserContext } from "../context/UserContext";
 import { SwipeListButton } from "./SwipeListButton";
+
+import Icon from "../assets/icon.svg";
+import Goblin from "../assets/goblin.svg";
+import X from "../assets/x.svg";
+import PlusCircleWhite from "../assets/plus_circle_white.svg";
+import Trash from "../assets/trash.svg";
+import Door from "../assets/door.svg";
 
 export const SidebarDrawer = memo(({ navigation }) => {
   //더미
@@ -199,9 +200,13 @@ export const SidebarDrawer = memo(({ navigation }) => {
         </View>
       </View>
       <View style={drawerStyles.newCalendarButtonWrapper}>
+        <TouchableOpacity style={[drawerStyles.newCalendarButton, { backgroundColor: "#9F9EA4" }]}>
+          <Door width={16} height={16} />
+          <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 입장하기</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={drawerStyles.newCalendarButton}>
-          <AddCircleOutline />
-          <Text style={drawerStyles.newCalendarButtonText}>새 그룹 달력 추가</Text>
+          <PlusCircleWhite width={16} height={16} />
+          <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 생성하기</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -269,6 +274,7 @@ const drawerStyles = StyleSheet.create({
   },
   newCalendarButtonWrapper: {
     paddingTop: 40,
+    gap: 8,
   },
   newCalendarButton: {
     paddingVertical: 11,
@@ -277,12 +283,10 @@ const drawerStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 12,
-    borderColor: colors.skyBlue,
-    borderWidth: 1,
-    backgroundColor: "rgba(93, 174, 214, 0.15)",
+    backgroundColor: colors.skyBlue,
   },
   newCalendarButtonText: {
-    color: colors.skyBlue,
+    color: colors.white,
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 18,
