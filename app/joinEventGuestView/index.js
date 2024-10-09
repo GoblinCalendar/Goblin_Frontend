@@ -7,6 +7,9 @@ import { useRouter } from 'expo-router';
 
 const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
 
+// /api/groups/{groupId}/calendar/{calendarId}/available-time
+// /api/groups/{groupId}/calendar/{calendarId}/participants
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ScheduleScreen = () => {
