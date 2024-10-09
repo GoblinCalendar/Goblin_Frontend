@@ -100,6 +100,27 @@ export const SidebarDrawer = memo(({ navigation }) => {
     },
   });
 
+  useEffect(() => {
+    if (!isJoinModalOpen) setInviteLink("");
+  }, [isJoinModalOpen]);
+
+  // 초대 링크로 입장
+  const joinCalendar = () => {
+    groupJoinMutation.mutate({ token: inviteLink });
+  };
+
+  const groupJoinMutation = useMutation({
+    mutationFn: (data) => apiClient.post(`/api/groups/join-by-invite?token=${data?.token}`),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["getGroups"] });
+      setIsJoinModalOpen(false);
+      navigation.closeDrawer();
+    },
+    onError: () => {
+      alert("초대 링크가 올바르지 않습니다.");
+    },
+  });
+
   return (
     <View style={drawerStyles.wrapper}>
       <View style={{ flex: 1 }}>
@@ -280,7 +301,9 @@ export const SidebarDrawer = memo(({ navigation }) => {
         animationIn="fadeIn"
         animationOut="fadeOut"
         backdropOpacity={0.6}
-        onBackdropPress={() => setIsJoinModalOpen(false)}
+        onBackdropPress={() => {
+          setIsJoinModalOpen(false);
+        }}
         style={drawerStyles.joinModalWrapper}
       >
         <View style={drawerStyles.joinModalContainer}>
@@ -305,6 +328,7 @@ export const SidebarDrawer = memo(({ navigation }) => {
               { backgroundColor: inviteLink?.length > 0 ? colors.skyBlue : "#F1F1F5" },
             ]}
             disabled={inviteLink?.length === 0}
+            onPress={() => joinCalendar()}
           >
             <Text
               style={[
