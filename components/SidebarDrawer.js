@@ -42,6 +42,9 @@ export const SidebarDrawer = memo(({ navigation }) => {
 
   const [deleteCalendar, setDeleteCalendar] = useState({ open: false, id: null, name: null });
 
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [inviteLink, setInviteLink] = useState(null);
+
   return (
     <View style={drawerStyles.wrapper}>
       <View style={{ flex: 1 }}>
@@ -200,7 +203,10 @@ export const SidebarDrawer = memo(({ navigation }) => {
         </View>
       </View>
       <View style={drawerStyles.newCalendarButtonWrapper}>
-        <TouchableOpacity style={[drawerStyles.newCalendarButton, { backgroundColor: "#9F9EA4" }]}>
+        <TouchableOpacity
+          style={[drawerStyles.newCalendarButton, { backgroundColor: "#9F9EA4" }]}
+          onPress={() => setIsJoinModalOpen(true)}
+        >
           <Door width={16} height={16} />
           <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 입장하기</Text>
         </TouchableOpacity>
@@ -209,6 +215,48 @@ export const SidebarDrawer = memo(({ navigation }) => {
           <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 생성하기</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        isVisible={isJoinModalOpen}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        backdropOpacity={0.6}
+        onBackdropPress={() => setIsJoinModalOpen(false)}
+        style={drawerStyles.joinModalWrapper}
+      >
+        <View style={drawerStyles.joinModalContainer}>
+          <TouchableOpacity
+            style={drawerStyles.joinModalCloseWrapper}
+            onPress={() => setIsJoinModalOpen(false)}
+          >
+            <X width={24} height={24} />
+          </TouchableOpacity>
+          <Text style={drawerStyles.joinModalHeaderText}>초대 링크 입력</Text>
+          <Text style={drawerStyles.joinModalSubHeaderText}>초대받은 링크를 입력해 주세요!</Text>
+          <TextInput
+            style={drawerStyles.joinModalInviteTextInput}
+            value={inviteLink}
+            onChangeText={(text) => setInviteLink(text)}
+            returnKeyType="done"
+            placeholder="초대 링크 입력"
+          />
+          <TouchableOpacity
+            style={[
+              drawerStyles.joinModalButton,
+              { backgroundColor: inviteLink?.length > 0 ? colors.skyBlue : "#F1F1F5" },
+            ]}
+            disabled={inviteLink?.length === 0}
+          >
+            <Text
+              style={[
+                drawerStyles.joinModalText,
+                { color: inviteLink?.length > 0 ? colors.white : "#999999" },
+              ]}
+            >
+              입력 완료
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 });
@@ -362,5 +410,64 @@ const drawerStyles = StyleSheet.create({
     fontWeight: "500",
     lineHeight: 16,
     letterSpacing: -0.275,
+  },
+  joinModalWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  joinModalContainer: {
+    width: "100%",
+    backgroundColor: colors.white,
+    borderRadius: 24,
+  },
+  joinModalCloseWrapper: {
+    marginVertical: 16,
+    marginRight: 24,
+    alignSelf: "flex-end",
+  },
+  joinModalHeaderText: {
+    paddingLeft: 24,
+    color: "#000",
+    fontSize: 20,
+    fontWeight: "600",
+    lineHeight: 28,
+    letterSpacing: -0.5,
+  },
+  joinModalSubHeaderText: {
+    paddingTop: 4,
+    paddingLeft: 24,
+    color: "#B1B1B1",
+    fontSize: 12,
+    fontWeight: "400",
+    lineHeight: 18,
+    letterSpacing: -0.3,
+  },
+  joinModalInviteTextInput: {
+    marginHorizontal: 20,
+    marginTop: 17,
+    marginBottom: 48,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: colors.calendarColor,
+  },
+  joinModalButton: {
+    alignSelf: "center",
+    marginBottom: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "100%",
+  },
+  joinModalText: {
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 19.6,
+    letterSpacing: -0.35,
   },
 });
