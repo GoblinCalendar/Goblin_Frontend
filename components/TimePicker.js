@@ -4,14 +4,19 @@ import { Picker } from "@react-native-picker/picker";
 import colors from "../styles/colors";
 import Clock from "../assets/clock.svg";
 
-const TimePicker = ({ style, startTime, endTime, setStartTime, setEndTime }) => {
+const TimePicker = ({ style, startTime, endTime, setStartTime, setEndTime, keepOpened }) => {
   const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
   const [pickerType, setPickerType] = useState(""); // 'start' or 'end'
   const [selectedTime, setSelectedTime] = useState({
-    hour: "1",
+    hour: "12",
     minute: "00",
     ampm: "오전",
   });
+
+  // mount 되자마자
+  useEffect(() => {
+    if (keepOpened) openTimePicker("start");
+  }, []);
 
   // 오전/오후 옵션
   const ampmSet = ["오전", "오후"];
@@ -24,14 +29,19 @@ const TimePicker = ({ style, startTime, endTime, setStartTime, setEndTime }) => 
     setIsTimePickerVisible(true);
   };
 
-  const handleTimePickerConfirm = () => {
+  // selectedTime이 바뀔 때마다 시간 설정 및 리렌더링
+  useEffect(() => {
     const time = `${selectedTime.ampm} ${selectedTime.hour} : ${selectedTime.minute}`;
+
     if (pickerType === "start") {
       setStartTime(time);
     } else {
       setEndTime(time);
     }
-    setIsTimePickerVisible(false);
+  }, [selectedTime]);
+
+  const handleTimePickerConfirm = () => {
+    if (!keepOpened) setIsTimePickerVisible(false);
   };
 
   return (
