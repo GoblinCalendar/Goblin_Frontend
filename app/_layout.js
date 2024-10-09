@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Button, StyleSheet, LogBox } from "react-native";
 import { EventProvider } from "../context/EventContext";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -11,6 +11,7 @@ import { UserProvider } from "../context/UserContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 console.warn = () => {}; //warn 경고 안뜨게함
+LogBox.ignoreAllLogs(); // 앱 실행될 때 앱에뜨는 모든 로그 무시
 
 const toastConfig = {
   successToast: ({ text1 }) => (
