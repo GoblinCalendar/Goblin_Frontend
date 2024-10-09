@@ -110,10 +110,11 @@ export const SidebarDrawer = memo(({ navigation }) => {
   };
 
   const groupJoinMutation = useMutation({
-    mutationFn: (data) => apiClient.post("/api/groups/join-by-invite", { token: data?.token }),
-    onSuccess: () => {
+    mutationFn: (data) => apiClient.post(`/api/groups/join-by-invite?token=${data?.token}`),
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["getGroups"] });
       setIsJoinModalOpen(false);
+      navigation.closeDrawer();
     },
     onError: () => {
       alert("초대 링크가 올바르지 않습니다.");
