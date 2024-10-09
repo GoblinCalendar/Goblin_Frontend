@@ -52,7 +52,7 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
     const endTimeFrags = endTime?.split(" ");
 
     mutation.mutate({
-      scheduleName: newEvent?.name,
+      title: newEvent?.name,
       note: newEvent?.memo,
       date: Object.keys(selectedDates),
       amPmStart: convertToAmPm(startTimeFrags?.[0]),
