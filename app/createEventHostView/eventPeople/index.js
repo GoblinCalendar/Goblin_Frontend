@@ -54,20 +54,27 @@ const EventPeopleScreen = () => {
   }, []);
 
   const handleFriendSelect = (friend) => {
-    const selectedLoginId = friend.loginId;
+    const selectedFriend = selectedFriends.find(
+      (selected) => selected.loginId === friend.loginId
+    );
 
-    if (selectedFriends.includes(selectedLoginId)) {
-      setSelectedFriends(selectedFriends.filter((loginId) => loginId !== selectedLoginId));
+    if (selectedFriend) {
+      setSelectedFriends(
+        selectedFriends.filter((selected) => selected.loginId !== friend.loginId)
+      );
     } else {
-      setSelectedFriends([...selectedFriends, selectedLoginId]);
+      setSelectedFriends([...selectedFriends, { loginId: friend.loginId, username: friend.username }]);
     }
   };
 
   const handleNextPress = () => {
     if (selectedFriends.length > 0) {
+      const selectedLoginIds = selectedFriends.map((friend) => friend.loginId);
+
       setEventDetails((prevDetails) => ({
         ...prevDetails,
-        participants: selectedFriends, // loginId를 저장
+        participants: selectedLoginIds, // loginId만 저장
+        participantsDetails: selectedFriends, // loginId와 username 모두 저장
       }));
       router.push("/createEventHostView/eventPlace");
     }
@@ -100,20 +107,17 @@ const EventPeopleScreen = () => {
           {selectedFriends.length === 0 ? (
             <Text style={styles.placeholderText}>참여 인원 선택</Text>
           ) : (
-            selectedFriends.map((loginId, index) => {
-              const selectedFriend = friends.find((friend) => friend.loginId === loginId);
-              return (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.friendButton, styles.selectedFriend]}
-                  onPress={() => handleFriendSelect(selectedFriend)} // 선택 해제 기능
-                >
-                  <Text style={[styles.friendText, styles.selectedText]}>
-                    {selectedFriend?.username || loginId}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })
+            selectedFriends.map((friend, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.friendButton, styles.selectedFriend]}
+                onPress={() => handleFriendSelect(friend)} // 선택 해제 기능
+              >
+                <Text style={[styles.friendText, styles.selectedText]}>
+                  {friend.username}
+                </Text>
+              </TouchableOpacity>
+            ))
           )}
         </ScrollView>
       </TouchableOpacity>
@@ -125,7 +129,7 @@ const EventPeopleScreen = () => {
             key={index}
             style={[
               styles.friendButton,
-              selectedFriends.includes(friend.loginId)
+              selectedFriends.some((selected) => selected.loginId === friend.loginId)
                 ? styles.selectedFriend
                 : styles.unselectedFriend,
             ]}
@@ -134,7 +138,7 @@ const EventPeopleScreen = () => {
             <Text
               style={[
                 styles.friendText,
-                selectedFriends.includes(friend.loginId)
+                selectedFriends.some((selected) => selected.loginId === friend.loginId)
                   ? styles.selectedText
                   : styles.unselectedText,
               ]}

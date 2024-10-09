@@ -23,6 +23,7 @@ import { convertToMarkedDates } from "../../lib/convertToMarkedDates";
 import { UserContext } from "../../context/UserContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToAmPm } from "../../lib/convertToAmPm";
+import { getDay } from "../../lib/getDay";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -268,11 +269,9 @@ export default function Monthly() {
                     onPress={() => {
                       setIsModalOpen(true);
                       setEventsModal({
-                        date: `${date?.month}월 ${date?.day}일 (${
-                          ["일", "월", "화", "수", "목", "금", "토"][
-                            new Date(date?.dateString)?.getDay()
-                          ]
-                        })`,
+                        date: `${date?.month}월 ${date?.day}일 (${getDay(
+                          new Date(date?.dateString)?.getDay()
+                        )})`,
                         events: markedDates?.[date?.dateString],
                       });
                       setModalMode("view");

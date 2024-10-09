@@ -1,34 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList } from 'react-native';
 import SearchIcon from '../../assets/search_black.svg';
 import IconGray from '../../assets/icon_gray.svg';
 import colors from '../../styles/colors';
 import ClockGray from '../../assets/clock_gray.svg';
 import CalendarGray from '../../assets/calendar_gray.svg';
+import apiClient from "../../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "../../context/UserContext";
 
 export default function Search() {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);  // 검색 후 보여줄 데이터를 저장
+  const [originalData, setOriginalData] = useState([]);  // 전체 데이터를 저장할 상태
+  const [isSearching, setIsSearching] = useState(false); // 검색 중인지 여부
+  const { groupId } = useContext(UserContext);
 
-  // 임의의 데이터 목록
-  const data = [
-    { id: '1', title: '1차 대면 회의', time: '오후 1:00 ~ 오후 8:00' },
-    { id: '2', title: '2차 대면 회의', time: '오후 1:00 ~ 오후 8:00' },
-    { id: '3', title: '3차 대면 회의', time: '오후 1:00 ~ 오후 8:00' },
-  ];
+  // 날짜 형식을 변환하는 함수 (오전/오후 형식으로)
+  const formatTime = (startDateTime, endDateTime) => {
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      let hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? '오후' : '오전';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0시일 때 12시로 표시
+      return `${ampm} ${hours}:${minutes}`;
+    };
+
+    const formattedStart = formatDate(startDateTime);
+    const formattedEnd = formatDate(endDateTime);
+
+    return `${formattedStart} ~ ${formattedEnd}`;
+  };
+
+  // selectedDates에서 가장 이른 날짜와 가장 늦은 날짜를 찾는 함수
+  const formatSelectedDates = (selectedDates) => {
+    if (selectedDates.length === 0) return '';
+    const sortedDates = selectedDates.sort();
+    const earliestDate = new Date(sortedDates[0]);
+    const latestDate = new Date(sortedDates[sortedDates.length - 1]);
+
+    const formatDate = (date) => `${date.getMonth() + 1}.${date.getDate()}`;
+
+    return `${formatDate(earliestDate)} ~ ${formatDate(latestDate)}`;
+  };
+
+  // API에서 데이터를 불러오는 함수
+  const fetchCalendarData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const response = await apiClient.get(`/api/groups/${groupId}/calendar`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const formattedData = response.data.map(item => ({
+        id: item.id,
+        title: item.title,
+        time: formatTime(
+          item.selectedDateTimes[0].startDateTime,
+          item.selectedDateTimes[0].endDateTime
+        ),
+        selectedDates: formatSelectedDates(item.selectedDates),
+      }));
+      setOriginalData(formattedData);  // 원본 데이터를 저장
+    } catch (error) {
+      console.error('캘린더 데이터를 가져오는 중 오류 발생:', error);
+  
+      // 에러 응답 본문 확인
+      if (error.response) {
+        console.error('에러 응답 상태 코드:', error.response.status); // 상태 코드
+        console.error('에러 응답 본문:', error.response.data); // 에러 본문
+      } else {
+        console.error('응답을 받지 못했습니다. 네트워크 오류일 수 있습니다.');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchCalendarData(); // 컴포넌트가 로드될 때 API 호출
+  }, []);
 
   // 검색어에 따라 데이터를 필터링하는 함수
   const handleSearch = (text) => {
     setSearchText(text);
+    setIsSearching(true);  // 검색을 시작했음을 표시
 
     if (text) {
-      const newData = data.filter(item => 
-        item.title.includes(text)
+      const newData = originalData.filter(item =>
+        item.title.includes(text)  // 일정 이름에 검색어가 포함된 데이터만 필터링
       );
       setFilteredData(newData);
     } else {
-      setFilteredData([]);
+      setFilteredData([]); // 검색어가 없으면 결과를 초기화
     }
   };
 
@@ -49,7 +116,7 @@ export default function Search() {
       </View>
       <View style={styles.resultTime}>
         <CalendarGray width={12} height={12} />
-        <Text style={styles.resultCalendarTime}>{item.time}</Text>
+        <Text style={styles.resultCalendarTime}>{item.selectedDates}</Text>
         <Text style={styles.devide}>ㅣ</Text>
         <ClockGray width={12} height={12} />
         <Text style={styles.resultClockTime}>{item.time}</Text>
@@ -61,7 +128,7 @@ export default function Search() {
   const renderSeparator = () => (
     <View style={styles.separator} />
   );
-  
+
   return (
     <View style={styles.container}>
       {/* 검색창 */}
@@ -77,13 +144,13 @@ export default function Search() {
         />
       </View>
       
-      {/* 검색 결과 */}
-      {filteredData.length === 0 && !searchText ? (
-        renderEmptyState() // 검색어가 없을 때 빈 상태 표시
+      {/* 검색 결과 또는 빈 상태 */}
+      {filteredData.length === 0 ? (
+        renderEmptyState()  // 검색 결과가 없으면 빈 상태를 표시
       ) : (
         <FlatList
-          data={filteredData}
-          keyExtractor={item => item.id}
+          data={filteredData}  // 검색 결과 데이터를 표시
+          keyExtractor={item => item.id.toString()}
           renderItem={renderItem}
           style={styles.resultList}
           ItemSeparatorComponent={renderSeparator}

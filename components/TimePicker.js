@@ -35,7 +35,7 @@ const TimePicker = ({ style, startTime, endTime, setStartTime, setEndTime, keepO
 
     if (pickerType === "start") {
       setStartTime(time);
-    } else {
+    } else if(pickerType === "end") {
       setEndTime(time);
     }
   }, [selectedTime]);
