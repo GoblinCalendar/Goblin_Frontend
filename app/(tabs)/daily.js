@@ -112,7 +112,7 @@ export default function Daily() {
 
   const DailyComponent = ({ navigation }) => {
     // 일별 일정 조회
-    const { data: schedule = [], isLoading: isScheduleLoading } = useQuery({
+    const { data: schedule = [], isStale } = useQuery({
       queryKey: ["getDailyEvents"],
       queryFn: () =>
         apiClient
@@ -139,7 +139,7 @@ export default function Daily() {
 
     return useMemo(() => {
       /* 
-        TODO 성능 개선..?
+        TODO 성능 개선..? + convertToTimeGrid 캐싱?
       */
 
       const [scheduleDummy, maxColumns] = convertToTimeGrid(schedule);
@@ -188,7 +188,7 @@ export default function Daily() {
         });
 
         //시간 변환
-        const label = hour < 12 ? `오전 ${hour}시` : `오후 ${hour === 12 ? hour : hour - 12}시`;
+        const label = hour < 12 ? `오전 ${hour === 0 ? 12 : hour}시` : `오후 ${hour % 12 || 12}시`;
 
         return (
           <View style={_styles.timeWrapper}>
@@ -254,14 +254,14 @@ export default function Daily() {
             <View style={[styles.nowSeparatorWrapper, { top: now.yOffset }]}>
               {/* 현재 시각 */}
               <Text style={styles.nowTimeText}>
-                {String(now.hour)}:{String(now.minute).padStart(0, "2")}
+                {String(now.hour).padStart(2, "0")}:{String(now.minute).padStart(2, "0")}
               </Text>
               <View style={styles.nowSeparator}></View>
             </View>
           </ScrollView>
         </View>
       );
-    }, [isScheduleLoading, now?.yOffset]);
+    }, [isStale ? true : undefined, now?.yOffset]);
   };
 
   return <DrawerWrapper screen={DailyComponent} />;
