@@ -21,6 +21,7 @@ import { SwipeListButton } from "../../components/SwipeListButton";
 import apiClient from "../../lib/api";
 import { convertToMarkedDates } from "../../lib/convertToMarkedDates";
 import { UserContext } from "../../context/UserContext";
+import { useQuery } from "@tanstack/react-query";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -30,22 +31,24 @@ export default function Monthly() {
 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
 
-  const [markedDates, setMarkedDates] = useState([]);
-
   const { username } = useContext(UserContext);
 
-  useEffect(() => {
-    // 개인 일반 일정
-    apiClient
-      .get(`/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`)
-      .then((response) => {
-        setMarkedDates(
+  //개인 일반 일정
+  const {
+    isPending,
+    error,
+    data: markedDates,
+  } = useQuery({
+    queryKey: ["getGeneralEvents"],
+    queryFn: () =>
+      apiClient
+        .get(`/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`)
+        .then((response) =>
           convertToMarkedDates(
             response.data?.map((d) => ({ ...d, type: "general", creator: username }))
           )
-        );
-      });
-  }, []);
+        ),
+  });
 
   // 2-2, 2-3
   const [modalMode, setModalMode] = useState(null);
