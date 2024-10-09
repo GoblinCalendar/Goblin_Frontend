@@ -57,6 +57,7 @@ export default function Monthly() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   const [eventsModal, setEventsModal] = useState({
+    dateString: null,
     date: null,
     events: [
       // {
@@ -160,6 +161,24 @@ export default function Monthly() {
     mutationFn: (data) => apiClient.put(`/api/fixed/${data.id}/update`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
+    },
+  });
+
+  // 개인 일반 일정 삭제
+  const deleteGeneralEvent = (id, row) => {
+    deleteGeneralEventMutation.mutate({ id });
+    row.closeRow();
+  };
+
+  const deleteGeneralEventMutation = useMutation({
+    mutationFn: (data) => apiClient.delete(`/api/calendar/user/delete/${data?.id}`),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["getGeneralEvents"] }).then(() => {
+        setEventsModal((prev) => ({
+          ...prev,
+          events: [...prev.events?.filter((d) => d.id !== response.data?.id)],
+        }));
+      });
     },
   });
 
@@ -269,6 +288,7 @@ export default function Monthly() {
                     onPress={() => {
                       setIsModalOpen(true);
                       setEventsModal({
+                        dateString: date?.dateString,
                         date: `${date?.month}월 ${date?.day}일 (${getDay(
                           new Date(date?.dateString)?.getDay()
                         )})`,
@@ -357,7 +377,9 @@ export default function Monthly() {
                       data={data}
                       rowMap={rowMap}
                       onEditPress={() => console.log("Edit")}
-                      onDeletePress={() => null}
+                      onDeletePress={() =>
+                        deleteGeneralEvent(data?.item?.id, rowMap[data?.item?.key])
+                      }
                     />
                   )}
                   rightOpenValue={-80}
