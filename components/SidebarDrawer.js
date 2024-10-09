@@ -65,11 +65,36 @@ export const SidebarDrawer = memo(({ navigation }) => {
 
   // 팀 캘린더 생성
   const createNewCalendar = () => {
-    groupsMutation.mutate({ groupName: `새 캘린더 ${groupList?.length + 1}` });
+    groupsPostMutation.mutate({ groupName: `새 캘린더 ${groupList?.length + 1}` });
   };
 
-  const groupsMutation = useMutation({
+  const groupsPostMutation = useMutation({
     mutationFn: (data) => apiClient.post(`/api/groups`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getGroups"] });
+    },
+  });
+
+  // 캘린더 이름 수정
+  const editCalendarName = (id, text) => {
+    if (text?.trim()?.length === 0) return;
+    groupsEditMutation.mutate({ id, groupName: text });
+  };
+
+  const groupsEditMutation = useMutation({
+    mutationFn: (data) => apiClient.put(`/api/groups/${data?.id}`, { groupName: data?.groupName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getGroups"] });
+    },
+  });
+
+  // 캘린더 삭제
+  const _deleteCalendar = (id) => {
+    groupsDeleteMutation.mutate({ id });
+  };
+
+  const groupsDeleteMutation = useMutation({
+    mutationFn: (data) => apiClient.delete(`/api/groups/${data?.id}`, { groupId: data?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getGroups"] });
     },
@@ -115,7 +140,10 @@ export const SidebarDrawer = memo(({ navigation }) => {
                   drawerStyles.deleteCalendarModalButton,
                   { backgroundColor: colors.deleteButtonRed },
                 ]}
-                onPress={() => console.log("delete calendar")}
+                onPress={() => {
+                  _deleteCalendar(deleteCalendar?.id);
+                  setDeleteCalendar((prev) => ({ ...prev, open: false }));
+                }}
               >
                 <Text style={[drawerStyles.deleteCalendarModalButtonText, { color: colors.white }]}>
                   삭제
@@ -182,10 +210,9 @@ export const SidebarDrawer = memo(({ navigation }) => {
                       onChangeText={(text) =>
                         setEditName((prev) => ({ ...prev, name: text?.trim() }))
                       }
-                      onSubmitEditing={({ nativeEvent: { text } }) => {
-                        // Done 누름
-                        console.log(editName);
-                      }}
+                      onSubmitEditing={({ nativeEvent: { text } }) =>
+                        editCalendarName(data?.item?.id, text)
+                      }
                       onBlur={() => setEditName({ id: null, name: "" })}
                       value={`${editName?.name}`}
                     />
