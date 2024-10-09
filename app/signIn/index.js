@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import BackButton from "../../components/BackButton"; // 뒤로가기 버튼
 import InputBox from "../../components/InputBox"; // 인풋 박스
@@ -27,6 +27,26 @@ export default function SignIn() {
     setUsername: setUsernameContext,
     setUserRole: setUserRoleContext,
   } = useContext(UserContext);
+
+  // 앱이 시작될 때 저장된 아이디와 비밀번호 가져오기
+  useEffect(() => {
+    const loadStoredCredentials = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("storedUserId");
+        const storedPassword = await AsyncStorage.getItem("storedPassword");
+
+        if (storedUserId && storedPassword) {
+          setUserId(storedUserId);
+          setPassword(storedPassword);
+          handleSubmit(storedUserId, storedPassword); // 저장된 정보로 자동 로그인
+        }
+      } catch (error) {
+        console.error("저장된 자격 증명을 가져오는 중 오류 발생:", error);
+      }
+    };
+
+    loadStoredCredentials();
+  }, []);
 
   // 로그인 버튼 활성화 여부
   const isFormValid = userId.length > 0 && password.length > 0;
@@ -68,6 +88,10 @@ export default function SignIn() {
       await AsyncStorage.setItem("userId", loginId);
       await AsyncStorage.setItem("username", username);
       await AsyncStorage.setItem("userRole", userRole);
+
+      // 아이디와 비밀번호 저장 (자동 로그인을 위해)
+      await AsyncStorage.setItem("storedUserId", loginId);
+      await AsyncStorage.setItem("storedPassword", userPassword);
 
       // 컨텍스트 저장
       setUserIdContext(userId);

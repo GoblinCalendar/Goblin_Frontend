@@ -61,6 +61,9 @@ export default function Index() {
     if (isLoggedIn === null) {
       // 로그인 상태를 로드 중인 경우
       return;
+    } else if (isLoggedIn) {
+      // 로그인되어 있으면 메인 페이지로 이동
+      router.replace("/monthly");
     } else {
       // 로그인되어 있지 않으면 랜딩 페이지로 이동
       router.replace("/landingPage");
@@ -86,4 +89,3 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
-
