@@ -14,6 +14,7 @@ import X from "../assets/x.svg";
 import PlusCircleWhite from "../assets/plus_circle_white.svg";
 import Trash from "../assets/trash.svg";
 import Door from "../assets/door.svg";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const SidebarDrawer = memo(({ navigation }) => {
   //더미
@@ -21,18 +22,33 @@ export const SidebarDrawer = memo(({ navigation }) => {
   //   .fill("")
   //   .map((_, i) => ({ key: i, id: i, name: i }));
 
-  const [groupList, setGroupList] = useState([]);
-  useEffect(() => {
-    apiClient.get("/api/groups").then((response) => {
-      setGroupList(
-        response.data?.map((data) => ({
-          key: data?.groupId,
-          id: data?.groupId,
-          name: data?.groupName,
+  // const [groupList, setGroupList] = useState([]);
+
+  // 캘린더 목록
+  const { data: groupList } = useQuery({
+    queryKey: ["getGroups"],
+    queryFn: () =>
+      apiClient.get(`/api/groups`).then((response) =>
+        response.data?.map((d) => ({
+          key: d?.groupId,
+          id: d?.groupId,
+          name: d?.groupName,
+          createdBy: d?.createdBy,
         }))
-      );
-    });
-  }, []);
+      ),
+  });
+
+  // useEffect(() => {
+  //   apiClient.get("/api/groups").then((response) => {
+  //     setGroupList(
+  //       response.data?.map((data) => ({
+  //         key: data?.groupId,
+  //         id: data?.groupId,
+  //         name: data?.groupName,
+  //       }))
+  //     );
+  //   });
+  // }, []);
 
   const { username, groupId, setGroupId } = useContext(UserContext);
   // TODO 리렌더링 줄이기
@@ -44,6 +60,20 @@ export const SidebarDrawer = memo(({ navigation }) => {
 
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [inviteLink, setInviteLink] = useState(null);
+
+  const queryClient = useQueryClient();
+
+  // 팀 캘린더 생성
+  const createNewCalendar = () => {
+    groupsMutation.mutate({ groupName: `새 캘린더 ${groupList?.length + 1}` });
+  };
+
+  const groupsMutation = useMutation({
+    mutationFn: (data) => apiClient.post(`/api/groups`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getGroups"] });
+    },
+  });
 
   return (
     <View style={drawerStyles.wrapper}>
@@ -210,7 +240,10 @@ export const SidebarDrawer = memo(({ navigation }) => {
           <Door width={16} height={16} />
           <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 입장하기</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={drawerStyles.newCalendarButton}>
+        <TouchableOpacity
+          style={drawerStyles.newCalendarButton}
+          onPress={() => createNewCalendar()}
+        >
           <PlusCircleWhite width={16} height={16} />
           <Text style={drawerStyles.newCalendarButtonText}>팀 캘린더 생성하기</Text>
         </TouchableOpacity>
