@@ -6,6 +6,8 @@ import CustomArrowButton from './ArrowButton';
 import TimeDragBar from './TimeDragBar';
 import TimeSelectionModal from './TimeSelectionModal';
 
+// /api/groups/{groupId}/calendar
+
 // 시간 그리드 생성 함수
 const generateTimeGrid = (start, end) => {
   const hours = [];
@@ -214,10 +216,42 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
       return updatedTimes;
     });
 
+    // 날짜 및 시간 데이터를 변환해서 형식에 맞게 가공
+    const formattedData = formatTimeData(start, end, selectedDate);
+  
+    // 부모 컴포넌트로 전달하는 함수 호출 (props로 전달된 onSubmit 호출)
+    props.onSubmit(formattedData);
+
     setSelectedDayIndex(null); // 날짜 선택 해제
     setSelectedDate(null);     // 날짜 상태 초기화
   
     setModalVisible(false); // 모달 닫기
+  };
+
+  const formatTimeData = (start, end, selectedDate) => {
+    const parseTime = (timeString) => {
+      const [period, time] = timeString.split(' ');
+      const [hour, minute] = time.split(':').map(Number);
+      return {
+        period: period === '오전' ? 'AM' : 'PM',
+        hour: period === '오후' && hour !== 12 ? hour + 12 : hour === 12 && period === '오전' ? 0 : hour,
+        minute: minute,
+      };
+    };
+  
+    const startTime = parseTime(start);
+    const endTime = parseTime(end);
+  
+    // 선택된 날짜와 시간을 포맷팅하여 반환
+    return {
+      date: selectedDate.date,  // 선택된 날짜
+      startAmPm: startTime.period,
+      startHour: startTime.hour,
+      startMinute: startTime.minute,
+      endAmPm: endTime.period,
+      endHour: endTime.hour,
+      endMinute: endTime.minute,
+    };
   };
 
   return (

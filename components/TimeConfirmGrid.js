@@ -3,6 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import colors from '../styles/colors';
 import CustomArrowButton from './ArrowButton';
 
+// /api/groups/{groupId}/calendar
+
 // 시간 배열
 const hours = Array.from({ length: 96 }, (_, i) => {
     const hour = Math.floor(i / 4);

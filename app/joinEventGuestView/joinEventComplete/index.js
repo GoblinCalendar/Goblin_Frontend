@@ -20,9 +20,9 @@ const JoinEventComplete = () => {
     <View style={styles.container}>
       <View style={styles.content}>
         <CheckCircle width={58} height={58} marginTop={164} />
-        <Text style={styles.title}>2차 대면 회의</Text>
-        <Text style={styles.subtitle}>일정 등록 완료</Text>
-        <Text style={styles.description}>일정이 확정되면, 다시 알려드릴게요!</Text>
+        <Text style={styles.title}>2차 대면 회의</Text> {/*이것도 불러오기*/}
+        <Text style={styles.subtitle}>일정 등록 완료</Text> {/*이것도 불러오기*/}
+        <Text style={styles.description}>일정이 확정되면, 다시 알려드릴게요!</Text> {/*이것도 불러오기*/}
       </View>
       {/* ButtonComponent 사용 */}
       <ButtonComponent 
