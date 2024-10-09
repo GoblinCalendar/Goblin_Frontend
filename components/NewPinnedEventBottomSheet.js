@@ -18,6 +18,7 @@ import RadioActive from "../assets/radio_active.svg";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BottomSheetTextInput } from "./BottomSheetTextInput";
 import apiClient from "../lib/api";
+import { convertToAmPm } from "../lib/convertToAmPm";
 
 export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
   // ref
@@ -55,13 +56,13 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
     mutation.mutate({
       scheduleName: newEvent?.name,
       dayOfWeek: days.filter((d) => d.selected).map((d) => d.id),
-      amPmStart: startTimeFrags?.[0],
-      startHour: startTimeFrags?.[1],
-      startMinute: startTimeFrags?.[3],
-      amPmEnd: endTimeFrags?.[0],
-      endHour: endTimeFrags?.[1],
-      endMinute: endTimeFrags?.[3],
-      colorCode: selectedColor,
+      amPmStart: convertToAmPm(startTimeFrags?.[0]),
+      startHour: parseInt(startTimeFrags?.[1]),
+      startMinute: parseInt(startTimeFrags?.[3]),
+      amPmEnd: convertToAmPm(endTimeFrags?.[0]),
+      endHour: parseInt(endTimeFrags?.[1]),
+      endMinute: parseInt(endTimeFrags?.[3]),
+      colorCode: selectedColor.id,
       public: true, //기본값 공개
     });
   };

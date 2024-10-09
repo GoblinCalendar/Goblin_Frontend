@@ -21,7 +21,8 @@ import { SwipeListButton } from "../../components/SwipeListButton";
 import apiClient from "../../lib/api";
 import { convertToMarkedDates } from "../../lib/convertToMarkedDates";
 import { UserContext } from "../../context/UserContext";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { convertToAmPm } from "../../lib/convertToAmPm";
 import { getDay } from "../../lib/getDay";
 
 LocaleConfig.locales.kr = LocaleKR;
@@ -33,6 +34,8 @@ export default function Monthly() {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth() + 1);
 
   const { username } = useContext(UserContext);
+
+  const queryClient = useQueryClient();
 
   //개인 일반 일정
   const { data: markedDates } = useQuery({
@@ -81,9 +84,15 @@ export default function Monthly() {
   const { data: pinnedEvents } = useQuery({
     queryKey: ["getPinnedEvents"],
     queryFn: () =>
-      apiClient
-        .get(`/api/fixed/user`)
-        .then((response) => convertToMarkedDates(response.data?.map((d) => ({})))),
+      apiClient.get(`/api/fixed/user`).then((response) =>
+        response.data?.map((d) => ({
+          id: d?.id,
+          name: d?.scheduleName,
+          color: `#${d?.color}`,
+          active: d?.public,
+          ...d,
+        }))
+      ),
   });
 
   // const [pinnedEvents, setPinnedEvents] = useState([
@@ -124,6 +133,35 @@ export default function Monthly() {
   //     color: "#E6E8E3",
   //   },
   // ]);
+
+  // 고정 일정 토글
+  const togglePinnedEvent = (id) => {
+    const getPinnedEventsById = pinnedEvents.find((e) => e.id === id);
+
+    getPinnedEventsById.public = !getPinnedEventsById.public;
+
+    console.log(getPinnedEventsById);
+
+    pinnedEventMutation.mutate({
+      scheduleName: getPinnedEventsById?.scheduleName,
+      dayOfWeek: getPinnedEventsById?.dayOfWeek,
+      amPmStart: getPinnedEventsById?.amPmStart,
+      startHour: getPinnedEventsById?.startHour,
+      startMinute: getPinnedEventsById?.startMinute,
+      amPmEnd: getPinnedEventsById?.amPmEnd,
+      endHour: getPinnedEventsById?.endHour,
+      endMinute: getPinnedEventsById?.endMinute,
+      colorCode: getPinnedEventsById?.colorCode,
+      public: getPinnedEventsById.public,
+    });
+  };
+
+  const pinnedEventMutation = useMutation({
+    mutationFn: (data) => apiClient.put(`/api/fixed/${data.id}/update`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
+    },
+  });
 
   const MonthComponent = ({ navigation }) =>
     useMemo(() => {
@@ -348,14 +386,14 @@ export default function Monthly() {
               </View>
             </>
           )}
-          {/* 고정 일정 선택 */}
+          {/* 고정일정 관리 */}
           {modalMode === "pin" && (
             <>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <TouchableOpacity onPress={() => setModalMode("view")}>
                   <ArrowLeft width={20} height={20} />
                 </TouchableOpacity>
-                <Text style={styles.eventsModalHeader}>고정 일정 선택</Text>
+                <Text style={styles.eventsModalHeader}>고정일정 관리</Text>
               </View>
               <View style={styles.eventsModalContent}>
                 <SwipeListView
@@ -394,13 +432,7 @@ export default function Monthly() {
                               borderRadius: "50%",
                               backgroundColor: data?.item?.active ? colors.skyBlue : "#E5E5EC",
                             }}
-                            onPress={() =>
-                              setPinnedEvents((prev) => [
-                                ...prev.map((d) =>
-                                  d?.id === data?.item?.id ? { ...d, active: !d?.active } : d
-                                ),
-                              ])
-                            }
+                            onPress={() => togglePinnedEvent(data?.item?.id)}
                           />
                         </View>
                       </View>
