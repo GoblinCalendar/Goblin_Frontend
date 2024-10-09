@@ -3,9 +3,62 @@ import colors from "../../styles/colors";
 import CalendarNavbar from "../../components/CalendarNavbar";
 import { convertToTimeGrid } from "../../lib/convertToTimeGrid";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getDay } from "../../lib/getDay";
 
 export default function Daily() {
+  const [date, setDate] = useState(new Date());
+
+  // now
+  const [now, setNow] = useState({
+    hour: date.getHours() % 12 || 12,
+    minute: date.getMinutes(),
+    yOffset:
+      48 * (date.getHours() % 12 || 12) +
+      4 * (date.getHours() % 12 || 12) +
+      48 * Number((date.getMinutes() / 60).toFixed(2)),
+  });
+
+  // 현재 시각 separator의 y값 계산
+  const getNowYOffset = (hour, minute) =>
+    48 * hour + 4 * hour + 48 * Number((minute / 60).toFixed(2));
+
+  //
+  const reload = () => {
+    setNow({
+      hour: new Date().getHours() % 12 || 12,
+      minute: new Date().getMinutes(),
+      yOffset: getNowYOffset(new Date().getHours() % 12 || 12, new Date().getMinutes()),
+    });
+  };
+
+  // 현재 시간 업데이트
+  useEffect(() => {
+    // mount 되었을 때 남은 초 계산
+    const currentSeconds = date.getSeconds(); // Get the current seconds (0-59)
+    let beforeMountSeconds = 60 - currentSeconds;
+
+    const initialTimer = new Promise((resolve, reject) =>
+      setTimeout(() => {
+        reload();
+        resolve(true);
+      }, beforeMountSeconds)
+    );
+
+    let timer;
+
+    initialTimer.then(() => {
+      timer = setInterval(() => {
+        reload();
+      }, 60);
+    });
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(initialTimer);
+    };
+  }, []);
+
   //더미
   const [schedule, setSchedule] = useState([
     {
@@ -157,7 +210,9 @@ export default function Daily() {
             onPress={() => navigation.openDrawer()}
           />
           <View style={styles.dateHeaderContainer}>
-            <Text style={styles.dateHeaderText}>17일 금요일</Text>
+            <Text style={styles.dateHeaderText}>
+              {date.getDate()}일 {getDay(date.getDay())}요일
+            </Text>
           </View>
           <ScrollView style={styles.timeContainer}>
             {[
@@ -165,10 +220,17 @@ export default function Daily() {
             ].map((hour, index) => (
               <TimeBlock key={hour} hour={hour} />
             ))}
+            <View style={[styles.nowSeparatorWrapper, { top: now.yOffset }]}>
+              {/* 현재 시각 */}
+              <Text style={styles.nowTimeText}>
+                {String(now.hour)}:{String(now.minute).padStart(0, "2")}
+              </Text>
+              <View style={styles.nowSeparator}></View>
+            </View>
           </ScrollView>
         </View>
       );
-    }, [schedule]);
+    }, [schedule, now?.yOffset]);
 
   return <DrawerWrapper screen={DailyComponent} />;
 }
@@ -194,6 +256,28 @@ const styles = StyleSheet.create({
     letterSpacing: -0.35,
   },
   timeContainer: {
+    position: "relative",
     paddingTop: 48,
+  },
+  nowSeparatorWrapper: {
+    position: "absolute",
+    top: 8,
+    paddingLeft: 39,
+    paddingRight: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  nowTimeText: {
+    color: colors.skyBlue,
+    fontSize: 11,
+    fontWeight: "600",
+    lineHeight: 16,
+    letterSpacing: -0.275,
+  },
+  nowSeparator: {
+    width: Dimensions.get("window").width - 20 - 66,
+    height: 2,
+    backgroundColor: colors.skyBlue,
   },
 });
