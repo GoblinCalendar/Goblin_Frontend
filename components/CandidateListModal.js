@@ -1,46 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Dimensions, FlatList } from 'react-native';
 import Modal from 'react-native-modal';
 import SvgCheckMark from '../assets/check.svg';
 import colors from '../styles/colors';
 import ButtonComponent from '../components/Button';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../lib/api';
 
-// /api/groups/calendar/{groupId}/{calendarId}/optimal-time
 // /api/groups/{groupId}/calendar/{calendarId}/confirm
 
 // 임시 데이터
-const scheduleData = [
-    {
-      id: '1',
-      date: '9.12 (목)',
-      time: '오후 12시 ~ 오후 9시',
-      participants: ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '김현서', '김가은'],
-    },
-    {
-      id: '2',
-      date: '9.12 (목)',
-      time: '오후 12시 ~ 오후 9시',
-      participants: ['홍길동', '김철수', '이영희', '박민수', '최진영'],
-    },
-    {
-      id: '3',
-      date: '9.12 (목)',
-      time: '오후 12시 ~ 오후 9시',
-      participants: ['홍길동', '김철수', '이영희', '박민수'],
-    },
-    {
-      id: '4',
-      date: '9.12 (목)',
-      time: '오후 12시 ~ 오후 9시',
-      participants: ['홍길동', '김철수'],
-    },
-];
+// const scheduleData = [
+//     {
+//       id: '1',
+//       date: '9.12 (목)',
+//       time: '오후 12시 ~ 오후 9시',
+//       participants: ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '김현서', '김가은'],
+//     },
+//     {
+//       id: '2',
+//       date: '9.12 (목)',
+//       time: '오후 12시 ~ 오후 9시',
+//       participants: ['홍길동', '김철수', '이영희', '박민수', '최진영'],
+//     },
+//     {
+//       id: '3',
+//       date: '9.12 (목)',
+//       time: '오후 12시 ~ 오후 9시',
+//       participants: ['홍길동', '김철수', '이영희', '박민수'],
+//     },
+//     {
+//       id: '4',
+//       date: '9.12 (목)',
+//       time: '오후 12시 ~ 오후 9시',
+//       participants: ['홍길동', '김철수'],
+//     },
+// ];
 
-const CandidateListModal = ({ visible, toggleModal }) => {
+const CandidateListModal = ({ visible, toggleModal, groupId, calendarId }) => {
     const [selectedId, setSelectedId] = useState(null);
     const [expectedDuration, setExpectedDuration] = useState('3');
+    const [scheduleData, setScheduleData] = useState([]); // API에서 받아올 데이터
     const router = useRouter();
+
+    useEffect(() => {
+      const fetchOptimalTime = async () => {
+        try {
+          const token = await AsyncStorage.getItem('accessToken');
+          const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/optimal-time`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setScheduleData(response.data);
+        } catch (error) {
+          console.error('Error fetching optimal time:', error);
+        }
+      };
+  
+      if (visible) {
+        fetchOptimalTime();
+      }
+    }, [visible, groupId, calendarId]);
 
     const handleSelect = (id) => {
         setSelectedId(id);  // 하나의 아이템만 선택할 수 있도록 설정
@@ -49,7 +71,7 @@ const CandidateListModal = ({ visible, toggleModal }) => {
     const handleApply = () => {
         toggleModal();  // 모달을 닫고
         setTimeout(() => {
-            router.push('/');  // 홈으로 이동
+            router.push('/monthly');  // 홈으로 이동
         }, 300);  // 모달이 닫히는 애니메이션 시간이 지나고 홈으로 이동
     };
 

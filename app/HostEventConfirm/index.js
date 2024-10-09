@@ -5,9 +5,9 @@ import TimeConfirmGrid from '../../components/TimeConfirmGrid';
 import { useRouter } from 'expo-router';
 import ButtonComponent from '../../components/Button';
 import CandidateListModal from '../../components/CandidateListModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../../lib/api';
 
-const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
-// /api/groups/{groupId}/calendar/{calendarId}/participants
 // /api/groups/{groupId}/calendar/{calendarId}/available-times
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -17,11 +17,34 @@ const ScheduleConfirmScreen = () => {
   const maxParticipantsToShow = 6;
   const extraParticipants = participants.length - maxParticipantsToShow;
 
-  const [headerText, setHeaderText] = useState('2차 대면 회의');
+  const [headerText, setHeaderText] = useState('2차 대면 회의'); // 이거불러오기
   const [isModalVisible, setModalVisible] = useState(false);
   
   // TimeConfirmGrid에 접근하기 위한 ref 생성
   const timeConfirmGridRef = useRef(null);
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const groupId = {groupId};  // 그룹 ID를 실제 값으로 교체
+        const calendarId = {calendarId};  // 캘린더 ID를 실제 값으로 교체
+
+        const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/participants`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 참가자 데이터 저장
+        setParticipants(response.data.map(participant => participant.username));
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+      }
+    };
+
+    fetchParticipants();
+  }, []);
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible); // 모달 열고 닫기 토글
@@ -33,9 +56,9 @@ const ScheduleConfirmScreen = () => {
             <View style={styles.header}>
             <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>1시간 30분</Text>
+                <Text style={styles.meetingDuration}>1시간 30분</Text> {/*가져 오기*/}
                 <Text style={styles.devide}> | </Text>
-                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text>
+                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text> {/*가져 오기*/}
             </View>
             <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (

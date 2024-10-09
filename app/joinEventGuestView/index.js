@@ -1,31 +1,77 @@
-// ScheduleScreen.js
-import React, { useRef, useState  } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
 import colors from '../../styles/colors';
-import TimeSelectionGrid from '../../components/TimeSelectionGrid';
 import { useRouter } from 'expo-router';
-
-const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
-
-// /api/groups/{groupId}/calendar/{calendarId}/available-time
-// /api/groups/{groupId}/calendar/{calendarId}/participants
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../../lib/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ScheduleScreen = () => {
   const router = useRouter();
   const maxParticipantsToShow = 6;
+  const [participants, setParticipants] = useState([]);
   const extraParticipants = participants.length - maxParticipantsToShow;
+  const [formattedData, setFormattedData] = useState(null);
+  const [headerText, setHeaderText] = useState('2차 대면 회의'); // 알람에서 넘어올 때 같이 보내기
 
-  const [headerText, setHeaderText] = useState('2차 대면 회의');
+  const groupId = 4;
+  const calendarId = 1;
   
   // TimeSelectionGrid에 접근하기 위한 ref 생성
   const timeSelectionGridRef = useRef(null);
 
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/participants`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setParticipants(response.data.map(participant => participant.username));
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+      }
+    };
+
+    fetchParticipants();
+  }, [groupId, calendarId]);
+
   // 일정 등록 완료 버튼을 눌렀을 때 호출되는 함수
-  const handleSubmit = () => {
-    console.log(headerText);
-    router.push(`/joinEventGuestView/joinEventComplete?headerText=${encodeURIComponent(headerText)}`);
+  const handleSubmit = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      
+      const response = await apiClient.post(`/api/groups/${groupId}/calendar/${calendarId}/available-time`, {
+        availableTimeSlots: [formattedData],  // formattedData를 서버로 보냄
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // 성공 시 다음 화면으로 이동
+      Alert.alert('성공', response.data.message, [
+        {
+          text: '확인',
+          onPress: () => router.push(`/joinEventGuestView/joinEventComplete?headerText=${encodeURIComponent(headerText)}`)
+        }
+      ]);
+
+    } catch (error) {
+      // 에러 발생 시 에러 메시지 표시
+      if (error.response) {
+        // 서버에서 반환한 에러가 있는 경우
+        console.error('에러 응답:', error.response.data);
+        Alert.alert('에러', `에러가 발생했습니다: ${error.response.data.message}`);
+      } else {
+        // 서버에 도달하지 못한 경우
+        console.error('서버에 도달할 수 없습니다:', error.message);
+        Alert.alert('에러', '서버에 도달할 수 없습니다. 네트워크 상태를 확인하세요.');
+      }
+    }
   };
 
   // 초기화 버튼을 눌렀을 때 호출되는 함수
@@ -42,29 +88,26 @@ const ScheduleScreen = () => {
     <View style={styles.container}>
         <View style={styles.headerBox}>
             <View style={styles.header}>
-            <Text style={styles.headerText}>{headerText}</Text>
-            <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>1시간 30분</Text>
+              <Text style={styles.headerText}>{headerText}</Text>
+              <View style={styles.headerDetails}>
+                <Text style={styles.meetingDuration}>1시간 30분</Text> {/*이것도 불러오기*/}
                 <Text style={styles.devide}> | </Text>
-                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text>
-            </View>
-            <View style={styles.participantContainer}>
+                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text> {/*이것도 불러오기*/}
+              </View>
+              <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (
                 <View key={index} style={styles.participant}>
-                    <Text style={styles.participantText}>{participant}</Text>
+                  <Text style={styles.participantText}>{participant}</Text>
                 </View>
                 ))}
                 {extraParticipants > 0 && (
-                <Text style={styles.extraParticipants}>+{extraParticipants}</Text>
+                  <Text style={styles.extraParticipants}>+{extraParticipants}</Text>
                 )}
-            </View>
+              </View>
             </View>
         </View>
 
         <View style={styles.grayBG}>
-            {/* 시간 선택 그리드 컴포넌트 사용 */}
-            <TimeSelectionGrid ref={timeSelectionGridRef}/>
-
             <View style={styles.footer}>
               <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
                   <Text style={styles.resetText}>초기화</Text>
