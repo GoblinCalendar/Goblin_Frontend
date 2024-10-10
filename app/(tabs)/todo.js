@@ -76,11 +76,7 @@ export default function Todo() {
     useMemo(() => {
       return (
         <View style={styles.container}>
-          <CalendarNavbar
-            title="성북뭉게해커톤"
-            currentMonth={9}
-            onPress={() => navigation.openDrawer()}
-          />
+          <CalendarNavbar currentMonth={9} onPress={() => navigation.openDrawer()} />
           <ScrollView contentContainerStyle={styles.scrollContent}>
             {mockData.map((day, index) => (
               <View key={index} style={styles.dayContainer}>

@@ -235,11 +235,7 @@ export default function Daily() {
 
       return (
         <View style={styles.container}>
-          <CalendarNavbar
-            title="성북뭉게해커톤"
-            currentMonth={9}
-            onPress={() => navigation.openDrawer()}
-          />
+          <CalendarNavbar currentMonth={9} onPress={() => navigation.openDrawer()} />
           <View style={styles.dateHeaderContainer}>
             <Text style={styles.dateHeaderText}>
               {today.getDate()}일 {getDay(today.getDay())}요일
