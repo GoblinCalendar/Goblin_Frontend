@@ -91,7 +91,7 @@ export default function SignIn() {
 
       // 아이디와 비밀번호 저장 (자동 로그인을 위해)
       await AsyncStorage.setItem("storedUserId", loginId);
-      await AsyncStorage.setItem("storedPassword", userPassword);
+      await AsyncStorage.setItem("storedPassword", password);
 
       // 컨텍스트 저장
       setUserIdContext(userId);
