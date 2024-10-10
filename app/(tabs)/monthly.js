@@ -227,6 +227,7 @@ export default function Monthly() {
 
       return (
         <View style={styles.container}>
+
           <CalendarNavbar currentMonth={currentMonth} onPress={() => navigation.openDrawer()} />
           <CalendarProvider
             date={`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`}
