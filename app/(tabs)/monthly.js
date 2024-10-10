@@ -57,7 +57,7 @@ export default function Monthly() {
 
   //고정 일정
   const { data: pinnedMarkedDates } = useQuery({
-    queryKey: ["getPinnedEvents", currentMonth, groupId],
+    queryKey: ["getPinnedEvents", groupId],
     queryFn: async () => {
       const query =
         groupId === personalGroupId
