@@ -64,6 +64,7 @@ export default function Index() {
     } else if (isLoggedIn) {
       // 로그인되어 있으면 메인 페이지로 이동
       router.replace("/monthly");
+      // router.replace("/landingPage");
     } else {
       // 로그인되어 있지 않으면 랜딩 페이지로 이동
       router.replace("/landingPage");

@@ -16,10 +16,15 @@ const ScheduleScreen = () => {
   const [participants, setParticipants] = useState([]);  // 참가자 데이터를 저장할 상태
   const extraParticipants = participants.length - maxParticipantsToShow;
 
-  const [headerText, setHeaderText] = useState('뭉게구름 해커톤'); // 헤더 텍스트 상태
+  const [headerText, setHeaderText] = useState(''); // 헤더 텍스트 상태
+  const [meetingDuration, setMeetingDuration] = useState(''); // 회의 시간 상태
+  const [meetingDate, setMeetingDate] = useState(''); // 선택된 날짜 상태
+  const [selectedTimeRanges, setSelectedTimeRanges] = useState([]); // 선택된 시간 범위 상태 추가
   const timeSelectionGridRef = useRef(null);  // TimeSelectionGrid에 대한 ref 생성
 
-  const { groupId, calendarId } = useGlobalSearchParams();
+  // const { groupId, calendarId } = useGlobalSearchParams();
+  const groupId = '2';  // 임의의 그룹 ID
+  const calendarId = '81';  // 임의의 캘린더 ID
 
   console.log("Group ID:", groupId);
   console.log("Calendar ID:", calendarId);
@@ -48,10 +53,128 @@ const ScheduleScreen = () => {
     }
   }, [groupId, calendarId]);
 
+  useEffect(() => {
+    const fetchCalendarDetails = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        
+        // 그룹과 캘린더의 세부 정보 API 호출
+        const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // API 응답을 로그로 출력
+        console.log('캘린더 API 응답:', response.data);
+
+        // headerText 업데이트 (일정 제목)
+        setHeaderText(response.data.title);
+  
+        // meetingDuration 업데이트 (분을 시간으로 변환)
+        const totalMinutes = response.data.time;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        setMeetingDuration(`${hours}시간 ${minutes === 0 ? '00' : minutes}분`);
+  
+        // meetingDate 업데이트 (선택된 날짜 범위)
+        const selectedDates = response.data.selectedDates;
+        const startDate = new Date(selectedDates[0]);
+        const endDate = new Date(selectedDates[selectedDates.length - 1]);
+        const formattedStartDate = `${startDate.getFullYear()}.${startDate.getMonth() + 1}.${startDate.getDate()}`;
+        const formattedEndDate = `${endDate.getFullYear()}.${endDate.getMonth() + 1}.${endDate.getDate()}`;
+        setMeetingDate(`${formattedStartDate} ~ ${formattedEndDate}`);
+  
+      } catch (error) {
+        console.error('캘린더 세부 정보를 가져오는 중 오류 발생:', error);
+  
+        // 에러 응답 본문을 로그에 출력
+        if (error.response) {
+          console.error('에러 상태 코드:', error.response.status); // 상태 코드
+          console.error('에러 메시지:', error.response.data); // 에러 응답 본문
+        } else {
+          console.error('응답을 받지 못했습니다. 네트워크 오류일 수 있습니다.');
+        }
+      }
+    };
+  
+    if (groupId && calendarId) {
+      fetchCalendarDetails();  // groupId와 calendarId가 있을 때 캘린더 세부 정보 가져옴
+    }
+  }, [groupId, calendarId]);
+
+  // TimeSelectionGrid에서 선택한 시간 데이터를 받을 함수
+  const handleTimeChange = (newTimeRange) => {
+    setSelectedTimeRanges((prevRanges) => {
+      const updatedRanges = [...prevRanges];
+      const existingIndex = updatedRanges.findIndex(range => range.date === newTimeRange.date);
+
+      if (existingIndex !== -1) {
+        // 같은 날짜가 이미 존재하면 그 값을 갱신
+        updatedRanges[existingIndex] = newTimeRange;
+      } else {
+        // 새로운 날짜는 배열에 추가
+        updatedRanges.push(newTimeRange);
+      }
+
+      // 로그에 날짜, 선택 시작 시간, 선택 끝 시간을 출력
+      console.log(`저장된 날짜 범위: `, updatedRanges);
+      return updatedRanges;
+    });
+  };
+  
   // 일정 등록 완료 버튼을 눌렀을 때 호출되는 함수
-  const handleSubmit = () => {
-    console.log(headerText);
-    router.push(`/joinEventGuestView/joinEventComplete?headerText=${encodeURIComponent(headerText)}`);
+  const handleSubmit = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+  
+      const formattedTimeSlots = selectedTimeRanges.map(range => {
+        // 시간을 적절한 형식으로 변환
+        const startAmPm = range.start.includes('오전') ? 'AM' : 'PM';
+        const endAmPm = range.end.includes('오전') ? 'AM' : 'PM';
+  
+        // 정규식을 사용해 시간과 분을 추출
+        const startMatch = range.start.match(/(\d+)\s*시\s*(\d+)?\s*분/);
+        const endMatch = range.end.match(/(\d+)\s*시\s*(\d+)?\s*분/);
+
+        // 값이 있을 때만 숫자로 변환하고 없으면 0으로 처리
+        const startHour = startMatch ? parseInt(startMatch[1], 10) : 0;
+        const startMinute = startMatch && startMatch[2] ? parseInt(startMatch[2], 10) : 0;
+
+        const endHour = endMatch ? parseInt(endMatch[1], 10) : 0;
+        const endMinute = endMatch && endMatch[2] ? parseInt(endMatch[2], 10) : 0;
+  
+        return {
+          date: `2024-${range.date.replace('.', '').replace(' ', '-')}`, // '10. 12' => '2024-10-12'
+          startAmPm,
+          startHour,
+          startMinute,
+          endAmPm,
+          endHour,
+          endMinute,
+        };
+      });
+
+      console.log("formattedTimeSlots: ", formattedTimeSlots);
+  
+      const body = {
+        availableTimeSlots: formattedTimeSlots,
+      };
+  
+      const response = await apiClient.post(`/api/groups/${groupId}/calendar/${calendarId}/available-time`, body, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.status === 200) {
+        console.log('Response message:', response.data);  // '가능한 시간이 제출되었습니다.' 메시지
+        router.push(`/joinEventGuestView/joinEventComplete?headerText=${encodeURIComponent(headerText)}`);
+      }
+    } catch (error) {
+      console.log("headerText: ",headerText);
+      console.error('시간 제출 중 오류 발생:', error);
+    }
   };
 
   // 초기화 버튼을 눌렀을 때 호출되는 함수
@@ -67,9 +190,9 @@ const ScheduleScreen = () => {
             <View style={styles.header}>
             <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>2시간 00분</Text>
+                <Text style={styles.meetingDuration}>{meetingDuration}</Text>
                 <Text style={styles.devide}> |   </Text>
-                <Text style={styles.meetingDate}>24.10.07 ~ 24.10.12</Text>
+                <Text style={styles.meetingDate}>{meetingDate}</Text>
             </View>
             <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (
@@ -86,7 +209,12 @@ const ScheduleScreen = () => {
 
         <View style={styles.grayBG}>
             {/* 시간 선택 그리드 컴포넌트 사용 */}
-            <TimeSelectionGrid ref={timeSelectionGridRef} calendarId={calendarId}/>
+            <TimeSelectionGrid
+              ref={timeSelectionGridRef}
+              calendarId={calendarId}
+              groupId={groupId}
+              onTimeChange={handleTimeChange}
+            />
 
             <View style={styles.footer}>
               <TouchableOpacity style={styles.resetButton} onPress={handleReset}>

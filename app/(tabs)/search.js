@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import SearchIcon from '../../assets/search_black.svg';
 import IconGray from '../../assets/icon_gray.svg';
 import colors from '../../styles/colors';
@@ -8,6 +8,7 @@ import CalendarGray from '../../assets/calendar_gray.svg';
 import apiClient from "../../lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserContext } from "../../context/UserContext";
+import { useRouter } from 'expo-router';
 
 export default function Search() {
   const [isFocused, setIsFocused] = useState(false);
@@ -16,6 +17,7 @@ export default function Search() {
   const [originalData, setOriginalData] = useState([]);  // 전체 데이터를 저장할 상태
   const [isSearching, setIsSearching] = useState(false); // 검색 중인지 여부
   const { groupId } = useContext(UserContext);
+  const router = useRouter();
 
   // 날짜 형식을 변환하는 함수 (오전/오후 형식으로)
   const formatTime = (startDateTime, endDateTime) => {
@@ -104,6 +106,9 @@ export default function Search() {
     <View style={styles.emptyStateContainer}>
       <IconGray width={120} height={120} style={{ opacity: 0.5 }} />
       <Text style={styles.emptyStateText}>일정 이름을 검색해보세요!</Text>
+      <TouchableOpacity onPress={() => router.push('/HostEventConfirm')} style={styles.button}>
+        <Text style={styles.buttonText}>일정 확정</Text>
+      </TouchableOpacity>
     </View>
   );
 

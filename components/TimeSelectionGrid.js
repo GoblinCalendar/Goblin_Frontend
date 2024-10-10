@@ -26,16 +26,12 @@ const generateTimeGrid = (start, end) => {
   return hours;
 };
 
-// const time = ['11:00', '18:00']; 이렇게 데이터로 들어옴
-const time = ['11:30', '19:30'];
-// const hours = generateTimeGrid(time[0], time[1]);
-
-// const days = ['화', '수', '목', '금', '일', '월'];
-// const dates = ['9. 10', '9. 11', '9. 12', '9. 13', '9. 15', '9.20'];
-
 const TimeSelectionGrid = forwardRef((props, ref) => {
   const [visibleStartHour, setVisibleStartHour] = useState(0);
   const [selectedTimes, setSelectedTimes] = useState({});
+  const [selectedStartTime, setSelectedStartTime] = useState(null); // 시작 시간을 추적
+  const [selectedEndTime, setSelectedEndTime] = useState(null); // 끝 시간을 추적
+  const [selectedDayForTimeSelection, setSelectedDayForTimeSelection] = useState(null); // 선택된 날짜 추적
   const [visibleStartDay, setVisibleStartDay] = useState(0); 
   const [selectedDayIndex, setSelectedDayIndex] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -45,12 +41,16 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
 
   const [days, setDays] = useState([]);
   const [dates, setDates] = useState([]);
-  // const [time, setTime] = useState([]);
+  const [time, setTime] = useState([]);
   const [hours, setHours] = useState([]);
 
   // 초기화 함수
   const resetSelection = () => {
     setSelectedTimes({});
+    setSelectedStartTime(null); // 초기화 시 시작 시간도 초기화
+    setSelectedEndTime(null); // 끝 시간도 초기화
+    setSelectedDate(null);
+    setSelectedDayForTimeSelection(null);
   };
 
   // ref를 통해 상위 컴포넌트에서 초기화 함수를 호출할 수 있도록 함
@@ -62,14 +62,11 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
     const fetchCalendarData = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        const response = await apiClient.get(`/api/groups/calendar/${props.calendarId}`, {
+        const response = await apiClient.get(`/api/groups/${props.groupId}/calendar/${props.calendarId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        // API 응답 데이터 로그 출력
-        console.log("API 응답 데이터: ", response.data);
 
         const data = response.data;
         const selectedDates = data.selectedDates; // ['2024-10-10', '2024-10-11'] 형태
@@ -88,16 +85,16 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
           return parsedDate.replace(/\.$/, ''); // 마지막 마침표만 제거
         });
 
-        // startDateTime과 endDateTime을 통해 시간 범위 추출
-        // const startTime = new Date(data.selectedDateTimes[0].startDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
-        // const endTime = new Date(data.selectedDateTimes[0].endDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // 첫 번째 selectedDateTimes 항목을 통해 시간 범위 추출
+        const startTime = new Date(data.selectedDateTimes[0].startDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const endTime = new Date(data.selectedDateTimes[0].endDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         setDays(parsedDays);
         setDates(parsedDates);
-        // setTime([startTime, endTime]); // 시간 배열 설정
+        setTime([startTime, endTime]); // 시간 배열 설정
 
         // 시간을 기반으로 그리드 생성
-        const generatedHours = generateTimeGrid(time[0], time[1]);
+        const generatedHours = generateTimeGrid(startTime, endTime);
         setHours(generatedHours); // 시간 그리드를 상태로 설정
       } catch (error) {
         console.error('캘린더 데이터를 가져오는 중 오류 발생:', error);
@@ -105,7 +102,20 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
     };
 
     fetchCalendarData();
-  }, [props.calendarId]);
+  }, [props.groupId, props.calendarId]);
+
+  // 선택된 시간 범위 변환 및 부모 컴포넌트로 전송
+  const changeTimeSelection = () => {
+    if (selectedStartTime && selectedEndTime && selectedDayForTimeSelection) {
+      const formattedData = {
+        date: selectedDayForTimeSelection, // 선택한 날짜
+        start: selectedStartTime, // 선택한 시작 시간
+        end: selectedEndTime, // 선택한 끝 시간
+      };
+      console.log("formattedData: ",formattedData);
+      props.onTimeChange(formattedData); // 부모 컴포넌트로 선택된 시간 범위 전달
+    }
+  };
 
   // 시간 범위가 8시간을 넘으면 arrowButton 표시
   const showHourArrows = hours.length > 32;
@@ -114,18 +124,43 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
 
   // 사용자가 선택한 시간 변환 함수
   const handleTouch = (dayIndex, hourIndex, isDragging = false) => {
+    const selectedBlockTime = hours[hourIndex];
+    const selectedDay = dates[visibleStartDay + dayIndex]; // 현재 선택한 날짜를 항상 추적
+  
+    // 다른 날짜가 선택되었을 때 시작 시간을 다시 설정하도록 초기화
+    if (selectedDayForTimeSelection !== selectedDay) {
+      setSelectedStartTime(null);  // 다른 날짜가 선택되면 시작 시간을 초기화
+      setSelectedDayForTimeSelection(selectedDay);  // 선택한 날짜를 업데이트
+    }
+  
     setSelectedTimes((prev) => {
       const key = `${dayIndex}-${hourIndex}`;
-      if (isDragging) {
-        return { ...prev, [key]: true }; // 드래그 중에는 무조건 선택
-      } else {
-        return { ...prev, [key]: !prev[key] }; // 드래그 중이 아닐 때는 토글
+      const isSelected = prev[key];
+      const updatedSelection = { ...prev, [key]: !isSelected };
+  
+      // 처음 터치 시 한 번만 시작 시간 설정
+      if (!isSelected && !selectedStartTime) {
+        setSelectedStartTime(selectedBlockTime); // 처음 터치한 시간으로 시작 시간 설정
+        setSelectedDayForTimeSelection(selectedDay);
+        console.log(`시작 시간 설정: ${selectedBlockTime}`);
       }
+  
+      // 끝 시간은 항상 업데이트
+      if (!isSelected) {
+        setSelectedEndTime(selectedBlockTime);
+      } else {
+        // 시간 선택이 해제될 경우에도 끝 시간 갱신
+        const remainingKeys = Object.keys(updatedSelection).filter((key) => updatedSelection[key]);
+        const maxHour = Math.max(...remainingKeys.map((key) => parseInt(key.split('-')[1], 10)));
+        setSelectedEndTime(hours[maxHour] || null);
+      }
+  
+      // 선택된 시간 변경 시 바로 부모로 전송
+      changeTimeSelection();
+  
+      // console.log(`선택한 날짜: ${selectedDay}, 선택한 시간: ${selectedBlockTime}`);
+      return updatedSelection;
     });
-
-    // 선택된 블록의 시간 계산 후 로그 출력
-    const selectedBlockTime = hours[hourIndex];
-    console.log(`선택한 날짜: ${dates[visibleStartDay + dayIndex]}, 선택한 시간: ${selectedBlockTime}`);
   };
 
   const onGestureEvent = (dayIndex, event) => {
@@ -272,9 +307,6 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
 
     // 날짜 및 시간 데이터를 변환해서 형식에 맞게 가공
     const formattedData = formatTimeData(start, end, selectedDate);
-  
-    // 부모 컴포넌트로 전달하는 함수 호출 (props로 전달된 onSubmit 호출)
-    // props.onSubmit(formattedData);
 
     setSelectedDayIndex(null); // 날짜 선택 해제
     setSelectedDate(null);     // 날짜 상태 초기화

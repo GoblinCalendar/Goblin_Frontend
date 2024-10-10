@@ -77,12 +77,30 @@ const EventCompleteScreen = () => {
 
   // 시간을 AM/PM 형식으로 변환하는 함수
   const convertTimeToAmPm = (time) => {
-    const [hourMinute, ampm] = time.split(" ");
-    const [hour, minute] = hourMinute.split(":").map(Number);
+    // 시간 형식이 "오전 8 : 00", "오후 2 : 00" 이런 식으로 들어오는 경우 처리
+    const timeMatch = time.match(/(오전|오후)\s*(\d+)\s*:\s*(\d+)/);
+  
+    if (!timeMatch) {
+      console.error("시간 형식이 잘못되었습니다:", time);
+      return {
+        amPm: null,
+        hour: null,
+        minute: null,
+      };
+    }
+  
+    const ampm = timeMatch[1]; // 오전/오후
+    const hour = parseInt(timeMatch[2], 10); // 시
+    const minute = parseInt(timeMatch[3], 10); // 분
+  
+    // 오전/오후 처리
+    const amPm = ampm === "오전" ? "AM" : "PM";
+    const adjustedHour = amPm === "PM" && hour !== 12 ? hour % 12 + 12 : hour % 12;
+  
     return {
-      amPm: ampm === "오전" ? "AM" : "PM",
-      hour: isNaN(hour) ? null : hour % 12 === 0 ? 12 : hour % 12, // 12시간 형식
-      minute: isNaN(minute) ? 0 : minute, // NaN일 경우 0으로
+      amPm,
+      hour: adjustedHour,
+      minute,
     };
   };
 
@@ -96,6 +114,9 @@ const EventCompleteScreen = () => {
 
     const start = convertTimeToAmPm(startTime);
     const end = convertTimeToAmPm(endTime);
+
+    console.log("start", start);
+    console.log("end", end);
 
     let placeField = place;
     let linkField = null;
@@ -134,6 +155,7 @@ const EventCompleteScreen = () => {
     const token = await AsyncStorage.getItem("accessToken");
     const eventData = prepareEventDetailsForApi();
 
+    console.log("eventData", eventData);
     try {
       await apiClient.post(`/api/groups/${groupId}/calendar`, eventData, {
         headers: {

@@ -1,8 +1,8 @@
-import React, { useRef, useState  } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import colors from '../../styles/colors';
 import TimeConfirmGrid from '../../components/TimeConfirmGrid';
-import { useRouter } from 'expo-router';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 import ButtonComponent from '../../components/Button';
 import CandidateListModal from '../../components/CandidateListModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,11 +15,15 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ScheduleConfirmScreen = () => {
   const router = useRouter();
   const maxParticipantsToShow = 6;
+  const [participants, setParticipants] = useState([]);
   const extraParticipants = participants.length - maxParticipantsToShow;
-
-  const [headerText, setHeaderText] = useState('2차 대면 회의'); // 이거불러오기
+  const [headerText, setHeaderText] = useState('프론트엔드 회의'); // 이거불러오기
   const [isModalVisible, setModalVisible] = useState(false);
   
+  // const { groupId, calendarId } = useGlobalSearchParams();
+  const groupId = '4';  // 임의의 그룹 ID
+  const calendarId = '65';  // 임의의 캘린더 ID
+
   // TimeConfirmGrid에 접근하기 위한 ref 생성
   const timeConfirmGridRef = useRef(null);
 
@@ -27,8 +31,6 @@ const ScheduleConfirmScreen = () => {
     const fetchParticipants = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        const groupId = {groupId};  // 그룹 ID를 실제 값으로 교체
-        const calendarId = {calendarId};  // 캘린더 ID를 실제 값으로 교체
 
         const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/participants`, {
           headers: {
@@ -56,9 +58,9 @@ const ScheduleConfirmScreen = () => {
             <View style={styles.header}>
             <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>1시간 30분</Text> {/*가져 오기*/}
+                <Text style={styles.meetingDuration}>2시간 00분</Text> {/*가져 오기*/}
                 <Text style={styles.devide}> | </Text>
-                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text> {/*가져 오기*/}
+                <Text style={styles.meetingDate}>24.10.14 ~ 24.10.18</Text> {/*가져 오기*/}
             </View>
             <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (

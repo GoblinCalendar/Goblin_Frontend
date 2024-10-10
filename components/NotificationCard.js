@@ -105,10 +105,7 @@ const NotificationCard = () => {
     } else if (type === 'MUST_FIX_EVENT') {
       // groupId와 calendarId를 쿼리 매개변수로 전달
       setShowNotification(false);
-      router.push({
-        pathname: '/HostEventConfirm',
-        params: { groupId, calendarId }
-      });
+      router.push(`/HostEventConfirm?groupId=${groupId}&calendarId=${calendarId}`);
     } else if (type === 'EVENT_FIXED') {
       setShowNotification(false);  // 알림을 닫음
     }
@@ -155,10 +152,10 @@ const NotificationCard = () => {
             <Text style={styles.title}>{eventName}</Text>
             <View style={styles.detailsRow}>
               <CalendarSVG width={12} height={12} />
-              <Text style={styles.date}>{details1}</Text>
+              <Text style={styles.date}>24.10.16</Text>
               <Text style={styles.divider}>ㅣ</Text>
               <ClockSVG width={12} height={12} />
-              <Text style={styles.time}>{details2}</Text>
+              <Text style={styles.time}>오후 2시 ~ 오후 4시</Text>
             </View>
             <TouchableOpacity style={styles.confirmButtonContainer} onPress={handleConfirmPress}>
               <CheckButtonSVG style={styles.confirmButton} />
@@ -267,6 +264,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   date: {
+    color: colors.fontGray,
+    fontSize: 10,
+  },
+  time: {
     color: colors.fontGray,
     fontSize: 10,
   },
