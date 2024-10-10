@@ -3,7 +3,7 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import { TouchableOpacity } from "react-native";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../styles/colors";
-import { memo, useContext, useEffect, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import apiClient from "../lib/api";
 import { UserContext } from "../context/UserContext";
 import { SwipeListButton } from "./SwipeListButton";
@@ -15,6 +15,8 @@ import PlusCircleWhite from "../assets/plus_circle_white.svg";
 import Trash from "../assets/trash.svg";
 import Door from "../assets/door.svg";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useAsyncStorage from "../hooks/useAsyncStorage";
 
 export const SidebarDrawer = memo(({ navigation }) => {
   //더미
@@ -29,12 +31,14 @@ export const SidebarDrawer = memo(({ navigation }) => {
     queryKey: ["getGroups"],
     queryFn: () =>
       apiClient.get(`/api/groups`).then((response) =>
-        response.data?.map((d) => ({
-          key: d?.groupId,
-          id: d?.groupId,
-          name: d?.groupName,
-          createdBy: d?.createdBy,
-        }))
+        response.data
+          ?.filter((d) => d?.groupName !== "개인") //TODO groupName 대신 개별 attribute로
+          ?.map((d) => ({
+            key: d?.groupId,
+            id: d?.groupId,
+            name: d?.groupName,
+            createdBy: d?.createdBy,
+          }))
       ),
   });
 
@@ -50,7 +54,7 @@ export const SidebarDrawer = memo(({ navigation }) => {
   //   });
   // }, []);
 
-  const { username, groupId, setGroupId } = useContext(UserContext);
+  const { username, personalGroupId, groupId, setGroupId, setGroupName } = useContext(UserContext);
   // TODO 리렌더링 줄이기
   // console.log(username);
 
@@ -62,6 +66,12 @@ export const SidebarDrawer = memo(({ navigation }) => {
   const [inviteLink, setInviteLink] = useState(null);
 
   const queryClient = useQueryClient();
+
+  // 캘린더 변경
+  const switchGroup = (id, name) => {
+    setGroupId(id);
+    setGroupName(name);
+  };
 
   // 팀 캘린더 생성
   const createNewCalendar = () => {
@@ -94,7 +104,7 @@ export const SidebarDrawer = memo(({ navigation }) => {
   };
 
   const groupsDeleteMutation = useMutation({
-    mutationFn: (data) => apiClient.delete(`/api/groups/${data?.id}`, { groupId: data?.id }),
+    mutationFn: (data) => apiClient.delete(`/api/groups/group/${data?.id}`, { groupId: data?.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getGroups"] });
     },
@@ -187,13 +197,15 @@ export const SidebarDrawer = memo(({ navigation }) => {
           <Text style={drawerStyles.calendarLabel}>내 캘린더</Text>
           <Pressable
             style={[drawerStyles.calendarContainer, { paddingLeft: 4 }]}
-            onPress={() => setGroupId(null)}
+            onPress={() => switchGroup(personalGroupId, `${username}님의 캘린더`)}
           >
-            {groupId === null && <View style={drawerStyles.calendarIndicator}></View>}
+            {(groupId === null || groupId === personalGroupId) && (
+              <View style={drawerStyles.calendarIndicator}></View>
+            )}
             <Text
               style={[
                 drawerStyles.calendarText,
-                ...(groupId === null
+                ...(groupId === null || groupId === personalGroupId
                   ? [
                       {
                         color: colors.skyBlue,
@@ -216,7 +228,7 @@ export const SidebarDrawer = memo(({ navigation }) => {
             renderItem={(data, rowMap) => (
               <Pressable
                 style={drawerStyles.calendarContainer}
-                onPress={() => setGroupId(data?.item?.id)}
+                onPress={() => switchGroup(data?.item?.id, data?.item?.name)}
               >
                 {groupId === data?.item?.id && <View style={drawerStyles.calendarIndicator}></View>}
                 {data?.item?.id === editName?.id ? (

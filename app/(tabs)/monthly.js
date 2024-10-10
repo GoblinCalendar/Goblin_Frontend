@@ -24,6 +24,7 @@ import { UserContext } from "../../context/UserContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToAmPm } from "../../lib/convertToAmPm";
 import { getDay } from "../../lib/getDay";
+import { convertPinnedToMarkedDates } from "../../lib/convertPinnedToMarkedDates";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -37,8 +38,10 @@ export default function Monthly() {
 
   const queryClient = useQueryClient();
 
-  //개인 일반 일정
-  const { data: markedDates } = useQuery({
+  const { groupId, personalGroupId } = useContext(UserContext);
+
+  //일반 일정
+  const { data: generalMarkedDates } = useQuery({
     queryKey: ["getGeneralEvents"],
     queryFn: () =>
       apiClient
@@ -48,7 +51,32 @@ export default function Monthly() {
             response.data?.map((d) => ({ ...d, type: "general", creator: username }))
           )
         ),
+    enabled: !!today && groupId === personalGroupId,
+    initialData: {},
   });
+
+  //고정 일정
+  const { data: pinnedMarkedDates } = useQuery({
+    queryKey: ["getPinnedEvents", currentMonth, groupId],
+    queryFn: async () => {
+      const query =
+        groupId === personalGroupId
+          ? "/api/fixed/personal-group/schedules"
+          : `/api/fixed/group/${groupId}`;
+
+      return apiClient.get(query).then((response) =>
+        convertPinnedToMarkedDates(
+          response.data?.filter((d) => !!d?.public),
+          currentMonth,
+          "pinned"
+        )
+      );
+    },
+    enabled: !!today && groupId === personalGroupId,
+    initialData: {},
+  });
+
+  //고정 일정
 
   // 2-2, 2-3
   const [modalMode, setModalMode] = useState(null);
@@ -81,19 +109,26 @@ export default function Monthly() {
     ],
   });
 
-  //개인 고정 일정
+  // 고정 일정 불러오기
   const { data: pinnedEvents } = useQuery({
-    queryKey: ["getPinnedEvents"],
-    queryFn: () =>
-      apiClient.get(`/api/fixed/user`).then((response) =>
+    queryKey: ["getPinnedEvents", groupId],
+    queryFn: async () => {
+      const query =
+        groupId === personalGroupId
+          ? `/api/fixed/personal-group/schedules`
+          : `/api/fixed/group/${groupId}`;
+
+      return apiClient.get(query).then((response) =>
         response.data?.map((d) => ({
           id: d?.id,
+          groupId: d?.groupId,
           name: d?.scheduleName,
           color: `#${d?.color}`,
           active: d?.public,
-          ...d,
         }))
-      ),
+      );
+    },
+    enabled: !!groupId,
   });
 
   // const [pinnedEvents, setPinnedEvents] = useState([
@@ -137,28 +172,11 @@ export default function Monthly() {
 
   // 고정 일정 토글
   const togglePinnedEvent = (id) => {
-    const getPinnedEventsById = pinnedEvents.find((e) => e.id === id);
-
-    getPinnedEventsById.public = !getPinnedEventsById.public;
-
-    console.log(getPinnedEventsById);
-
-    pinnedEventMutation.mutate({
-      scheduleName: getPinnedEventsById?.scheduleName,
-      dayOfWeek: getPinnedEventsById?.dayOfWeek,
-      amPmStart: getPinnedEventsById?.amPmStart,
-      startHour: getPinnedEventsById?.startHour,
-      startMinute: getPinnedEventsById?.startMinute,
-      amPmEnd: getPinnedEventsById?.amPmEnd,
-      endHour: getPinnedEventsById?.endHour,
-      endMinute: getPinnedEventsById?.endMinute,
-      colorCode: getPinnedEventsById?.colorCode,
-      public: getPinnedEventsById.public,
-    });
+    pinnedEventToggleMutation.mutate({ id });
   };
 
-  const pinnedEventMutation = useMutation({
-    mutationFn: (data) => apiClient.put(`/api/fixed/${data.id}/update`, data),
+  const pinnedEventToggleMutation = useMutation({
+    mutationFn: (data) => apiClient.put(`/api/fixed/${data.id}/group/${groupId}/toggle-public`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
     },
@@ -209,11 +227,7 @@ export default function Monthly() {
 
       return (
         <View style={styles.container}>
-          <CalendarNavbar
-            title="성북뭉게해커톤"
-            currentMonth={currentMonth}
-            onPress={() => navigation.openDrawer()}
-          />
+          <CalendarNavbar currentMonth={currentMonth} onPress={() => navigation.openDrawer()} />
           <CalendarProvider
             date={`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`}
             onMonthChange={(date) => setCurrentMonth(date?.month)}
@@ -244,7 +258,7 @@ export default function Monthly() {
                 },
               }}
               weekHeight={1500} /* ! 임의의 큰 값 */
-              markedDates={markedDates}
+              markedDates={{ ...generalMarkedDates, ...pinnedMarkedDates }}
               calendarStyle={styles.calendar}
               headerStyle={styles.calendarHeader}
               initialPosition="open"
@@ -292,13 +306,21 @@ export default function Monthly() {
                         date: `${date?.month}월 ${date?.day}일 (${getDay(
                           new Date(date?.dateString)?.getDay()
                         )})`,
-                        events: markedDates?.[date?.dateString],
+                        events: { ...generalMarkedDates, ...pinnedMarkedDates }?.[date?.dateString],
                       });
                       setModalMode("view");
                     }}
                   >
                     {(marking?.length > 3 ? marking?.slice(0, 3) : marking)?.map((mark) => (
-                      <View key={mark?.title} style={styles.dayMarker}>
+                      <View
+                        key={mark?.title}
+                        style={[
+                          styles.dayMarker,
+                          ...(mark?.type === "pinned"
+                            ? [styles.dayMarkerPinned, { backgroundColor: mark?.color }]
+                            : []),
+                        ]}
+                      >
                         {mark?.type === "general" && <View style={styles.dayMarkerGeneral}></View>}
                         <Text style={styles.dayMarkerText} numberOfLines={1}>
                           {mark?.title}
@@ -319,7 +341,7 @@ export default function Monthly() {
           </CalendarProvider>
         </View>
       );
-    }, [currentMonth, markedDates]);
+    }, [currentMonth, generalMarkedDates, pinnedMarkedDates]);
 
   return (
     <>
@@ -561,6 +583,9 @@ const styles = StyleSheet.create({
     width: 1,
     height: 10,
     backgroundColor: "#CCD7E5",
+  },
+  dayMarkerPinned: {
+    borderRadius: 4,
   },
   dayMarkerText: {
     color: "#505050",
