@@ -7,41 +7,14 @@ import ButtonComponent from '../components/Button';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../lib/api';
+import CandidateListConfirmModal from './CandidateListConfirmModal';
 
-// /api/groups/{groupId}/calendar/{calendarId}/confirm
-
-// 임시 데이터
-// const scheduleData = [
-//     {
-//       id: '1',
-//       date: '9.12 (목)',
-//       time: '오후 12시 ~ 오후 9시',
-//       participants: ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '김현서', '김가은'],
-//     },
-//     {
-//       id: '2',
-//       date: '9.12 (목)',
-//       time: '오후 12시 ~ 오후 9시',
-//       participants: ['홍길동', '김철수', '이영희', '박민수', '최진영'],
-//     },
-//     {
-//       id: '3',
-//       date: '9.12 (목)',
-//       time: '오후 12시 ~ 오후 9시',
-//       participants: ['홍길동', '김철수', '이영희', '박민수'],
-//     },
-//     {
-//       id: '4',
-//       date: '9.12 (목)',
-//       time: '오후 12시 ~ 오후 9시',
-//       participants: ['홍길동', '김철수'],
-//     },
-// ];
-
-const CandidateListModal = ({ visible, toggleModal, groupId, calendarId }) => {
+const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meetingDuration}) => {
     const [selectedId, setSelectedId] = useState(null);
-    const [expectedDuration, setExpectedDuration] = useState('3');
+    const [selectedSchedule, setSelectedSchedule] = useState(null); // 선택된 일정 저장
+    const [expectedDuration, setExpectedDuration] = useState(meetingDuration);
     const [scheduleData, setScheduleData] = useState([]); // API에서 받아올 데이터
+    const [isConfirmModalVisible, setConfirmModalVisible] = useState(false); // 확정 모달의 상태
     const router = useRouter();
 
     useEffect(() => {
@@ -66,13 +39,15 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId }) => {
 
     const handleSelect = (id) => {
         setSelectedId(id);  // 하나의 아이템만 선택할 수 있도록 설정
+        const selected = scheduleData.find((item) => item.id === id); // 선택된 일정 찾기
+        setSelectedSchedule(selected); // 선택된 일정 저장
     };
 
     const handleApply = () => {
         toggleModal();  // 모달을 닫고
         setTimeout(() => {
-            router.push('/monthly');  // 홈으로 이동
-        }, 300);  // 모달이 닫히는 애니메이션 시간이 지나고 홈으로 이동
+          setConfirmModalVisible(true); // 선택하기 버튼 누르면 확정 모달을 띄움
+        }, 300); 
     };
 
     const renderItem = ({ item }) => {
@@ -116,40 +91,52 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId }) => {
     };
 
   return (
-    <Modal
-      isVisible={visible}
-      useNativeDriver={true}
-      onBackdropPress={toggleModal}
-      onBackButtonPress={toggleModal}
-      animationIn="slideInUp"
-      animationOut="slideOutDown"
-      animationInTiming={800}
-      animationOutTiming={800}
-      style={styles.modal}
-    >
-      <View style={styles.container}>
-        <View style={styles.modalStart}></View>
-        
-        <Text style={styles.titleText}>일정 후보 리스트</Text>
-        <Text style={styles.subTitleText}>예상 일정 소요 시간 : {expectedDuration}시간</Text>
+    <View>
+      <Modal
+        isVisible={visible}
+        useNativeDriver={true}
+        onBackdropPress={toggleModal}
+        onBackButtonPress={toggleModal}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        animationInTiming={800}
+        animationOutTiming={800}
+        style={styles.modal}
+      >
+        <View style={styles.container}>
+          <View style={styles.modalStart}></View>
+          
+          <Text style={styles.titleText}>일정 후보 리스트</Text>
+          <Text style={styles.subTitleText}>예상 일정 소요 시간 : {expectedDuration}</Text>
 
-        {/* 리스트 */}
-        <FlatList
-          data={scheduleData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          extraData={selectedId}
-        />
+          {/* 리스트 */}
+          <FlatList
+            data={scheduleData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            extraData={selectedId}
+          />
 
-        {/* 선택하기 버튼 */}
-        <ButtonComponent
-          title="선택하기"
-          style={styles.applyButton}
-          isActive={selectedId !== null}
-          onPress={handleApply}
-        />
-      </View>
-    </Modal>
+          {/* 선택하기 버튼 */}
+          <ButtonComponent
+            title="선택하기"
+            style={styles.applyButton}
+            // isActive={selectedId !== null}
+            isActive={true}
+            onPress={handleApply}
+          />
+        </View>
+      </Modal>
+
+      {/* CandidateListConfirmModal을 모달로 추가 */}
+      <CandidateListConfirmModal
+        visible={isConfirmModalVisible}
+        toggleModal={() => setConfirmModalVisible(false)}
+        selectedSchedule={selectedSchedule} // 선택된 일정 전달
+        expectedDuration={expectedDuration}
+      />
+    </View>
+
   );
 };
 

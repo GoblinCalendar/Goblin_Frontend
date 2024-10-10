@@ -22,9 +22,9 @@ const ScheduleScreen = () => {
   const [selectedTimeRanges, setSelectedTimeRanges] = useState([]); // 선택된 시간 범위 상태 추가
   const timeSelectionGridRef = useRef(null);  // TimeSelectionGrid에 대한 ref 생성
 
-  // const { groupId, calendarId } = useGlobalSearchParams();
-  const groupId = '2';  // 임의의 그룹 ID
-  const calendarId = '81';  // 임의의 캘린더 ID
+  const { groupId, calendarId } = useGlobalSearchParams();
+  // const groupId = '2';  // 임의의 그룹 ID
+  // const calendarId = '81';  // 임의의 캘린더 ID
 
   console.log("Group ID:", groupId);
   console.log("Calendar ID:", calendarId);

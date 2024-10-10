@@ -17,7 +17,9 @@ const ScheduleConfirmScreen = () => {
   const maxParticipantsToShow = 6;
   const [participants, setParticipants] = useState([]);
   const extraParticipants = participants.length - maxParticipantsToShow;
-  const [headerText, setHeaderText] = useState('프론트엔드 회의'); // 이거불러오기
+  const [headerText, setHeaderText] = useState(''); // 헤더 텍스트 상태
+  const [meetingDuration, setMeetingDuration] = useState(''); // 회의 시간 상태
+  const [meetingDate, setMeetingDate] = useState(''); // 선택된 날짜 상태
   const [isModalVisible, setModalVisible] = useState(false);
   
   // const { groupId, calendarId } = useGlobalSearchParams();
@@ -48,6 +50,56 @@ const ScheduleConfirmScreen = () => {
     fetchParticipants();
   }, []);
 
+  useEffect(() => {
+    const fetchCalendarDetails = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        
+        // 그룹과 캘린더의 세부 정보 API 호출
+        const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // API 응답을 로그로 출력
+        console.log('캘린더 API 응답:', response.data);
+
+        // headerText 업데이트 (일정 제목)
+        setHeaderText(response.data.title);
+  
+        // meetingDuration 업데이트 (분을 시간으로 변환)
+        const totalMinutes = response.data.time;
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        setMeetingDuration(`${hours}시간 ${minutes === 0 ? '00' : minutes}분`);
+  
+        // meetingDate 업데이트 (선택된 날짜 범위)
+        const selectedDates = response.data.selectedDates;
+        const startDate = new Date(selectedDates[0]);
+        const endDate = new Date(selectedDates[selectedDates.length - 1]);
+        const formattedStartDate = `${startDate.getFullYear()}.${startDate.getMonth() + 1}.${startDate.getDate()}`;
+        const formattedEndDate = `${endDate.getFullYear()}.${endDate.getMonth() + 1}.${endDate.getDate()}`;
+        setMeetingDate(`${formattedStartDate} ~ ${formattedEndDate}`);
+  
+      } catch (error) {
+        console.error('캘린더 세부 정보를 가져오는 중 오류 발생:', error);
+  
+        // 에러 응답 본문을 로그에 출력
+        if (error.response) {
+          console.error('에러 상태 코드:', error.response.status); // 상태 코드
+          console.error('에러 메시지:', error.response.data); // 에러 응답 본문
+        } else {
+          console.error('응답을 받지 못했습니다. 네트워크 오류일 수 있습니다.');
+        }
+      }
+    };
+  
+    if (groupId && calendarId) {
+      fetchCalendarDetails();  // groupId와 calendarId가 있을 때 캘린더 세부 정보 가져옴
+    }
+  }, [groupId, calendarId]);
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible); // 모달 열고 닫기 토글
   };
@@ -58,9 +110,9 @@ const ScheduleConfirmScreen = () => {
             <View style={styles.header}>
             <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>2시간 00분</Text> {/*가져 오기*/}
+                <Text style={styles.meetingDuration}>{meetingDuration}</Text>
                 <Text style={styles.devide}> | </Text>
-                <Text style={styles.meetingDate}>24.10.14 ~ 24.10.18</Text> {/*가져 오기*/}
+                <Text style={styles.meetingDate}>{meetingDate}</Text>
             </View>
             <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (
@@ -77,7 +129,7 @@ const ScheduleConfirmScreen = () => {
 
         <View style={styles.grayBG}>
             {/* 시간 선택 그리드 컴포넌트 사용 */}
-            <TimeConfirmGrid ref={timeConfirmGridRef}/>
+            <TimeConfirmGrid ref={timeConfirmGridRef} groupId={groupId} calendarId={calendarId} />
 
             <View style={styles.footer}>
                 <ButtonComponent 
@@ -93,6 +145,9 @@ const ScheduleConfirmScreen = () => {
         <CandidateListModal
             visible={isModalVisible}
             toggleModal={toggleModal}
+            groupId={groupId} 
+            calendarId={calendarId}
+            meetingDuration={meetingDuration}
         />
     </View>
   );
