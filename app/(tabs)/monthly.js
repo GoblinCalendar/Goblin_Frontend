@@ -210,7 +210,7 @@ export default function Monthly() {
       return (
         <View style={styles.container}>
           <CalendarNavbar
-            title="성북뭉게해커톤"
+            title="강북뭉게구름톤"
             currentMonth={currentMonth}
             onPress={() => navigation.openDrawer()}
           />

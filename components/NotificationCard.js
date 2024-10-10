@@ -100,12 +100,11 @@ const NotificationCard = () => {
 
     if (type === 'EVENT_CREATED') {
       // groupId와 calendarId를 쿼리 매개변수로 전달
-      router.push({
-        pathname: '/joinEventGuestView',
-        params: { groupId, calendarId }
-      });
+      setShowNotification(false);
+      router.push(`/joinEventGuestView?groupId=${groupId}&calendarId=${calendarId}`);
     } else if (type === 'MUST_FIX_EVENT') {
       // groupId와 calendarId를 쿼리 매개변수로 전달
+      setShowNotification(false);
       router.push({
         pathname: '/HostEventConfirm',
         params: { groupId, calendarId }

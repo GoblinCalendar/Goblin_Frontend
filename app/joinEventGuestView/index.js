@@ -1,28 +1,52 @@
-// ScheduleScreen.js
-import React, { useRef, useState  } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import colors from '../../styles/colors';
 import TimeSelectionGrid from '../../components/TimeSelectionGrid';
-import { useRouter } from 'expo-router';
+import { useRouter, useGlobalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../../lib/api';
 
-const participants = ['홍길동', '김철수', '이영희', '박민수', '최진영', '정다은', '이현우'];
-
 // /api/groups/{groupId}/calendar/{calendarId}/available-time
-// /api/groups/{groupId}/calendar/{calendarId}/participants
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const ScheduleScreen = () => {
   const router = useRouter();
   const maxParticipantsToShow = 6;
+  const [participants, setParticipants] = useState([]);  // 참가자 데이터를 저장할 상태
   const extraParticipants = participants.length - maxParticipantsToShow;
 
-  const [headerText, setHeaderText] = useState('2차 대면 회의');
-  
-  // TimeSelectionGrid에 접근하기 위한 ref 생성
-  const timeSelectionGridRef = useRef(null);
+  const [headerText, setHeaderText] = useState('뭉게구름 해커톤'); // 헤더 텍스트 상태
+  const timeSelectionGridRef = useRef(null);  // TimeSelectionGrid에 대한 ref 생성
+
+  const { groupId, calendarId } = useGlobalSearchParams();
+
+  console.log("Group ID:", groupId);
+  console.log("Calendar ID:", calendarId);
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        // 참가자 정보를 API로 호출
+        const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/participants`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // 참가자 이름만 추출 후 중복 제거
+        const uniqueParticipants = [...new Set(response.data.map(participant => participant.username))];
+
+        setParticipants(uniqueParticipants);
+      } catch (error) {
+        console.error('참가자 정보를 가져오는 중 오류 발생:', error);
+      }
+    };
+
+    if (groupId && calendarId) {
+      fetchParticipants();  // groupId와 calendarId가 있을 때 참가자 데이터를 가져옴
+    }
+  }, [groupId, calendarId]);
 
   // 일정 등록 완료 버튼을 눌렀을 때 호출되는 함수
   const handleSubmit = () => {
@@ -33,10 +57,7 @@ const ScheduleScreen = () => {
   // 초기화 버튼을 눌렀을 때 호출되는 함수
   const handleReset = () => {
     if (timeSelectionGridRef.current) {
-      console.log('ref is working');
       timeSelectionGridRef.current.resetSelection();  // 선택한 시간 초기화
-    } else {
-      console.log('ref is null');
     }
   };
 
@@ -46,9 +67,9 @@ const ScheduleScreen = () => {
             <View style={styles.header}>
             <Text style={styles.headerText}>{headerText}</Text>
             <View style={styles.headerDetails}>
-                <Text style={styles.meetingDuration}>1시간 30분</Text>
-                <Text style={styles.devide}> | </Text>
-                <Text style={styles.meetingDate}>24.09.10 ~ 24.09.15</Text>
+                <Text style={styles.meetingDuration}>2시간 00분</Text>
+                <Text style={styles.devide}> |   </Text>
+                <Text style={styles.meetingDate}>24.10.07 ~ 24.10.12</Text>
             </View>
             <View style={styles.participantContainer}>
                 {participants.slice(0, maxParticipantsToShow).map((participant, index) => (
@@ -65,7 +86,7 @@ const ScheduleScreen = () => {
 
         <View style={styles.grayBG}>
             {/* 시간 선택 그리드 컴포넌트 사용 */}
-            <TimeSelectionGrid ref={timeSelectionGridRef}/>
+            <TimeSelectionGrid ref={timeSelectionGridRef} calendarId={calendarId}/>
 
             <View style={styles.footer}>
               <TouchableOpacity style={styles.resetButton} onPress={handleReset}>

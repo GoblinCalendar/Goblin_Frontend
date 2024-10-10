@@ -1,12 +1,12 @@
-import React, { useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import colors from '../styles/colors';
 import CustomArrowButton from './ArrowButton';
 import TimeDragBar from './TimeDragBar';
 import TimeSelectionModal from './TimeSelectionModal';
-
-// /api/groups/{groupId}/calendar
+import apiClient from '../lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 시간 그리드 생성 함수
 const generateTimeGrid = (start, end) => {
@@ -27,11 +27,11 @@ const generateTimeGrid = (start, end) => {
 };
 
 // const time = ['11:00', '18:00']; 이렇게 데이터로 들어옴
-const time = ['11:00', '21:00'];
-const hours = generateTimeGrid(time[0], time[1]);
+const time = ['11:30', '19:30'];
+// const hours = generateTimeGrid(time[0], time[1]);
 
-const days = ['화', '수', '목', '금', '일', '월'];
-const dates = ['9. 10', '9. 11', '9. 12', '9. 13', '9. 15', '9.20'];
+// const days = ['화', '수', '목', '금', '일', '월'];
+// const dates = ['9. 10', '9. 11', '9. 12', '9. 13', '9. 15', '9.20'];
 
 const TimeSelectionGrid = forwardRef((props, ref) => {
   const [visibleStartHour, setVisibleStartHour] = useState(0);
@@ -43,6 +43,11 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
   const [lastSelectedBlock, setLastSelectedBlock] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const [days, setDays] = useState([]);
+  const [dates, setDates] = useState([]);
+  // const [time, setTime] = useState([]);
+  const [hours, setHours] = useState([]);
+
   // 초기화 함수
   const resetSelection = () => {
     setSelectedTimes({});
@@ -52,6 +57,55 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     resetSelection,
   }));
+
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const response = await apiClient.get(`/api/groups/calendar/${props.calendarId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // API 응답 데이터 로그 출력
+        console.log("API 응답 데이터: ", response.data);
+
+        const data = response.data;
+        const selectedDates = data.selectedDates; // ['2024-10-10', '2024-10-11'] 형태
+
+        // selectedDates에서 요일과 날짜 추출
+        const parsedDays = selectedDates.map(date => {
+          const day = new Date(date).toLocaleDateString('ko-KR', { weekday: 'short' });
+          return day;
+        });
+
+        const parsedDates = selectedDates.map(date => {
+          const parsedDate = new Date(date).toLocaleDateString('ko-KR', {
+            month: 'numeric',
+            day: 'numeric'
+          });
+          return parsedDate.replace(/\.$/, ''); // 마지막 마침표만 제거
+        });
+
+        // startDateTime과 endDateTime을 통해 시간 범위 추출
+        // const startTime = new Date(data.selectedDateTimes[0].startDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+        // const endTime = new Date(data.selectedDateTimes[0].endDateTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        setDays(parsedDays);
+        setDates(parsedDates);
+        // setTime([startTime, endTime]); // 시간 배열 설정
+
+        // 시간을 기반으로 그리드 생성
+        const generatedHours = generateTimeGrid(time[0], time[1]);
+        setHours(generatedHours); // 시간 그리드를 상태로 설정
+      } catch (error) {
+        console.error('캘린더 데이터를 가져오는 중 오류 발생:', error);
+      }
+    };
+
+    fetchCalendarData();
+  }, [props.calendarId]);
 
   // 시간 범위가 8시간을 넘으면 arrowButton 표시
   const showHourArrows = hours.length > 32;
@@ -220,7 +274,7 @@ const TimeSelectionGrid = forwardRef((props, ref) => {
     const formattedData = formatTimeData(start, end, selectedDate);
   
     // 부모 컴포넌트로 전달하는 함수 호출 (props로 전달된 onSubmit 호출)
-    props.onSubmit(formattedData);
+    // props.onSubmit(formattedData);
 
     setSelectedDayIndex(null); // 날짜 선택 해제
     setSelectedDate(null);     // 날짜 상태 초기화
