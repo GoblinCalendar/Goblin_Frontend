@@ -9,6 +9,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getColorsByColorId } from "../../lib/getColorsByColorId";
 import apiClient from "../../lib/api";
 
+import ClockGray from "../../assets/clock_gray.svg";
+
 export default function Daily() {
   const [today, setToday] = useState(new Date());
 
@@ -112,7 +114,7 @@ export default function Daily() {
 
   const DailyComponent = ({ navigation }) => {
     // 일별 일정 조회
-    const { data: schedule = [], isStale } = useQuery({
+    const { data: schedule = [] } = useQuery({
       queryKey: ["getDailyEvents"],
       queryFn: () =>
         apiClient
@@ -131,7 +133,7 @@ export default function Daily() {
                 title: d?.title,
                 startTime: `${startTimeDate?.getHours()}:${startTimeDate?.getMinutes()}`,
                 endTime: `${endTimeDate?.getHours()}:${endTimeDate?.getMinutes()}`,
-                backgroundColor: getColorsByColorId(d?.colorCode),
+                backgroundColor: `#${d?.color}`,
               };
             })
           ),
@@ -164,15 +166,14 @@ export default function Daily() {
             position: "relative",
             flex: 1,
             height: 60,
-            marginBottom: -8,
+            marginTop: 8,
             paddingRight: 4,
             paddingTop: 2,
-            borderBottomWidth: 0.5,
-            borderBottomColor: "#E3EFF5",
+            borderTopWidth: 0.5,
+            borderTopColor: "#E3EFF5",
           },
           timeScheduleBlock: {
             position: "absolute",
-            marginTop: 8,
             paddingHorizontal: 8,
             paddingBottom: 8,
             paddingTop: 4,
@@ -180,6 +181,21 @@ export default function Daily() {
           },
           timeScheduleBlockText: {
             color: "#505050",
+            fontSize: 11,
+            fontWeight: "400",
+            lineHeight: 12,
+            letterSpacing: -0.275,
+          },
+          timeIndicatorWrapper: {
+            position: "absolute",
+            top: 4,
+            right: 8,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 2,
+          },
+          timeIndicator: {
+            color: colors.font04Gray,
             fontSize: 11,
             fontWeight: "400",
             lineHeight: 12,
@@ -210,6 +226,26 @@ export default function Daily() {
                       4;
                     const xOffset = 4 + (blockWidth + 4) * schedule?.push;
 
+                    const startTimeHour = schedule?.startTime?.split(":")?.[0] % 12 || 12;
+                    const startTimeMinute = String(schedule?.startTime?.split(":")?.[1])?.padStart(
+                      2,
+                      "0"
+                    );
+                    const startTimeLabel =
+                      startTimeHour < 12
+                        ? `오전 ${startTimeHour}:${startTimeMinute}`
+                        : `오후 ${startTimeHour}:${startTimeMinute}`;
+
+                    const endTimeHour = schedule?.endTime?.split(":")?.[0] % 12 || 12;
+                    const endTimeMinute = String(schedule?.endTime?.split(":")?.[1])?.padStart(
+                      2,
+                      "0"
+                    );
+                    const endTimeLabel =
+                      endTimeHour < 12
+                        ? `오전 ${endTimeHour}:${endTimeMinute}`
+                        : `오후 ${endTimeHour}:${endTimeMinute}`;
+
                     return (
                       <View
                         key={schedule?.id}
@@ -225,6 +261,12 @@ export default function Daily() {
                         ]}
                       >
                         <Text style={_styles.timeScheduleBlockText}>{schedule?.title}</Text>
+                        <View style={_styles.timeIndicatorWrapper}>
+                          <ClockGray width={12} height={12} />
+                          <Text style={_styles.timeIndicator}>
+                            {startTimeLabel} ~ {endTimeLabel}
+                          </Text>
+                        </View>
                       </View>
                     );
                   })}
@@ -235,33 +277,32 @@ export default function Daily() {
 
       return (
         <View style={styles.container}>
-          <CalendarNavbar
-            title="성북뭉게해커톤"
-            currentMonth={9}
-            onPress={() => navigation.openDrawer()}
-          />
+          <CalendarNavbar currentMonth={9} onPress={() => navigation.openDrawer()} />
           <View style={styles.dateHeaderContainer}>
             <Text style={styles.dateHeaderText}>
               {today.getDate()}일 {getDay(today.getDay())}요일
             </Text>
           </View>
-          <ScrollView style={styles.timeContainer}>
-            {[
-              0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-            ].map((hour, index) => (
-              <TimeBlock key={hour} hour={hour} />
-            ))}
-            <View style={[styles.nowSeparatorWrapper, { top: now.yOffset }]}>
-              {/* 현재 시각 */}
-              <Text style={styles.nowTimeText}>
-                {String(now.hour).padStart(2, "0")}:{String(now.minute).padStart(2, "0")}
-              </Text>
-              <View style={styles.nowSeparator}></View>
-            </View>
-          </ScrollView>
+          <View style={styles.timeWrapper}>
+            <ScrollView style={styles.timeContainer}>
+              {[
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                23,
+              ].map((hour, index) => (
+                <TimeBlock key={hour} hour={hour} />
+              ))}
+              <View style={[styles.nowSeparatorWrapper, { top: now.yOffset }]}>
+                {/* 현재 시각 */}
+                <Text style={styles.nowTimeText}>
+                  {String(now.hour).padStart(2, "0")}:{String(now.minute).padStart(2, "0")}
+                </Text>
+                <View style={styles.nowSeparator}></View>
+              </View>
+            </ScrollView>
+          </View>
         </View>
       );
-    }, [isStale ? true : undefined, now?.yOffset]);
+    }, [now?.yOffset]);
   };
 
   return <DrawerWrapper screen={DailyComponent} />;
@@ -287,9 +328,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     letterSpacing: -0.35,
   },
+  timeWrapper: { flex: 1, paddingTop: 48 },
   timeContainer: {
     position: "relative",
-    paddingTop: 48,
   },
   nowSeparatorWrapper: {
     position: "absolute",

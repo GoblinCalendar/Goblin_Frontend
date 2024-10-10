@@ -3,10 +3,13 @@ import Drawer from "../assets/drawer.svg";
 import People from "../assets/people.svg";
 import colors from "../styles/colors";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { UserContext } from "../context/UserContext";
 
-export default function CalendarNavbar({ title, currentMonth, onPress }) {
+export default function CalendarNavbar({ currentMonth, onPress }) {
   const router = useRouter();
+
+  const { groupName } = useContext(UserContext);
 
   return (
     <View style={styles.navbar}>
@@ -14,7 +17,7 @@ export default function CalendarNavbar({ title, currentMonth, onPress }) {
         <Drawer />
       </TouchableOpacity>
       <Text style={styles.title} numberOfLines={1}>
-        {title || "???"}
+        {groupName || "???"}
       </Text>
       <View style={styles.indicators}>
         <TouchableOpacity onPress={() => router.push("/memberHostView")}>

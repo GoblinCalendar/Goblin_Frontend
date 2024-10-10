@@ -26,6 +26,8 @@ export default function SignIn() {
     setUserId: setUserIdContext,
     setUsername: setUsernameContext,
     setUserRole: setUserRoleContext,
+    setGroupId: setGroupIdContext,
+    setGroupName: setGroupNameContext,
   } = useContext(UserContext);
 
   // 앱이 시작될 때 저장된 아이디와 비밀번호 가져오기
@@ -77,29 +79,35 @@ export default function SignIn() {
         password: password,
       });
 
-      const { accessToken, refreshToken, loginId, username } = response.data;
-      const userRole = "USER";
+      const { accessToken, refreshToken, loginId, username, personalGroupId } = response.data;
+
       // 콘솔에 로그인 성공 메시지와 토큰 정보 출력
       console.log("로그인 성공:", response.data);
 
-      // 토큰 저장 (AsyncStorage에 저장)
-      await AsyncStorage.setItem("accessToken", accessToken);
-      await AsyncStorage.setItem("refreshToken", refreshToken);
-      await AsyncStorage.setItem("userId", loginId);
-      await AsyncStorage.setItem("username", username);
-      await AsyncStorage.setItem("userRole", userRole);
+      // Batch AsyncStorage operations
+      const keyValuePairs = [
+        ["accessToken", accessToken],
+        ["refreshToken", refreshToken],
+        ["userId", loginId],
+        ["username", username],
+        ["userRole", "USER"],
+        ["groupId", String(personalGroupId)], // 문자열로 저장 or 앱 충돌
+        ["personalGroupId", String(personalGroupId)], //개인 캘린더로 시작
+        ["storedUserId", loginId], //아이디 저장
+        ["storedPassword", password], //비번 저장
+        ["isLoggedIn", "true"], // 로그인 상태를 AsyncStorage에 저장
+      ];
 
-      // 아이디와 비밀번호 저장 (자동 로그인을 위해)
-      await AsyncStorage.setItem("storedUserId", loginId);
-      await AsyncStorage.setItem("storedPassword", password);
+      await AsyncStorage.multiSet(keyValuePairs);
 
       // 컨텍스트 저장
       setUserIdContext(userId);
       setUsernameContext(username);
-      setUserRoleContext(userRole);
+      setUserRoleContext("USER");
 
-      // 로그인 상태를 AsyncStorage에 저장
-      await AsyncStorage.setItem("isLoggedIn", "true");
+      //개인 캘린더로 시작
+      setGroupIdContext(personalGroupId);
+      setGroupNameContext(`${username}님의 캘린더`);
 
       // 홈 화면으로 이동
       router.push("/monthly");

@@ -4,7 +4,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
+  const [personalGroupId, setPersonalGroupId] = useState(null);
   const [groupId, setGroupId] = useState(null);
+  const [groupName, setGroupName] = useState(null);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -13,12 +15,21 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const storedGroupId = await AsyncStorage.getItem("groupId");
-        const storedUserId = await AsyncStorage.getItem("userId");
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedUserRole = await AsyncStorage.getItem("userRole");
+        const keys = ["groupId", "personalGroupId", "userId", "username", "userRole"];
+        const results = await AsyncStorage.multiGet(keys);
 
-        if (storedGroupId) setGroupId(storedGroupId);
+        const [
+          [, storedGroupId],
+          [, storedPersonalGroupId],
+          [, storedUserId],
+          [, storedUsername],
+          [, storedUserRole],
+        ] = results;
+
+        setPersonalGroupId(storedPersonalGroupId);
+        setGroupId(storedPersonalGroupId); //개인 캘린더로 시작
+        setGroupName(`${storedUsername}님의 캘린더`);
+
         if (storedUserId) setUserId(storedUserId);
         if (storedUsername) setUsername(storedUsername);
         if (storedUserRole) setUserRole(storedUserRole);
@@ -33,8 +44,11 @@ export const UserProvider = ({ children }) => {
   return (
     <UserContext.Provider
       value={{
+        personalGroupId,
         groupId,
         setGroupId,
+        groupName,
+        setGroupName,
         userId,
         setUserId,
         username,
