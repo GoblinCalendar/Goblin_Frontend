@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import MemberManageButton from "../../components/MemberManageButton";
 import SvgCheckMark from "../../assets/check.svg";
 import InviteMemberModal from "../../components/InviteMemberModal";
-import InviteMemberLinkModal from "../../components/InviteMenberLinkModal";
+import InviteMemberLinkModal from "../../components/InviteMemberLinkModal";
 import apiClient from "../../lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { UserContext } from "../../context/UserContext";
