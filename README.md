@@ -2,7 +2,7 @@
   <img src="https://github.com/user-attachments/assets/89c45b3c-a2e6-4c03-a4f1-676415e0a6ae" width="200">
 </p>
 
-<h1 align="center"> <img src="https://github.com/user-attachments/assets/28d1eafd-0b44-4ebd-a4f4-95e1648e24e1" width="120"> - 프론트엔드</h1>
+<h1 align="center"> <img src="https://github.com/user-attachments/assets/28d1eafd-0b44-4ebd-a4f4-95e1648e24e1" width="150"> <br>  $\cal{Frontend}$</h1>
 
 
 <p align="center">
@@ -12,20 +12,32 @@
   <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=GitHubActions&logoColor=white" />
 </p>
 
-<h2 align="center" style="font-size: 24;"><b>🚀 프로젝트 소개</b></h2>
+<h2 align="center" style="font-size: 24"><b>🚀 프로젝트 소개</b></h2>
 
-<p align="center" style="font-size: 20;">
-  <i><span style="color:#5DAED6">모두의 일정, 한눈에 뚝딱 정리!</span></i><br><br>
+<p align="center" style="font-size: 20">
+  <i>모두의 일정, 한눈에 뚝딱 정리!</i><br><br>
   일정 조율을 간편하게 해주는 캘린더 애플리케이션입니다.<br>
   그룹을 생성해 <b>쉽고! 간편하게!</b> 일정 관리를 할 수 있습니다.
 </p>
+
+<br><br>
 
 ## 🛠️ 기술 스택
 - **React Native (Expo)**: 모바일 애플리케이션 구축
 - **JavaScript**: 애플리케이션 로직 구현
 - **GitHub Actions**: 자동 빌드 및 배포 파이프라인 관리
 
+<br><br>
+ 
+## 📦 APK 파일 다운로드
+현재 이 애플리케이션은 **Android**용 APK 파일만 제공됩니다. 아래 링크를 통해 APK 파일을 다운로드할 수 있습니다
+
+[👉여기를 클릭하여 최신 Android APK 파일 다운로드👈](https://github.com/GoblinCalendar/Goblin_Frontend/releases/download/v1.0.0/application-e502fab9-2ce1-4300-a966-7ece374adac7.apk)
+
+<br><br>
+
 ## 🌟 주요 기능
+
 ### 🔐 사용자 인증
 - JWT 기반의 사용자 인증 및 권한 관리.
   
@@ -40,6 +52,8 @@
 
 ### 💬 To-Do 관리
 - 사용자는 자신이 완료해야 할 할 일 목록을 작성하고 관리할 수 있습니다.
+
+<br><br>
 
 ## 🎨 화면 예시
 <!-- 화면 예시 이미지를 여기에 추가 -->
