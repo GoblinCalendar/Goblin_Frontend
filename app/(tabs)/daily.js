@@ -3,16 +3,20 @@ import colors from "../../styles/colors";
 import CalendarNavbar from "../../components/CalendarNavbar";
 import { convertToTimeGrid } from "../../lib/convertToTimeGrid";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getDay } from "../../lib/getDay";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { getColorsByColorId } from "../../lib/getColorsByColorId";
 import apiClient from "../../lib/api";
 
 import ClockGray from "../../assets/clock_gray.svg";
+import { UserContext } from "../../context/UserContext";
+import { all } from "axios";
 
 export default function Daily() {
   const [today, setToday] = useState(new Date());
+
+  const { groupId, personalGroupId } = useContext(UserContext);
 
   // now
   const [now, setNow] = useState({
@@ -112,31 +116,64 @@ export default function Daily() {
 
   // console.log(scheduleDummy);
 
+  // 모든 일별 일정 한번에
   const DailyComponent = ({ navigation }) => {
-    // 일별 일정 조회
-    const { data: schedule = [] } = useQuery({
-      queryKey: ["getDailyEvents"],
-      queryFn: () =>
-        apiClient
-          .get(
-            `/api/calendar/user/view-day?year=${today?.getFullYear()}&month=${
-              today?.getMonth() + 1
-            }&day=${today?.getDate()}`
-          )
-          .then((response) =>
-            response.data?.map((d) => {
-              const startTimeDate = new Date(d?.startTime);
-              const endTimeDate = new Date(d?.endTime);
+    const allDailyEvents = useQueries({
+      queries: [
+        {
+          queryKey: ["getDailyEvents"],
+          queryFn: async () => {
+            const query =
+              groupId === personalGroupId
+                ? `/api/calendar/user/view-day?year=${today?.getFullYear()}&month=${
+                    today?.getMonth() + 1
+                  }&day=${today?.getDate()}`
+                : `/api/groups/${groupId}/calendars/confirmed/day?year=${today?.getFullYear()}&month=${
+                    today?.getMonth() + 1
+                  }&day=${today?.getDate()}`;
 
-              return {
-                id: String(d?.id),
-                title: d?.title,
-                startTime: `${startTimeDate?.getHours()}:${startTimeDate?.getMinutes()}`,
-                endTime: `${endTimeDate?.getHours()}:${endTimeDate?.getMinutes()}`,
-                backgroundColor: `#${d?.color}`,
-              };
-            })
-          ),
+            return apiClient.get(query).then((response) =>
+              response.data?.map((d) => {
+                const startTimeDate = new Date(d?.startTime || d?.startDateTime);
+                const endTimeDate = new Date(d?.endTime || d?.endDateTime);
+
+                return {
+                  id: String(d?.id),
+                  title: d?.title,
+                  startTime: `${startTimeDate?.getHours()}:${startTimeDate?.getMinutes()}`,
+                  endTime: `${endTimeDate?.getHours()}:${endTimeDate?.getMinutes()}`,
+                  backgroundColor: `#${d?.color || "A5B4DB"}`,
+                };
+              })
+            );
+          },
+          enabled: !!groupId,
+          initialData: [],
+        },
+        {
+          queryKey: ["getDailyPinnedEvents"],
+          queryFn: async () => {
+            const query =
+              groupId === personalGroupId
+                ? `/api/fixed/personal-group/schedules`
+                : `/api/fixed/group/${groupId}`;
+
+            return apiClient.get(query).then((response) =>
+              response.data?.map((d) => {
+                return {
+                  id: String(d?.id),
+                  title: d?.scheduleName,
+                  startTime: d?.startTime,
+                  endTime: d?.endTime,
+                  backgroundColor: "#A5B4DB",
+                };
+              })
+            );
+          },
+          enabled: !!groupId,
+          initialData: [],
+        },
+      ],
     });
 
     return useMemo(() => {
@@ -144,7 +181,10 @@ export default function Daily() {
         TODO 성능 개선..? + convertToTimeGrid 캐싱?
       */
 
-      const [scheduleDummy, maxColumns] = convertToTimeGrid(schedule);
+      const [scheduleDummy, maxColumns] = convertToTimeGrid([
+        ...allDailyEvents?.[1]?.data,
+        ...allDailyEvents?.[0]?.data,
+      ]);
 
       const TimeBlock = ({ hour }) => {
         const _styles = StyleSheet.create({
@@ -277,7 +317,10 @@ export default function Daily() {
 
       return (
         <View style={styles.container}>
-          <CalendarNavbar currentMonth={9} onPress={() => navigation.openDrawer()} />
+          <CalendarNavbar
+            currentMonth={today?.getMonth() + 1}
+            onPress={() => navigation.openDrawer()}
+          />
           <View style={styles.dateHeaderContainer}>
             <Text style={styles.dateHeaderText}>
               {today.getDate()}일 {getDay(today.getDay())}요일

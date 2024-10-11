@@ -25,6 +25,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { convertToAmPm } from "../../lib/convertToAmPm";
 import { getDay } from "../../lib/getDay";
 import { convertPinnedToMarkedDates } from "../../lib/convertPinnedToMarkedDates";
+import { convertGroupToMarkedDates } from "../../lib/convertGroupToMarkedDates";
+import { mergeMarkedDates } from "../../lib/mergeMarkedDates";
 
 LocaleConfig.locales.kr = LocaleKR;
 LocaleConfig.defaultLocale = "kr";
@@ -42,22 +44,32 @@ export default function Monthly() {
 
   //일반 일정
   const { data: generalMarkedDates } = useQuery({
-    queryKey: ["getGeneralEvents"],
-    queryFn: () =>
-      apiClient
-        .get(`/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`)
+    queryKey: ["getGeneralEvents", groupId, currentMonth],
+    queryFn: async () => {
+      const query =
+        groupId === personalGroupId
+          ? `/api/calendar/user/view-month?year=${today.getFullYear()}&month=${currentMonth}`
+          : `/api/groups/${groupId}/calendars/confirmed/month?year=${today.getFullYear()}&month=${currentMonth}`;
+
+      return apiClient
+        .get(query)
         .then((response) =>
-          convertToMarkedDates(
-            response.data?.map((d) => ({ ...d, type: "general", creator: username }))
-          )
-        ),
-    enabled: !!today && groupId === personalGroupId,
+          groupId === personalGroupId
+            ? convertToMarkedDates(
+                response.data?.map((d) => ({ ...d, type: "general", creator: username }))
+              )
+            : convertGroupToMarkedDates(
+                response.data?.map((d) => ({ ...d, type: "group", creator: username }))
+              )
+        );
+    },
+    enabled: !!today && !!groupId,
     initialData: {},
   });
 
   //고정 일정
   const { data: pinnedMarkedDates } = useQuery({
-    queryKey: ["getPinnedEvents", groupId],
+    queryKey: ["getPinnedEvents", groupId, currentMonth],
     queryFn: async () => {
       const query =
         groupId === personalGroupId
@@ -72,17 +84,16 @@ export default function Monthly() {
         )
       );
     },
-    enabled: !!today && groupId === personalGroupId,
+    enabled: !!today && !!groupId,
     initialData: {},
   });
-
-  //고정 일정
 
   // 2-2, 2-3
   const [modalMode, setModalMode] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bottomSheetMode, setBottomSheetMode] = useState(null);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [initialStartDay, setInitialStartDay] = useState(null);
 
   const [eventsModal, setEventsModal] = useState({
     dateString: null,
@@ -111,7 +122,7 @@ export default function Monthly() {
 
   // 고정 일정 불러오기
   const { data: pinnedEvents } = useQuery({
-    queryKey: ["getPinnedEvents", groupId],
+    queryKey: ["getPinnedEvents", modalMode],
     queryFn: async () => {
       const query =
         groupId === personalGroupId
@@ -128,7 +139,7 @@ export default function Monthly() {
         }))
       );
     },
-    enabled: !!groupId,
+    enabled: !!groupId && modalMode === "pin",
   });
 
   // const [pinnedEvents, setPinnedEvents] = useState([
@@ -169,6 +180,11 @@ export default function Monthly() {
   //     color: "#E6E8E3",
   //   },
   // ]);
+
+  const mergedMarkedDates = useMemo(
+    () => mergeMarkedDates(generalMarkedDates, pinnedMarkedDates),
+    [generalMarkedDates, pinnedMarkedDates]
+  );
 
   // 고정 일정 토글
   const togglePinnedEvent = (id) => {
@@ -227,7 +243,6 @@ export default function Monthly() {
 
       return (
         <View style={styles.container}>
-
           <CalendarNavbar currentMonth={currentMonth} onPress={() => navigation.openDrawer()} />
           <CalendarProvider
             date={`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`}
@@ -259,7 +274,7 @@ export default function Monthly() {
                 },
               }}
               weekHeight={1500} /* ! 임의의 큰 값 */
-              markedDates={{ ...generalMarkedDates, ...pinnedMarkedDates }}
+              markedDates={mergedMarkedDates}
               calendarStyle={styles.calendar}
               headerStyle={styles.calendarHeader}
               initialPosition="open"
@@ -272,7 +287,12 @@ export default function Monthly() {
               markingType="custom"
               dayComponent={({ date, state, marking }) => (
                 <View style={[styles.dayWrapper, { height: 121 }]}>
-                  <View
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsBottomSheetOpen(true);
+                      setInitialStartDay(date?.dateString);
+                      setBottomSheetMode("new_common_event");
+                    }}
                     style={[
                       styles.dayNumberWrapper,
                       {
@@ -297,7 +317,7 @@ export default function Monthly() {
                         },
                       ]}
                     >{`${date?.day}`}</Text>
-                  </View>
+                  </TouchableOpacity>
                   <TouchableOpacity
                     styles={styles.dayMarkWrapper}
                     onPress={() => {
@@ -307,7 +327,7 @@ export default function Monthly() {
                         date: `${date?.month}월 ${date?.day}일 (${getDay(
                           new Date(date?.dateString)?.getDay()
                         )})`,
-                        events: { ...generalMarkedDates, ...pinnedMarkedDates }?.[date?.dateString],
+                        events: mergedMarkedDates?.[date?.dateString],
                       });
                       setModalMode("view");
                     }}
@@ -521,7 +541,10 @@ export default function Monthly() {
       {isBottomSheetOpen && (
         <>
           {bottomSheetMode === "new_common_event" && (
-            <NewCommonEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+            <NewCommonEventBottomSheet
+              setIsBottomSheetOpen={setIsBottomSheetOpen}
+              initialStartDay={initialStartDay}
+            />
           )}
           {bottomSheetMode === "new_pinned_event" && (
             <NewPinnedEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
@@ -565,7 +588,7 @@ const styles = StyleSheet.create({
   dayMarkWrapper: {
     flex: 1,
     marginTop: 8,
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   dayMarker: {
     width: 50,

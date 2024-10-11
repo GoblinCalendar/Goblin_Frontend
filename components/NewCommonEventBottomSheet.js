@@ -19,7 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BottomSheetTextInput } from "./BottomSheetTextInput";
 import { convertToAmPm } from "../lib/convertToAmPm";
 
-export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
+export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen, initialStartDay }) => {
   // ref
   const bottomSheetRef = useRef(null);
 
@@ -29,7 +29,11 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen }) => {
 
   // 날짜 선택
   const [selectedDates, setSelectedDates] = useState({
-    [moment().format("YYYY-MM-DD")]: { color: "#5DAED6", endingDay: true, startingDay: true },
+    [initialStartDay || moment().format("YYYY-MM-DD")]: {
+      color: "#5DAED6",
+      endingDay: true,
+      startingDay: true,
+    },
   });
   const [startDay, setStartDay] = useState(null);
   const [endDay, setEndDay] = useState(null);
