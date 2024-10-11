@@ -7,26 +7,30 @@ import ButtonComponent from '../components/Button';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../lib/api';
-import CandidateListConfirmModal from './CandidateListConfirmModal';
 
-const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meetingDuration}) => {
+const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meetingDuration, openConfirmModal}) => {
     const [selectedId, setSelectedId] = useState(null);
     const [selectedSchedule, setSelectedSchedule] = useState(null); // 선택된 일정 저장
-    const [expectedDuration, setExpectedDuration] = useState(meetingDuration);
     const [scheduleData, setScheduleData] = useState([]); // API에서 받아올 데이터
-    const [isConfirmModalVisible, setConfirmModalVisible] = useState(false); // 확정 모달의 상태
+
+
+    useEffect(() => {
+      console.log('meetingDuration:', meetingDuration); // 전달된 값 확인
+    }, [meetingDuration]);
+
     const router = useRouter();
 
     useEffect(() => {
       const fetchOptimalTime = async () => {
         try {
           const token = await AsyncStorage.getItem('accessToken');
-          const response = await apiClient.get(`/api/groups/${groupId}/calendar/${calendarId}/optimal-time`, {
+          const response = await apiClient.get(`/api/groups/calendar/${groupId}/${calendarId}/optimal-time`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
           setScheduleData(response.data);
+          // console.log("scheduleData: ",scheduleData);
         } catch (error) {
           console.error('Error fetching optimal time:', error);
         }
@@ -44,15 +48,39 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meeting
     };
 
     const handleApply = () => {
-        toggleModal();  // 모달을 닫고
-        setTimeout(() => {
-          setConfirmModalVisible(true); // 선택하기 버튼 누르면 확정 모달을 띄움
-        }, 300); 
+      toggleModal();
+      const { formattedDate, formattedTime } = formatDateAndTime(selectedSchedule.startTime, selectedSchedule.endTime);
+      openConfirmModal(selectedSchedule, formattedDate, formattedTime);
+    };
+
+   // 요일 구하는 함수
+   const getDayOfWeek = (date) => {
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      return dayNames[date.getDay()];
+    };
+
+    // 오전/오후 시간 변환 함수
+    const formatTimeToKorean = (date) => {
+      let hours = date.getHours();
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const suffix = hours >= 12 ? '오후' : '오전';
+      hours = hours % 12 || 12; // 12시간제로 변환 (0시는 12시로 표시)
+      return `${suffix} ${hours}시${minutes !== '00' ? ` ${minutes}분` : ''}`;
+    };
+
+    // 날짜 및 시간 포맷터 함수
+    const formatDateAndTime = (startTime, endTime) => {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      const formattedDate = `${start.getMonth() + 1}.${start.getDate()} (${getDayOfWeek(start)})`;
+      const formattedTime = `${formatTimeToKorean(start)} ~ ${formatTimeToKorean(end)}`;
+      return { formattedDate, formattedTime };
     };
 
     const renderItem = ({ item }) => {
-        const maxParticipantsToShow = 5;
-        const extraParticipants = item.participants.length - maxParticipantsToShow;
+      const { formattedDate, formattedTime } = formatDateAndTime(item.startTime, item.endTime);
+      const maxParticipantsToShow = 5;
+      const extraParticipants = item.participants.length - maxParticipantsToShow;
 
         return (
             <TouchableOpacity
@@ -71,9 +99,9 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meeting
                 </View>
                 <View style={styles.oneBlock}>
                     <View style={styles.scheduleInfo}>
-                        <Text style={styles.dateText}>{item.date}</Text>
+                        <Text style={styles.dateText}>{formattedDate}</Text>
                         <Text style={styles.devide}>ㅣ</Text>
-                        <Text style={styles.timeText}>{item.time}</Text>
+                        <Text style={styles.timeText}>{formattedTime}</Text>
                     </View>
                     <View style={styles.participantContainer}>
                         {item.participants.slice(0, maxParticipantsToShow).map((participant, index) => (
@@ -107,7 +135,8 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meeting
           <View style={styles.modalStart}></View>
           
           <Text style={styles.titleText}>일정 후보 리스트</Text>
-          <Text style={styles.subTitleText}>예상 일정 소요 시간 : {expectedDuration}</Text>
+          <Text style={styles.subTitleText}>예상 일정 소요 시간 : {meetingDuration}</Text>
+          {/* <Text style={styles.subTitleText}>예상 일정 소요 시간 : {expectedDuration}</Text> */}
 
           {/* 리스트 */}
           <FlatList
@@ -121,20 +150,12 @@ const CandidateListModal = ({ visible, toggleModal, groupId, calendarId, meeting
           <ButtonComponent
             title="선택하기"
             style={styles.applyButton}
-            // isActive={selectedId !== null}
-            isActive={true}
+            isActive={selectedId !== null}
             onPress={handleApply}
           />
         </View>
       </Modal>
 
-      {/* CandidateListConfirmModal을 모달로 추가 */}
-      <CandidateListConfirmModal
-        visible={isConfirmModalVisible}
-        toggleModal={() => setConfirmModalVisible(false)}
-        selectedSchedule={selectedSchedule} // 선택된 일정 전달
-        expectedDuration={expectedDuration}
-      />
     </View>
 
   );

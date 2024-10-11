@@ -5,6 +5,7 @@ import TimeConfirmGrid from '../../components/TimeConfirmGrid';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 import ButtonComponent from '../../components/Button';
 import CandidateListModal from '../../components/CandidateListModal';
+import CandidateListConfirmModal from '../../components/CandidateListConfirmModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiClient from '../../lib/api';
 
@@ -21,13 +22,19 @@ const ScheduleConfirmScreen = () => {
   const [meetingDuration, setMeetingDuration] = useState(''); // 회의 시간 상태
   const [meetingDate, setMeetingDate] = useState(''); // 선택된 날짜 상태
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isConfirmModalVisible, setConfirmModalVisible] = useState(false); // 확정 모달 상태
+  const [selectedSchedule, setSelectedSchedule] = useState(null); // 선택된 일정
   
-  // const { groupId, calendarId } = useGlobalSearchParams();
-  const groupId = '4';  // 임의의 그룹 ID
-  const calendarId = '65';  // 임의의 캘린더 ID
+  const { groupId, calendarId } = useGlobalSearchParams();
+  // const groupId = '4';  // 임의의 그룹 ID
+  // const calendarId = '65';  // 임의의 캘린더 ID
 
   // TimeConfirmGrid에 접근하기 위한 ref 생성
   const timeConfirmGridRef = useRef(null);
+
+  useEffect(() => {
+    console.log('isConfirmModalVisible:', isConfirmModalVisible);  // 상태 변화를 확인
+}, [isConfirmModalVisible]);
 
   useEffect(() => {
     const fetchParticipants = async () => {
@@ -72,7 +79,7 @@ const ScheduleConfirmScreen = () => {
         const totalMinutes = response.data.time;
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
-        setMeetingDuration(`${hours}시간 ${minutes === 0 ? '00' : minutes}분`);
+        setMeetingDuration(`${hours}시간 ${minutes === 0 ? '' : minutes분}`);
   
         // meetingDate 업데이트 (선택된 날짜 범위)
         const selectedDates = response.data.selectedDates;
@@ -101,7 +108,14 @@ const ScheduleConfirmScreen = () => {
   }, [groupId, calendarId]);
 
   const toggleModal = () => {
+    console.log('Modal state toggled');
     setModalVisible(!isModalVisible); // 모달 열고 닫기 토글
+  };
+
+  const openConfirmModal = (selectedSchedule) => {
+    console.log('Selected Schedule:', selectedSchedule); // 선택된 일정 로그 출력
+    setSelectedSchedule(selectedSchedule); // 선택된 일정 저장
+    setConfirmModalVisible(true); // 확정 모달 열기
   };
 
   return (
@@ -148,6 +162,17 @@ const ScheduleConfirmScreen = () => {
             groupId={groupId} 
             calendarId={calendarId}
             meetingDuration={meetingDuration}
+            openConfirmModal={openConfirmModal}
+        />
+
+        {/* CandidateListConfirmModal을 모달로 추가 */}
+        <CandidateListConfirmModal
+          visible={isConfirmModalVisible}
+          toggleModal={() => setConfirmModalVisible(!isConfirmModalVisible)}
+          selectedSchedule={selectedSchedule} // 선택된 일정 전달
+          expectedDuration={meetingDuration}
+          groupId={groupId} 
+          calendarId={calendarId}
         />
     </View>
   );
@@ -190,7 +215,7 @@ const styles = StyleSheet.create({
   meetingDuration: {
     fontSize: 12,
     color: colors.fontGray,
-    marginRight: 8,
+    marginRight: 0,
   },
   devide: {
     color: colors.lightGray,
@@ -232,7 +257,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lightGrayBG,
     position: 'absolute',
     top: 545,
-    right: 20,
     alignSelf: 'center',
   },
 });

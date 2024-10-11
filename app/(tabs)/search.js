@@ -106,9 +106,9 @@ export default function Search() {
     <View style={styles.emptyStateContainer}>
       <IconGray width={120} height={120} style={{ opacity: 0.5 }} />
       <Text style={styles.emptyStateText}>일정 이름을 검색해보세요!</Text>
-      <TouchableOpacity onPress={() => router.push('/HostEventConfirm')} style={styles.button}>
+      {/* <TouchableOpacity onPress={() => router.push('/HostEventConfirm')} style={styles.button}>
         <Text style={styles.buttonText}>일정 확정</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 
