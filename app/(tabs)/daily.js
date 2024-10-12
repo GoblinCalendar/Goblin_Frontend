@@ -235,7 +235,7 @@ export default function Daily() {
           },
           timeIndicatorWrapper: {
             position: "absolute",
-            top: 4,
+            bottom: 4,
             right: 8,
             flexDirection: "row",
             alignItems: "center",
