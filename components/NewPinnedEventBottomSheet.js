@@ -20,40 +20,66 @@ import { BottomSheetTextInput } from "./BottomSheetTextInput";
 import apiClient from "../lib/api";
 import { convertToAmPm } from "../lib/convertToAmPm";
 
-export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
+export const NewPinnedEventBottomSheet = ({
+  setIsBottomSheetOpen,
+  initialData,
+  setInitialData,
+  setIsModalOpen,
+}) => {
   // ref
   const bottomSheetRef = useRef(null);
 
   // 일정 이름 및 메모
-  const [newEvent, setNewEvent] = useState({ name: "" });
+  const [newEvent, setNewEvent] = useState({ name: initialData?.title || "" });
   const [selectMode, setSelectMode] = useState("time");
 
+  // console.log(initialData);
+
   // 날 선택
-  const [days, setDays] = useState([
-    { day: "일", id: "SUNDAY", selected: false },
-    { day: "월", id: "MONDAY", selected: false },
-    { day: "화", id: "TUESDAY", selected: false },
-    { day: "수", id: "WEDNESDAY", selected: false },
-    { day: "목", id: "THURSDAY", selected: false },
-    { day: "금", id: "FRIDAY", selected: false },
-    { day: "토", id: "SATURDAY", selected: false },
-  ]);
+  const [days, setDays] = useState(
+    [
+      { day: "일", id: "SUNDAY", selected: false },
+      { day: "월", id: "MONDAY", selected: false },
+      { day: "화", id: "TUESDAY", selected: false },
+      { day: "수", id: "WEDNESDAY", selected: false },
+      { day: "목", id: "THURSDAY", selected: false },
+      { day: "금", id: "FRIDAY", selected: false },
+      { day: "토", id: "SATURDAY", selected: false },
+    ].map((d) => ({
+      ...d,
+      selected: !!initialData ? initialData?.dayOfWeek?.some((i) => i === d?.id) : false,
+    }))
+  );
 
   //시간 선택
-  const [startTime, setStartTime] = useState("-");
-  const [endTime, setEndTime] = useState("-");
+  const [startTime, setStartTime] = useState(
+    initialData?.date?.split("~")?.[0]?.trim()?.replace(":", " : ") || "-"
+  );
+  const [endTime, setEndTime] = useState(
+    initialData?.date?.split("~")?.[1]?.trim()?.replace(":", " : ") || "-"
+  );
 
   // console.log(startTime, endTime);
 
   //색 선택
-  const [selectedColor, setSelectedColor] = useState(null);
+  const colorsMap = [
+    { id: 1, color: "#F3DAD8" },
+    { id: 2, color: "#F1DAED" },
+    { id: 3, color: "#F2EDD9" },
+    { id: 4, color: "#EBEBE3" },
+    { id: 5, color: "#B1B0B5" },
+  ];
 
-  // 고정 일정 추가
+  const [selectedColor, setSelectedColor] = useState(
+    colorsMap.find((c) => c.color === initialData?.color) || null
+  );
+
+  // 고정 일정 추가 or 수정
   const createNewPinnedEvent = () => {
     const startTimeFrags = startTime?.split(" ");
     const endTimeFrags = endTime?.split(" ");
 
-    mutation.mutate({
+    const payload = {
       scheduleName: newEvent?.name,
       dayOfWeek: days.filter((d) => d.selected).map((d) => d.id),
       amPmStart: convertToAmPm(startTimeFrags?.[0]),
@@ -64,23 +90,44 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
       endMinute: parseInt(endTimeFrags?.[3]),
       colorCode: selectedColor.id,
       public: true, //기본값 공개
-    });
+    };
+
+    if (!!initialData) {
+      editNewPinnedEventMutation.mutate(payload);
+    } else {
+      createNewPinnedEventMutation.mutate(payload);
+    }
+
+    setIsBottomSheetOpen(false);
   };
 
   //mutate
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  // 추가
+  const createNewPinnedEventMutation = useMutation({
     mutationFn: (data) => apiClient.post("/api/fixed/create", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
-      setIsBottomSheetOpen(false);
+      setInitialData(null);
+      setIsModalOpen(false);
+    },
+  });
+
+  // 수정
+  const editNewPinnedEventMutation = useMutation({
+    mutationFn: (data) => apiClient.put(`/api/fixed/${initialData?.id}/update`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] });
+      setInitialData(null);
+      setIsModalOpen(false);
     },
   });
 
   return (
     <BottomSheetModalComponent
       setIsBottomSheetOpen={setIsBottomSheetOpen}
+      setInitialData={setInitialData}
       bottomSheetRef={bottomSheetRef}
       height={selectMode === "time" ? 510 : 352}
     >
@@ -95,6 +142,7 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
           onChangeText={(text) => setNewEvent((prev) => ({ ...prev, name: text }))}
           autoFocus={true}
           returnKeyType="done"
+          editable={!(selectMode === "color")}
         />
         <Text style={styles.maxLengthText}>{newEvent?.name?.length || 0}/18</Text>
       </View>
@@ -150,13 +198,7 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
           <>
             <Text style={styles.selectColorText}>5가지 색상 중 1개를 선택해 주세요</Text>
             <View style={styles.colorsWrapper}>
-              {[
-                { id: 1, color: "#F3DAD8" },
-                { id: 2, color: "#F1DAED" },
-                { id: 3, color: "#F2EDD9" },
-                { id: 4, color: "#EBEBE3" },
-                { id: 5, color: "#B1B0B5" },
-              ].map((c, i) => (
+              {colorsMap.map((c, i) => (
                 <View style={styles.colorsContainer} key={c.id}>
                   <View style={[styles.colorsCircle, { backgroundColor: c.color }]}></View>
                   <TouchableOpacity
@@ -174,7 +216,7 @@ export const NewPinnedEventBottomSheet = ({ setIsBottomSheetOpen }) => {
             </View>
             <ButtonComponent
               style={{ marginTop: 48, width: "auto" }}
-              title="추가하기"
+              title={!!initialData ? "수정하기" : "추가하기"}
               isActive={
                 newEvent?.name?.length > 0 &&
                 startTime !== "-" &&

@@ -3,10 +3,9 @@ import colors from "../../styles/colors";
 import CalendarNavbar from "../../components/CalendarNavbar";
 import { convertToTimeGrid } from "../../lib/convertToTimeGrid";
 import { DrawerWrapper } from "../../components/DrawerWrapper";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getDay } from "../../lib/getDay";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { getColorsByColorId } from "../../lib/getColorsByColorId";
 import apiClient from "../../lib/api";
 
 import ClockGray from "../../assets/clock_gray.svg";
@@ -118,6 +117,8 @@ export default function Daily() {
 
   // 모든 일별 일정 한번에
   const DailyComponent = ({ navigation }) => {
+    const successfulQueriesCounter = useRef(0);
+
     const allDailyEvents = useQueries({
       queries: [
         {
@@ -149,6 +150,9 @@ export default function Daily() {
           },
           enabled: !!groupId,
           initialData: [],
+          onSuccess: () => {
+            successfulQueriesCounter.current = successfulQueriesCounter.current + 1;
+          },
         },
         {
           queryKey: ["getDailyPinnedEvents"],
@@ -172,6 +176,9 @@ export default function Daily() {
           },
           enabled: !!groupId,
           initialData: [],
+          onSuccess: () => {
+            successfulQueriesCounter.current = successfulQueriesCounter.current + 1;
+          },
         },
       ],
     });
@@ -345,7 +352,7 @@ export default function Daily() {
           </View>
         </View>
       );
-    }, [now?.yOffset]);
+    }, [now?.yOffset, successfulQueriesCounter.current]);
   };
 
   return <DrawerWrapper screen={DailyComponent} />;

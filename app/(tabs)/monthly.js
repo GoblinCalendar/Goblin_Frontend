@@ -198,23 +198,49 @@ export default function Monthly() {
     },
   });
 
-  // 개인 일반 일정 삭제
+  // 개인 일정 삭제
   const deleteGeneralEvent = (id, row) => {
     deleteGeneralEventMutation.mutate({ id });
     row.closeRow();
   };
 
   const deleteGeneralEventMutation = useMutation({
-    mutationFn: (data) => apiClient.delete(`/api/calendar/user/delete/${data?.id}`),
-    onSuccess: (response) => {
+    mutationFn: (data) =>
+      apiClient.delete(
+        groupId === personalGroupId
+          ? `/api/calendar/user/delete/${data?.id}`
+          : `/api/groups/${groupId}/calendar/${data?.id}`
+      ),
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["getGeneralEvents"] }).then(() => {
         setEventsModal((prev) => ({
           ...prev,
-          events: [...prev.events?.filter((d) => d.id !== response.data?.id)],
+          events: [...prev.events?.filter((d) => d.id !== variables?.id)],
         }));
       });
     },
   });
+
+  //고정 일정 삭제
+  const deletePinnedEvent = (id, row) => {
+    deletePinnedEventMutation.mutate({ id });
+    row.closeRow();
+  };
+
+  const deletePinnedEventMutation = useMutation({
+    mutationFn: (data) => apiClient.delete(`/api/fixed/delete/${data?.id}`),
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["getPinnedEvents"] }).then(() => {
+        setEventsModal((prev) => ({
+          ...prev,
+          events: [...prev.events?.filter((d) => d.id !== variables?.id)],
+        }));
+      });
+    },
+  });
+
+  //일정 수정
+  const [initialData, setInitialData] = useState(null);
 
   const MonthComponent = ({ navigation }) =>
     useMemo(() => {
@@ -419,10 +445,24 @@ export default function Monthly() {
                     <SwipeListButton
                       data={data}
                       rowMap={rowMap}
-                      onEditPress={() => console.log("Edit")}
-                      onDeletePress={() =>
-                        deleteGeneralEvent(data?.item?.id, rowMap[data?.item?.key])
-                      }
+                      onEditPress={() => {
+                        setInitialData(data?.item);
+
+                        if (data?.item?.type === "pinned") {
+                          setBottomSheetMode("new_pinned_event");
+                        } else {
+                          setBottomSheetMode("new_common_event");
+                        }
+
+                        setIsBottomSheetOpen(true);
+                      }}
+                      onDeletePress={() => {
+                        if (data?.item?.type === "pinned") {
+                          deletePinnedEvent(data?.item?.id, rowMap[data?.item?.key]);
+                        } else {
+                          deleteGeneralEvent(data?.item?.id, rowMap[data?.item?.key]);
+                        }
+                      }}
                     />
                   )}
                   rightOpenValue={-80}
@@ -544,10 +584,18 @@ export default function Monthly() {
             <NewCommonEventBottomSheet
               setIsBottomSheetOpen={setIsBottomSheetOpen}
               initialStartDay={initialStartDay}
+              initialData={initialData}
+              setInitialData={setInitialData}
+              setIsModalOpen={setIsModalOpen}
             />
           )}
           {bottomSheetMode === "new_pinned_event" && (
-            <NewPinnedEventBottomSheet setIsBottomSheetOpen={setIsBottomSheetOpen} />
+            <NewPinnedEventBottomSheet
+              setIsBottomSheetOpen={setIsBottomSheetOpen}
+              initialData={initialData}
+              setInitialData={setInitialData}
+              setIsModalOpen={setIsModalOpen}
+            />
           )}
         </>
       )}

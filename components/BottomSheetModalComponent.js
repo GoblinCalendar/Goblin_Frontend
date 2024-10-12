@@ -6,6 +6,7 @@ import colors from "../styles/colors";
 
 export const BottomSheetModalComponent = ({
   setIsBottomSheetOpen,
+  setInitialData,
   isBottomSheetOpen,
   children,
   bottomSheetRef,
@@ -23,7 +24,10 @@ export const BottomSheetModalComponent = ({
     </View>
   );
 
-  const onDismiss = useCallback(() => setIsBottomSheetOpen(false), [setIsBottomSheetOpen]);
+  const onDismiss = useCallback(() => {
+    setIsBottomSheetOpen(false);
+    setInitialData(null);
+  }, [setIsBottomSheetOpen, setInitialData]);
 
   const containerComponent = useCallback(
     ({ children }) => (
