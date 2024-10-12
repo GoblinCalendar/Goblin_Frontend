@@ -19,22 +19,36 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BottomSheetTextInput } from "./BottomSheetTextInput";
 import { convertToAmPm } from "../lib/convertToAmPm";
 
-export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen, initialStartDay }) => {
+export const NewCommonEventBottomSheet = ({
+  setIsBottomSheetOpen,
+  initialStartDay,
+  initialData,
+  setInitialData,
+  setIsModalOpen,
+}) => {
   // ref
   const bottomSheetRef = useRef(null);
 
+  // console.log(initialData);
+
   // 일정 이름 및 메모
-  const [newEvent, setNewEvent] = useState({ name: "", memo: "" });
+  const [newEvent, setNewEvent] = useState({
+    name: initialData?.title || "",
+    memo: initialData?.memo || "",
+  });
   const [selectMode, setSelectMode] = useState("calendar");
+
+  // console.log(initialData);
 
   // 날짜 선택
   const [selectedDates, setSelectedDates] = useState({
-    [initialStartDay || moment().format("YYYY-MM-DD")]: {
+    [initialData?.selectedDate || initialStartDay || moment().format("YYYY-MM-DD")]: {
       color: "#5DAED6",
       endingDay: true,
       startingDay: true,
     },
   });
+
   const [startDay, setStartDay] = useState(null);
   const [endDay, setEndDay] = useState(null);
 
@@ -45,17 +59,21 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen, initialStartDa
   };
 
   //시간 선택
-  const [startTime, setStartTime] = useState("-");
-  const [endTime, setEndTime] = useState("-");
+  const [startTime, setStartTime] = useState(
+    initialData?.date?.split("~")?.[0]?.trim()?.replace(":", " : ") || "-"
+  );
+  const [endTime, setEndTime] = useState(
+    initialData?.date?.split("~")?.[1]?.trim()?.replace(":", " : ") || "-"
+  );
 
-  // console.log(startTime, endTime);
+  console.log(startTime, endTime);
 
   // 일정 추가 API
   const createNewEvent = () => {
     const startTimeFrags = startTime?.split(" ");
     const endTimeFrags = endTime?.split(" ");
 
-    mutation.mutate({
+    const payload = {
       title: newEvent?.name,
       note: newEvent?.memo,
       date: Object.keys(selectedDates),
@@ -65,23 +83,44 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen, initialStartDa
       amPmEnd: convertToAmPm(endTimeFrags?.[0]),
       endHour: parseInt(endTimeFrags?.[1]),
       endMinute: parseInt(endTimeFrags?.[3]),
-    });
+    };
+
+    if (!!initialData) {
+      editNewEventMutation.mutate(payload);
+    } else {
+      createNewEventMutation.mutate(payload);
+    }
+
+    setIsBottomSheetOpen(false);
   };
 
   //mutate
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  // 추가
+  const createNewEventMutation = useMutation({
     mutationFn: (data) => apiClient.post("/api/calendar/user/save", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getGeneralEvents"] });
-      setIsBottomSheetOpen(false);
+      setInitialData(null);
+      setIsModalOpen(false);
+    },
+  });
+
+  // 수정
+  const editNewEventMutation = useMutation({
+    mutationFn: (data) => apiClient.put(`/api/calendar/user/edit/${initialData?.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getGeneralEvents"] });
+      setInitialData(null);
+      setIsModalOpen(false);
     },
   });
 
   return (
     <BottomSheetModalComponent
       setIsBottomSheetOpen={setIsBottomSheetOpen}
+      setInitialData={setInitialData}
       bottomSheetRef={bottomSheetRef}
       height={selectMode === "calendar" ? 617 : 512}
     >
@@ -177,12 +216,9 @@ export const NewCommonEventBottomSheet = ({ setIsBottomSheetOpen, initialStartDa
             />
             <ButtonComponent
               style={{ marginTop: 24, width: "" }}
-              title="추가하기"
+              title={!!initialData ? "수정하기" : "추가하기"}
               isActive={startTime !== "-" && endTime !== "-"}
-              onPress={() => {
-                createNewEvent();
-                setIsBottomSheetOpen(false);
-              }}
+              onPress={() => createNewEvent()}
             />
           </>
         )}
