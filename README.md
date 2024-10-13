@@ -55,5 +55,49 @@
 
 <br><br>
 
-## 🎨 화면 예시
-<!-- 화면 예시 이미지를 여기에 추가 -->
+## 🎨 화면 구현
+<p style="font-size: 8;">
+  이 이외에도 열심히 구현한 다른 화면들이 있으니 앱 다운 받아 유용하게 사용해 주시면 좋겠습니다~!
+</p>
+
+<h3 align="center">로그인 및 랜딩 페이지</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c2276079-1cb5-4024-aaa4-126efabf199e" width="200">
+  <img src="https://github.com/user-attachments/assets/01e693c6-50cc-42f4-a572-43ca466cf984" width="200">
+</p>
+
+<h3 align="center">메인 화면 및 캘린더</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/20d47ef2-b2f9-40bb-ac3b-50b7161a3077" width="200">
+  <img src="https://github.com/user-attachments/assets/41408a44-fd02-48ee-aaa8-85974fe349d3" width="200">
+</p>
+
+<h3 align="center">그룹 네비게이션 및 멤버 관리</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/54aac77d-a7d8-47f0-918f-61420a24925c" width="200">
+  <img src="https://github.com/user-attachments/assets/815ca676-7f02-47d2-a175-8ac746bea65a" width="200">
+</p>
+
+<h3 align="center">일정 추가 및 그룹 일정 생성</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/623e24cf-4da2-478e-bfa7-d9e8aca20ebf" width="200">
+  <img src="https://github.com/user-attachments/assets/e3828247-0871-4a65-9c05-f587413a9415" width="200">
+</p>
+
+<h3 align="center">알림 및 개인 선택</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/cd646ccf-8ba1-47bb-926b-97175d4dae1c" width="200">
+  <img src="https://github.com/user-attachments/assets/cc209abd-0989-41b9-ad8f-3f59d26312c6" width="200">
+</p>
+
+<h3 align="center">할 일 관리 및 검색</h3>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/2bc96968-4cd5-4776-b2ad-5a38da6d2791" width="200">
+  <img src="https://github.com/user-attachments/assets/c52ed416-f1f4-447f-b820-7559c22e6aa6" width="200">
+</p>
